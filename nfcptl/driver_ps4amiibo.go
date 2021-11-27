@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	registerDriver(&ps4amiibo{})
+	RegisterDriver(&ps4amiibo{})
 }
 
 const (

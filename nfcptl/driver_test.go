@@ -9,10 +9,10 @@ import (
 func TestRegisterDriverPanic(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
-			t.Errorf("registerDriver did not panic!")
+			t.Errorf("RegisterDriver did not panic!")
 		}
 	}()
-	registerDriver(&ps4amiibo{})
+	RegisterDriver(&ps4amiibo{})
 }
 
 func TestGetDriverByVendorAndDeviceAlias(t *testing.T) {

@@ -43,13 +43,13 @@ func (e DriverNotFoundError) Error() string {
 	return "no driver found for vendor=" + e.Vendor + "and product=" + e.Product
 }
 
-// registerDriver is responsible for registering all drivers at runtime. Each driver should call this function in the
+// RegisterDriver is responsible for registering all drivers at runtime. Each driver should call this function in the
 // driver's init function to ensure the driver is available for use.
-func registerDriver(d Driver) {
+func RegisterDriver(d Driver) {
 	driversMu.Lock()
 	defer driversMu.Unlock()
 	if d == nil {
-		panic("nfcptl: registerDriver command is nil")
+		panic("nfcptl: RegisterDriver command is nil")
 	}
 
 	va := d.VendorAlias()
@@ -59,7 +59,7 @@ func registerDriver(d Driver) {
 
 	pa := d.ProductAlias()
 	if _, dup := drivers[va][pa]; dup {
-		panic("nfcptl: registerDriver called twice for vendor '" + va + "' product '" + pa + "'")
+		panic("nfcptl: RegisterDriver called twice for vendor '" + va + "' product '" + pa + "'")
 	}
 	drivers[va][pa] = d
 }
