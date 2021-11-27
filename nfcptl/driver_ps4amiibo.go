@@ -15,7 +15,7 @@ const (
 	PIDPowerSavesForAmiibo     gousb.ID = 0x03d9
 )
 
-// ps4amiibo implements the driver for the following USB device:
+// ps4amiibo implements the Driver interface for the following USB device:
 //   ID 1c1a:03d9 Datel Electronics Ltd. NFC-Portal
 //   Device Descriptor:
 //     bLength                18
