@@ -8,17 +8,19 @@ import (
 
 // Client allows easy communications with an NFC portal connected over USB.
 type Client struct {
-	vid gousb.ID
-	pid gousb.ID
+	vid gousb.ID // The vendor ID to search for
+	pid gousb.ID // The product ID to search for
 
 	debug bool
 
-	ctx   *gousb.Context
-	dev   *gousb.Device
-	iface *gousb.Interface
-	done  func()
-	in    *gousb.InEndpoint
-	out   *gousb.OutEndpoint
+	debug bool // Will enable verbose logging
+
+	ctx   *gousb.Context     // The active context
+	dev   *gousb.Device      // The active USB device
+	iface *gousb.Interface   // The claimed USB interface
+	done  func()             // A cleanup function to close the interface and config
+	in    *gousb.InEndpoint  // The device-to-host endpoint
+	out   *gousb.OutEndpoint // The host-to-device endpoint
 }
 
 // NewClient builds a new Client struct.
@@ -69,6 +71,8 @@ func (c *Client) Connect() error {
 		log.Printf("config: %v", cdesc)
 	}
 
+	// Let's hope all NFC portals are plain and simple, otherwise we'll have to do a lot more here to get the correct
+	// interface.
 	if c.iface, c.done, err = c.dev.DefaultInterface(); err != nil {
 		return fmt.Errorf("%s.DefaultInterface(): %v", c.dev, err)
 	}
@@ -92,6 +96,7 @@ func (c *Client) Connect() error {
 
 // Disconnect cleanly disconnects the client and frees up all resources.
 func (c *Client) Disconnect() error {
+	// Calling done() closes the interface and the config.
 	if c.done != nil {
 		c.done()
 	}

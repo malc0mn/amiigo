@@ -5,32 +5,30 @@ import (
 	"github.com/google/gousb"
 )
 
+// vendor holds the definition for a vendor
 type vendor struct {
-	vid     gousb.ID
-	name    string
-	devices []*device
+	vid     gousb.ID  // The vendor ID
+	name    string    // The vendor's human-readable name
+	devices []*device // A list of supported vendor devices
 }
 
+// device holds the definition for an NFC USB portal
 type device struct {
-	pid  gousb.ID
-	name string
+	pid  gousb.ID // The product ID
+	name string   // The product's human-readable name
 }
 
 const (
 	// Vendor aliases
-
 	VendorDatelElextronicsLtd = "datel"
 
 	// Device aliases
-
 	DevicePowerSavesForAmiibo = "ps4amiibo"
 
 	// Vendor IDs
-
 	VIDDatelElectronicsLtd gousb.ID = 0x1c1a
 
 	// Product IDs
-
 	PIDPowerSavesForAmiibo gousb.ID = 0x03d9
 )
 
