@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/malc0mn/amiigo/usb"
+	"github.com/malc0mn/amiigo/nfcptl"
 	"log"
 	"os"
 	"path/filepath"
@@ -32,7 +32,7 @@ func main() {
 		os.Exit(ok)
 	}
 
-	client, err := usb.NewClient(conf.vendor, conf.device, verbose)
+	client, err := nfcptl.NewClient(conf.vendor, conf.device, verbose)
 	if err != nil {
 		log.Fatalf("Error initialising client: %s", err)
 	}

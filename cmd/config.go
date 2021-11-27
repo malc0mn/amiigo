@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/malc0mn/amiigo/usb"
+	"github.com/malc0mn/amiigo/nfcptl"
 )
 
 // config holds all the active settings
@@ -14,9 +14,9 @@ type config struct {
 
 const (
 	// defaultVendor is the default vendor alias to use for vendor ID lookup
-	defaultVendor = usb.VendorDatelElextronicsLtd
+	defaultVendor = nfcptl.VendorDatelElextronicsLtd
 	// defaultDevice is the default device alias to use for vendor ID lookup
-	defaultDevice = usb.DevicePowerSavesForAmiibo
+	defaultDevice = nfcptl.ProductPowerSavesForAmiibo
 )
 
 var conf = config{}
