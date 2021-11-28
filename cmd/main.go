@@ -5,7 +5,9 @@ import (
 	"github.com/malc0mn/amiigo/nfcptl"
 	"log"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 )
 
 const (
@@ -16,6 +18,7 @@ var (
 	version   = "0.0.0"
 	buildTime = "unknown"
 	exe       string
+	quit      = make(chan struct{})
 )
 
 func main() {
@@ -32,6 +35,14 @@ func main() {
 		os.Exit(ok)
 	}
 
+	sigs := make(chan os.Signal, 1)
+	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		sig := <-sigs
+		fmt.Printf("Received signal %s, shutting down...\n", sig)
+		close(quit)
+	}()
+
 	client, err := nfcptl.NewClient(conf.vendor, conf.device, verbose)
 	if err != nil {
 		log.Fatalf("Error initialising client: %s", err)
@@ -42,4 +53,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error connecting to device: %v", err)
 	}
+
+	<-quit
+	fmt.Println("Bye bye!")
 }
