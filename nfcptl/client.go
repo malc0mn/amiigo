@@ -103,7 +103,7 @@ func (c *Client) Connect() error {
 		go kl()
 	}
 
-	go c.read()
+	//go c.read()
 
 	return nil
 }

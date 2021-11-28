@@ -18,7 +18,26 @@ const (
 	ProductPowerSavesForAmiibo = "ps4amiibo"
 	// PIDPowerSavesForAmiibo holds the USB product ID for the 'PowerSaves for Amiibo' product
 	PIDPowerSavesForAmiibo gousb.ID = 0x03d9
+
+	// RequestDeviceName used as the payload in an interrupt message returns the device name
+	// "NFC-Portal".
+	RequestDeviceName byte = 0x02
+	// RequestSecondMsg used as the payload in an interrupt message returns a yet unknown
+	// sequence:
+	//   00000000  00 00 02 bf 3f 4c 17 60  3b 45 06 bd 1d be d2 0b  |....?L.`;E......|
+	//   00000010  c1 32 80 ad 41 00 00 00  00 00 00 00 00 00 00 00  |.2..A...........|
+	//   00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	//   00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	RequestSecondMsg byte = 0x90
 )
+
+// RequestThirdMsg used as the payload in an interrupt message returns a yet unknown
+// sequence:
+//  00000000  00 00 34 30 64 64 62 62  30 64 30 31 62 36 34 36  |..40ddbb0d01b646|
+//  00000010  64 64 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |dd..............|
+//  00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+//  00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+var RequestThirdMsg = []byte{0x80, 0x78, 0x2e, 0xc5, 0xf5, 0xb0, 0xfb, 0x7b, 0x20, 0x40, 0x29, 0xae, 0x60, 0xf2, 0x88, 0x46, 0x3c}
 
 // ps4amiibo implements the Driver interface for the following USB device:
 //   ID 1c1a:03d9 Datel Electronics Ltd. NFC-Portal
@@ -127,9 +146,9 @@ func (ps4amiibo) Init(c *Client, interval time.Duration, maxSize int) func() {
 
 		// Would be nice to know what the init procedure actually "means".
 		payloads := [][]byte{
-			{0x02},
-			{0x90},
-			{0x80, 0x78, 0x2e, 0xc5, 0xf5, 0xb0, 0xfb, 0x7b, 0x20, 0x40, 0x29, 0xae, 0x60, 0xf2, 0x88, 0x46, 0x3c},
+			{RequestDeviceName},
+			{RequestSecondMsg},
+			RequestThirdMsg,
 		}
 
 		c.SetIdle(0, 0)
@@ -141,6 +160,9 @@ func (ps4amiibo) Init(c *Client, interval time.Duration, maxSize int) func() {
 				if c.debug {
 					log.Printf("nfcptl: written %d bytes", n)
 				}
+				buff := make([]byte, maxSize)
+				c.in.Read(buff)
+				println(hex.Dump(buff))
 			}
 		}
 	}
@@ -152,6 +174,14 @@ func (ps4amiibo) Init(c *Client, interval time.Duration, maxSize int) func() {
 // ka? 10
 // ka? 12
 // 11 .. 10 .. 12 keeps repeating now
+// BREAKTHROUGH!!! When we're doing what is now called KeepAlive, this seems more like polling to
+// see if a token has placed on the portal. When a token is placed on the portal, this message is
+// returned on one of the three requests that we do (too late now to check to which of the three
+// it is a response):
+//   00000000  00 00 00 00 07 04 f4 b9  02 8d 4b 80 00 00 00 00  |..........K.....|
+//   00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+//   00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+//   00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 func (ps4amiibo) Keepalive(c *Client, interval time.Duration, maxSize int) func() {
 	return func() {
 		ticker := time.NewTicker(interval)
@@ -166,21 +196,21 @@ func (ps4amiibo) Keepalive(c *Client, interval time.Duration, maxSize int) func(
 				next, packet = ps4amiibo.buildPollPacket(ps4amiibo{}, next, maxSize)
 				n, _ := c.out.Write(packet)
 				log.Printf("nfcptl: written %d bytes", n)
+				buff := make([]byte, maxSize)
+				c.in.Read(buff)
+				println(hex.Dump(buff))
 			}
 		}
 	}
 }
 
 func (ps4amiibo) buildPollPacket(pos, size int) (int, []byte) {
-	sequence := []byte{0, 0x11, 0, 0x10, 0, 0x12}
+	sequence := []byte{0x11, 0x10, 0x12}
 	if pos > len(sequence)-1 {
 		pos = 0
 	}
 	first := sequence[pos]
 	next := pos + 1
-	if first == 0 {
-		return next, make([]byte, 0)
-	}
 
 	packet := ps4amiibo.createBasePacket(ps4amiibo{}, size)
 
