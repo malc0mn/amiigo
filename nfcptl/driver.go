@@ -7,12 +7,14 @@ import (
 )
 
 var (
-	driversMu sync.RWMutex                         // driversMu mutex to ensure only one driver is registered at a time
-	drivers   = make(map[string]map[string]Driver) // drivers holds all registered drivers
+	// driversMu mutex to ensure only one driver is registered at a time.
+	driversMu sync.RWMutex
+	// drivers holds all registered drivers.
+	drivers = make(map[string]map[string]Driver)
 )
 
-// Driver defines the interface for a third party driver. All drivers must implement the Driver interface to be
-// usable by the Client.
+// Driver defines the interface for a third party driver. All drivers must implement the Driver
+// interface to be usable by the Client.
 type Driver interface {
 	// VendorId returns the vendor ID the driver should search for.
 	VendorId() gousb.ID
@@ -43,8 +45,8 @@ func (e DriverNotFoundError) Error() string {
 	return "no driver found for vendor=" + e.Vendor + "and product=" + e.Product
 }
 
-// RegisterDriver is responsible for registering all drivers at runtime. Each driver should call this function in the
-// driver's init function to ensure the driver is available for use.
+// RegisterDriver is responsible for registering all drivers at runtime. Each driver should call
+// this function in the driver's init function to ensure the driver is available for use.
 func RegisterDriver(d Driver) {
 	driversMu.Lock()
 	defer driversMu.Unlock()
@@ -64,8 +66,8 @@ func RegisterDriver(d Driver) {
 	drivers[va][pa] = d
 }
 
-// GetDriverByVendorAndProductAlias searches for a driver based on the given vendor and device alias. If no driver is
-// found, a DriverNotFoundError error will be returned.
+// GetDriverByVendorAndProductAlias searches for a driver based on the given vendor and device
+// alias. If no driver is found, a DriverNotFoundError error will be returned.
 func GetDriverByVendorAndProductAlias(vendor, product string) (Driver, error) {
 	if d, ok := drivers[vendor][product]; ok {
 		return d, nil

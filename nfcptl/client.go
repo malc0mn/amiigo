@@ -57,8 +57,8 @@ func (c *Client) Connect() error {
 		return fmt.Errorf("no device found for vid=%s,pid=%s", c.driver.VendorId(), c.driver.ProductId())
 	}
 
-	// AutoDetach is mandatory: it will detach the kernel driver before attempting to claim the device. It will also
-	// reattach the kernel driver when we're done.
+	// AutoDetach is mandatory: it will detach the kernel driver before attempting to claim the
+	// device. It will also reattach the kernel driver when we're done.
 	c.dev.SetAutoDetach(true)
 
 	if c.debug {

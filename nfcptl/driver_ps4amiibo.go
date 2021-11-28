@@ -6,13 +6,17 @@ import (
 	"time"
 )
 
+// init MUST be used in drivers to register the driver by calling RegisterDriver. If the driver is not registered, it
+// will not be recognised!
 func init() {
 	RegisterDriver(&ps4amiibo{})
 }
 
 const (
-	ProductPowerSavesForAmiibo          = "ps4amiibo"
-	PIDPowerSavesForAmiibo     gousb.ID = 0x03d9
+	// ProductPowerSavesForAmiibo holds the alias for the 'PowerSaves for Amiibo' product
+	ProductPowerSavesForAmiibo = "ps4amiibo"
+	// PIDPowerSavesForAmiibo holds the USB product ID for the 'PowerSaves for Amiibo' product
+	PIDPowerSavesForAmiibo gousb.ID = 0x03d9
 )
 
 // ps4amiibo implements the Driver interface for the following USB device:
