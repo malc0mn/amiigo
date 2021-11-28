@@ -16,7 +16,7 @@ type Client struct {
 	ctx   *gousb.Context     // The active context
 	dev   *gousb.Device      // The active USB device
 	iface *gousb.Interface   // The claimed USB interface
-	done  func()             // A cleanup function to close the interface and config
+	cfg   *gousb.Config      // The active config
 	in    *gousb.InEndpoint  // The device-to-host endpoint
 	out   *gousb.OutEndpoint // The host-to-device endpoint
 }
@@ -68,17 +68,23 @@ func (c *Client) Connect() error {
 		log.Printf("config: %v", cdesc)
 	}
 
-	// Let's hope all NFC portals are plain and simple, otherwise we'll have to move some more stuff to the driver.
-	if c.iface, c.done, err = c.dev.DefaultInterface(); err != nil {
-		return fmt.Errorf("%s.DefaultInterface(): %v", c.dev, err)
+	setup := c.driver.Setup()
+
+	c.cfg, err = c.dev.Config(setup.Config)
+	if err != nil {
+		return fmt.Errorf("failed to claim config %d of device %s: %v", setup.Config, c.dev, err)
+	}
+	c.iface, err = c.cfg.Interface(setup.Interface, setup.AlternateSetting)
+	if err != nil {
+		return fmt.Errorf("failed to select interface #%d alternate setting %d of config %d of device %s: %v", setup.Interface, setup.AlternateSetting, setup.Config, c.dev, err)
 	}
 
-	if c.in, err = c.iface.InEndpoint(c.driver.InEndpoint()); err != nil {
-		return fmt.Errorf("%s.InEndpoint(%d): %v", c.iface, c.driver.InEndpoint(), err)
+	if c.in, err = c.iface.InEndpoint(setup.InEndpoint); err != nil {
+		return fmt.Errorf("%s.InEndpoint(%d): %v", c.iface, setup.InEndpoint, err)
 	}
 
-	if c.out, err = c.iface.OutEndpoint(c.driver.OutEndpoint()); err != nil {
-		return fmt.Errorf("%s.OutEndpoint(%d): %v", c.iface, c.driver.OutEndpoint(), err)
+	if c.out, err = c.iface.OutEndpoint(setup.OutEndpoint); err != nil {
+		return fmt.Errorf("%s.OutEndpoint(%d): %v", c.iface, setup.OutEndpoint, err)
 	}
 
 	if c.debug {
@@ -87,17 +93,29 @@ func (c *Client) Connect() error {
 		log.Printf("Max packet size %d", c.in.Desc.MaxPacketSize)
 	}
 
-	go c.Write(c.out.Desc.PollInterval, c.out.Desc.MaxPacketSize)
-	go c.Read(c.in.Desc.PollInterval, c.in.Desc.MaxPacketSize)
+	// Execute initialisation if needed.
+	if init := c.driver.Init(c, c.in.Desc.PollInterval, c.in.Desc.MaxPacketSize); init != nil {
+		init()
+	}
+
+	// Start the keep alive routine if needed.
+	if kl := c.driver.Keepalive(c, c.in.Desc.PollInterval, c.in.Desc.MaxPacketSize); kl != nil {
+		go kl()
+	}
+
+	go c.read()
 
 	return nil
 }
 
 // Disconnect cleanly disconnects the client and frees up all resources.
 func (c *Client) Disconnect() error {
-	// Calling done() closes the interface and the config.
-	if c.done != nil {
-		c.done()
+	if c.iface != nil {
+		c.iface.Close()
+	}
+
+	if c.cfg != nil {
+		c.cfg.Close()
 	}
 
 	if c.dev != nil {
@@ -126,12 +144,26 @@ func (c *Client) Debug() bool {
 	return c.debug
 }
 
-// Read reads data from the NFC portal.
-func (c *Client) Read(interval time.Duration, maxSize int) {
-	c.driver.Read(c, interval, maxSize)
+// SetIdle sends SET_IDLE control request to the device.
+func (c *Client) SetIdle(val, idx uint16) {
+	c.dev.Control(gousb.ControlOut|gousb.ControlClass|gousb.ControlInterface, bRequestSetIdle, val, idx, nil)
 }
 
-// Write sends data to the NFC portal.
-func (c *Client) Write(interval time.Duration, maxSize int) {
-	c.driver.Write(c, interval, maxSize)
+// read grabs data from the NFC portal and passes the data to the driver's HandleIn method for
+// further processing.
+func (c *Client) read() {
+	ticker := time.NewTicker(c.in.Desc.PollInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			buff := make([]byte, c.in.Desc.MaxPacketSize)
+			if n, err := c.in.Read(buff); err != nil {
+				log.Printf("nfcptl: read: read %d bytes from InEndpoint: %s", n, err)
+			}
+
+			c.driver.HandleIn(c, buff)
+		}
+	}
 }

@@ -3,6 +3,7 @@ package nfcptl
 import (
 	"encoding/hex"
 	"github.com/google/gousb"
+	"log"
 	"time"
 )
 
@@ -104,42 +105,111 @@ func (ps4amiibo) ProductAlias() string {
 	return ProductPowerSavesForAmiibo
 }
 
-func (ps4amiibo) InEndpoint() int {
-	return 1
+func (ps4amiibo) Setup() DeviceSetup {
+	return DeviceSetup{
+		Config:           1,
+		Interface:        0,
+		AlternateSetting: 0,
+		InEndpoint:       1,
+		OutEndpoint:      1,
+	}
 }
 
-func (ps4amiibo) OutEndpoint() int {
-	return 1
-}
+// Init preps the NFC portal for usage by doing a custom initialisation dance.
+// host to device:
+// init? 02
+// init? 90
+// init? 80 78 2e c5 f5 b0 fb 7b 20 40 29 ae 60 f2 88 46 3c
+func (ps4amiibo) Init(c *Client, interval time.Duration, maxSize int) func() {
+	return func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
 
-func (ps4amiibo) Read(c *Client, interval time.Duration, maxSize int) []byte {
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
+		// Would be nice to know what the init procedure actually "means".
+		payloads := [][]byte{
+			{0x02},
+			{0x90},
+			{0x80, 0x78, 0x2e, 0xc5, 0xf5, 0xb0, 0xfb, 0x7b, 0x20, 0x40, 0x29, 0xae, 0x60, 0xf2, 0x88, 0x46, 0x3c},
+		}
 
-	for {
-		select {
-		case <-ticker.C:
-			buff := make([]byte, maxSize)
-			n, _ := c.in.Read(buff)
+		c.SetIdle(0, 0)
 
-			data := buff[:n]
-			hex.Dump(data)
+		for _, p := range payloads {
+			select {
+			case <-ticker.C:
+				n, _ := c.out.Write(ps4amiibo.createPacket(ps4amiibo{}, p, maxSize))
+				if c.debug {
+					log.Printf("nfcptl: written %d bytes", n)
+				}
+			}
 		}
 	}
 }
 
-func (ps4amiibo) Write(c *Client, interval time.Duration, maxSize int) []byte {
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
+// Keepalive
+// host to device:
+// ka? 11
+// ka? 10
+// ka? 12
+// 11 .. 10 .. 12 keeps repeating now
+func (ps4amiibo) Keepalive(c *Client, interval time.Duration, maxSize int) func() {
+	return func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
 
-	for {
-		select {
-		case <-ticker.C:
-			buff := make([]byte, maxSize)
-			n, _ := c.out.Write(buff)
+		var packet []byte
+		next := 0
 
-			data := buff[:n]
-			hex.Dump(data)
+		for {
+			select {
+			case <-ticker.C:
+				next, packet = ps4amiibo.buildPollPacket(ps4amiibo{}, next, maxSize)
+				n, _ := c.out.Write(packet)
+				log.Printf("nfcptl: written %d bytes", n)
+			}
 		}
 	}
+}
+
+func (ps4amiibo) buildPollPacket(pos, size int) (int, []byte) {
+	sequence := []byte{0, 0x11, 0, 0x10, 0, 0x12}
+	if pos > len(sequence)-1 {
+		pos = 0
+	}
+	first := sequence[pos]
+	next := pos + 1
+	if first == 0 {
+		return next, make([]byte, 0)
+	}
+
+	packet := ps4amiibo.createBasePacket(ps4amiibo{}, size)
+
+	// Now set the first element
+	packet[0] = first
+
+	return next, packet
+}
+
+// createPacket creates a padded packet of the given size with the given payload.
+func (ps4amiibo) createPacket(pld []byte, size int) []byte {
+	pkt := ps4amiibo.createBasePacket(ps4amiibo{}, size)
+	copy(pkt, pld)
+
+	return pkt
+}
+
+func (ps4amiibo) createBasePacket(size int) []byte {
+	packet := make([]byte, size)
+	// Fill out packet with 0xcd
+	packet[0] = 0xcd
+	for n := 1; n < len(packet); n *= 2 {
+		copy(packet[n:], packet[:n])
+	}
+
+	return packet
+}
+
+func (ps4amiibo) HandleIn(c *Client, data []byte) {
+	// TODO: we probably need to respond properly to incoming data here
+	log.Println(hex.Dump(data))
 }

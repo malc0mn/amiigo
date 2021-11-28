@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+const bRequestSetIdle = 0x0a
+
 var (
 	// driversMu mutex to ensure only one driver is registered at a time.
 	driversMu sync.RWMutex
@@ -24,14 +26,32 @@ type Driver interface {
 	ProductId() gousb.ID
 	// ProductAlias returns the product alias to allow easy reference for the end users.
 	ProductAlias() string
-	// InEndpoint returns the device-to-host endpoint number. In most cases this will be 1.
-	InEndpoint() int
-	// OutEndpoint returns the host-to-device endpoint number. In most cases this will be 1.
-	OutEndpoint() int
-	// Read is the driver specific read implementation to read data from the device
-	Read(c *Client, interval time.Duration, maxSize int) []byte
-	// Write is the driver specific write implementation to send data to the device
-	Write(c *Client, interval time.Duration, maxSize int) []byte
+	// Setup returns the parameters needed to initialise the device, so it's ready for use.
+	Setup() DeviceSetup
+	// Init is the driver specific initialisation procedure to prep the device, so it's ready to
+	// use. Return nil when not needed.
+	Init(c *Client, interval time.Duration, maxSize int) func()
+	// Keepalive can be used if the device expects a special keep alive sequence to be sent. Return
+	// nil when not needed.
+	Keepalive(c *Client, interval time.Duration, maxSize int) func()
+	// HandleIn handles data read from the gousb.InEndpoint.
+	HandleIn(c *Client, data []byte)
+}
+
+// DeviceSetup describes which config, interface, setting and in/out endpoints to use for the
+// device.
+type DeviceSetup struct {
+	// Config holds the bConfigurationValue that needs to be set on the device for proper
+	// initialisation. Most likely 1.
+	Config int
+	// Interface holds the bInterfaceNumber that needs to be used. Usually 0.
+	Interface int
+	// AlternateSetting holds the bAlternateSetting that needs to be used. Usually 0.
+	AlternateSetting int
+	// InEndpoint holds the device-to-host bEndpointAddress. In most cases this will be 1.
+	InEndpoint int
+	// OutEndpoint holds the host-to-device bEndpointAddress. In most cases this will be 1.
+	OutEndpoint int
 }
 
 // DriverNotFoundError defines the error structure returned when a requested driver is not found.
@@ -42,7 +62,7 @@ type DriverNotFoundError struct {
 
 // Error implements the error interface
 func (e DriverNotFoundError) Error() string {
-	return "no driver found for vendor=" + e.Vendor + "and product=" + e.Product
+	return "nfcptl: no driver found for vendor=" + e.Vendor + "and product=" + e.Product
 }
 
 // RegisterDriver is responsible for registering all drivers at runtime. Each driver should call
