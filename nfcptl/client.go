@@ -111,13 +111,13 @@ func (c *Client) Disconnect() error {
 	return nil
 }
 
-// GetVid returns the vendor ID the client is using.
-func (c *Client) GetVid() gousb.ID {
+// Vid returns the vendor ID the client is using.
+func (c *Client) Vid() gousb.ID {
 	return c.driver.VendorId()
 }
 
-// GetPid returns the product ID the client is using.
-func (c *Client) GetPid() gousb.ID {
+// Pid returns the product ID the client is using.
+func (c *Client) Pid() gousb.ID {
 	return c.driver.ProductId()
 }
 
