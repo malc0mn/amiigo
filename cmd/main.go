@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/malc0mn/amiigo/nfcptl"
 	"log"
@@ -54,6 +55,16 @@ func main() {
 		log.Fatalf("Error connecting to device: %v", err)
 	}
 
-	<-quit
+	for {
+		select {
+		case e := <-client.Events():
+			fmt.Println("Received event:")
+			fmt.Println(e.String())
+			fmt.Println(hex.Dump(e.Data()))
+		case <-quit:
+			return
+		}
+	}
+
 	fmt.Println("Bye bye!")
 }

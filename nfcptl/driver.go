@@ -18,6 +18,8 @@ var (
 // Driver defines the interface for a third party driver. All drivers must implement the Driver
 // interface to be usable by the Client.
 type Driver interface {
+	// LedState returns the state of the LED: true for on, false for off.
+	LedState() bool
 	// VendorId returns the vendor ID the driver should search for.
 	VendorId() gousb.ID
 	// VendorAlias returns the vendor alias to allow easy reference for the end users.
@@ -28,14 +30,9 @@ type Driver interface {
 	ProductAlias() string
 	// Setup returns the parameters needed to initialise the device, so it's ready for use.
 	Setup() DeviceSetup
-	// Init is the driver specific initialisation procedure to prep the device, so it's ready to
-	// use. Return nil when not needed.
-	Init(c *Client, interval time.Duration, maxSize int) func()
-	// Keepalive can be used if the device expects a special keep alive sequence to be sent. Return
-	// nil when not needed.
-	Keepalive(c *Client, interval time.Duration, maxSize int) func()
-	// HandleIn handles data read from the gousb.InEndpoint.
-	HandleIn(c *Client, data []byte)
+	// Drive is where the main driver logic sits. The client starts this function as a go routine
+	// after the USB connection is established and the driver must take over to control the device.
+	Drive(c *Client, interval time.Duration, maxSize int)
 }
 
 // DeviceSetup describes which config, interface, setting and in/out endpoints to use for the

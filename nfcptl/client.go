@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/google/gousb"
 	"log"
-	"time"
 )
 
 // Client allows easy communications with an NFC portal connected over USB.
@@ -19,6 +18,8 @@ type Client struct {
 	cfg   *gousb.Config      // The active config
 	in    *gousb.InEndpoint  // The device-to-host endpoint
 	out   *gousb.OutEndpoint // The host-to-device endpoint
+
+	events chan *Event // Device events will be received on this channel
 }
 
 // NewClient builds a new Client struct.
@@ -31,6 +32,7 @@ func NewClient(vendor, device string, debug bool) (*Client, error) {
 	c := &Client{
 		driver: d,
 		debug:  debug,
+		events: make(chan *Event, 10),
 	}
 
 	if c.debug {
@@ -93,17 +95,8 @@ func (c *Client) Connect() error {
 		log.Printf("Max packet size %d", c.in.Desc.MaxPacketSize)
 	}
 
-	// Execute initialisation if needed.
-	if init := c.driver.Init(c, c.in.Desc.PollInterval, c.in.Desc.MaxPacketSize); init != nil {
-		init()
-	}
-
-	// Start the keep alive routine if needed.
-	if kl := c.driver.Keepalive(c, c.in.Desc.PollInterval, c.in.Desc.MaxPacketSize); kl != nil {
-		go kl()
-	}
-
-	//go c.read()
+	// Pass control to the driver now.
+	go c.driver.Drive(c, c.in.Desc.PollInterval, c.in.Desc.MaxPacketSize)
 
 	return nil
 }
@@ -126,16 +119,39 @@ func (c *Client) Disconnect() error {
 		c.ctx.Close()
 	}
 
+	close(c.events)
+
 	return nil
 }
 
-// Vid returns the vendor ID the client is using.
-func (c *Client) Vid() gousb.ID {
+// In returns the USB in endpoint for device-to-host communications.
+func (c *Client) In() *gousb.InEndpoint {
+	return c.in
+}
+
+// Out returns the USB out endpoint for host-to-device communications.
+func (c *Client) Out() *gousb.OutEndpoint {
+	return c.out
+}
+
+// Events returns the read only events channel. The caller can use this channel to listen for
+// device events and act accordingly.
+func (c *Client) Events() <-chan *Event {
+	return c.events
+}
+
+// PublishEvent places an event on the event channel.
+func (c *Client) PublishEvent(e *Event) {
+	c.events <- e
+}
+
+// VendorId returns the vendor ID the client is using.
+func (c *Client) VendorId() gousb.ID {
 	return c.driver.VendorId()
 }
 
-// Pid returns the product ID the client is using.
-func (c *Client) Pid() gousb.ID {
+// ProductId returns the product ID the client is using.
+func (c *Client) ProductId() gousb.ID {
 	return c.driver.ProductId()
 }
 
@@ -147,23 +163,4 @@ func (c *Client) Debug() bool {
 // SetIdle sends SET_IDLE control request to the device.
 func (c *Client) SetIdle(val, idx uint16) {
 	c.dev.Control(gousb.ControlOut|gousb.ControlClass|gousb.ControlInterface, bRequestSetIdle, val, idx, nil)
-}
-
-// read grabs data from the NFC portal and passes the data to the driver's HandleIn method for
-// further processing.
-func (c *Client) read() {
-	ticker := time.NewTicker(c.in.Desc.PollInterval)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case <-ticker.C:
-			buff := make([]byte, c.in.Desc.MaxPacketSize)
-			if n, err := c.in.Read(buff); err != nil {
-				log.Printf("nfcptl: read: read %d bytes from InEndpoint: %s", n, err)
-			}
-
-			c.driver.HandleIn(c, buff)
-		}
-	}
 }
