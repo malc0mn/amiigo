@@ -28,6 +28,7 @@ type Client struct {
 // NewClient builds a new Client struct.
 // TODO: do we need to use a context instead of a terminate channel?
 func NewClient(vendor, device string, terminate <-chan struct{}, debug bool) (*Client, error) {
+	// TODO: add auto detection when vendor and device are empty strings.
 	d, err := GetDriverByVendorAndProductAlias(vendor, device)
 	if err != nil {
 		return nil, err
@@ -131,22 +132,26 @@ func (c *Client) Disconnect() error {
 }
 
 // In returns the USB in endpoint for device-to-host communications.
+// This function is exposed to allow Driver implementations outside the nfcptl package.
 func (c *Client) In() *gousb.InEndpoint {
 	return c.in
 }
 
 // Out returns the USB out endpoint for host-to-device communications.
+// This function is exposed to allow Driver implementations outside the nfcptl package.
 func (c *Client) Out() *gousb.OutEndpoint {
 	return c.out
 }
 
 // PollInterval returns the poll interval for the NFC portal.
+// This function is exposed to allow Driver implementations outside the nfcptl package.
 func (c *Client) PollInterval() time.Duration {
 	return c.in.Desc.PollInterval
 }
 
 // MaxPacketSize returns the maximum packet size the NFC portal will accept. Use a multiple of this
 // value for optimal sending speed.
+// This function is exposed to allow Driver implementations outside the nfcptl package.
 func (c *Client) MaxPacketSize() int {
 	return c.in.Desc.MaxPacketSize
 }
@@ -158,18 +163,21 @@ func (c *Client) Events() <-chan *Event {
 }
 
 // PublishEvent places an event on the event channel.
+// This function is exposed to allow Driver implementations outside the nfcptl package.
 func (c *Client) PublishEvent(e *Event) {
 	c.events <- e
 }
 
 // Terminate returns the termination channel which a Driver MUST use to cleanly terminate any
 // goroutines. The channel is closed by the Disconnect function signaling the listeners to halt.
+// This function is exposed to allow Driver implementations outside the nfcptl package.
 func (c *Client) Terminate() <-chan struct{} {
 	return c.terminate
 }
 
 // Commands returns the read only commands channel. The Driver MUST use this channel to listen for
 // client commands and act accordingly.
+// This function is exposed to allow Driver implementations outside the nfcptl package.
 func (c *Client) Commands() <-chan ClientCommand {
 	return c.commands
 }
@@ -197,6 +205,7 @@ func (c *Client) Debug() bool {
 }
 
 // SetIdle sends SET_IDLE control request to the device.
+// This function is exposed to allow Driver implementations outside the nfcptl package.
 func (c *Client) SetIdle(val, idx uint16) {
 	c.dev.Control(gousb.ControlOut|gousb.ControlClass|gousb.ControlInterface, bRequestSetIdle, val, idx, nil)
 }

@@ -63,11 +63,12 @@ func (e DriverNotFoundError) Error() string {
 
 // RegisterDriver is responsible for registering all drivers at runtime. Each driver should call
 // this function in the driver's init function to ensure the driver is available for use.
+// This function is exposed to allow Driver implementations outside the nfcptl package.
 func RegisterDriver(d Driver) {
 	driversMu.Lock()
 	defer driversMu.Unlock()
 	if d == nil {
-		panic("nfcptl: RegisterDriver command is nil")
+		panic("nfcptl: RegisterDriver driver is nil")
 	}
 
 	va := d.VendorAlias()
