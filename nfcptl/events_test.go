@@ -5,8 +5,8 @@ import "testing"
 func TestString(t *testing.T) {
 	list := map[EventType]string {
 		DeviceName: "deviceName",
-		UnknownInitEventOne: "unknownInitEventOne",
-		UnknownInitEventTwo: "unknownInitEventTwo",
+		HardwareInfo: "hardwareInfo",
+		ApiPassword: "apiPassword",
 	}
 
 	for typ, want := range list {

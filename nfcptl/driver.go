@@ -3,7 +3,6 @@ package nfcptl
 import (
 	"github.com/google/gousb"
 	"sync"
-	"time"
 )
 
 const bRequestSetIdle = 0x0a
@@ -30,9 +29,9 @@ type Driver interface {
 	ProductAlias() string
 	// Setup returns the parameters needed to initialise the device, so it's ready for use.
 	Setup() DeviceSetup
-	// Drive is where the main driver logic sits. The client starts this function as a go routine
+	// Drive is where the main driver logic sits. The client starts this function as a goroutine
 	// after the USB connection is established and the driver must take over to control the device.
-	Drive(c *Client, interval time.Duration, maxSize int)
+	Drive(c *Client)
 }
 
 // DeviceSetup describes which config, interface, setting and in/out endpoints to use for the

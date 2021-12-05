@@ -44,7 +44,7 @@ func main() {
 		close(quit)
 	}()
 
-	client, err := nfcptl.NewClient(conf.vendor, conf.device, verbose)
+	client, err := nfcptl.NewClient(conf.vendor, conf.device, quit, verbose)
 	if err != nil {
 		log.Fatalf("Error initialising client: %s", err)
 	}
@@ -54,6 +54,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error connecting to device: %v", err)
 	}
+
+	//client.SendCommand(nfcptl.GetDeviceName)
+	//client.SendCommand(nfcptl.GetHardwareInfo)
 
 	for {
 		select {

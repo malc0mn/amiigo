@@ -3,12 +3,15 @@ package nfcptl
 type EventType int
 
 const(
-	// DeviceName is sent when the driver has received the name from the device.
+	// DeviceName is published when the driver has received data after sending the GetDeviceName
+	// command.
 	DeviceName EventType = iota
-	// UnknownInitEventOne figure out what it actually is
-	UnknownInitEventOne
-	// UnknownInitEventTwo figure out what it actually is
-	UnknownInitEventTwo
+	// HardwareInfo is published when the driver has received data after sending the
+	// GetHardwareInfo command.
+	HardwareInfo
+	// ApiPassword is sent when the driver has received data after sending the GetApiPassword
+	// command.
+	ApiPassword
 	// TokenDetected is sent when the driver has detected a token on the device. The token ID will
 	// be present in the event data.
 	TokenDetected
@@ -18,6 +21,8 @@ const(
 	// TokenTagData is sent when the driver has read the full token tag data which will be present
 	// in the event data.
 	TokenTagData
+	// OK is sent when the driver has successfully executed a command without specific return data.
+	OK
 )
 
 type Event struct {
@@ -35,8 +40,8 @@ func NewEvent(name EventType, data []byte) *Event {
 func (e *Event) String() string {
 	return map[EventType]string {
 		DeviceName: "deviceName",
-		UnknownInitEventOne: "unknownInitEventOne",
-		UnknownInitEventTwo: "unknownInitEventTwo",
+		HardwareInfo: "hardwareInfo",
+		ApiPassword: "apiPassword",
 	}[e.name]
 }
 

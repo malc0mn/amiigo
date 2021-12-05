@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/google/gousb"
 	"log"
+	"time"
 )
 
 // Client allows easy communications with an NFC portal connected over USB.
@@ -19,11 +20,14 @@ type Client struct {
 	in    *gousb.InEndpoint  // The device-to-host endpoint
 	out   *gousb.OutEndpoint // The host-to-device endpoint
 
-	events chan *Event // Device events will be received on this channel
+	terminate <-chan struct{} // A channel telling the client to terminate as soon as the channel is closed.
+	events chan *Event // Device events will be received on this channel.
+	commands chan ClientCommand // ClientCommands will be sent on this channel for the driver to act upon.
 }
 
 // NewClient builds a new Client struct.
-func NewClient(vendor, device string, debug bool) (*Client, error) {
+// TODO: do we need to use a context instead of a terminate channel?
+func NewClient(vendor, device string, terminate <-chan struct{}, debug bool) (*Client, error) {
 	d, err := GetDriverByVendorAndProductAlias(vendor, device)
 	if err != nil {
 		return nil, err
@@ -32,7 +36,9 @@ func NewClient(vendor, device string, debug bool) (*Client, error) {
 	c := &Client{
 		driver: d,
 		debug:  debug,
+		terminate: terminate,
 		events: make(chan *Event, 10),
+		commands: make(chan ClientCommand, 1),
 	}
 
 	if c.debug {
@@ -48,7 +54,7 @@ func (c *Client) Connect() error {
 
 	c.ctx = gousb.NewContext()
 	if c.debug {
-		c.ctx.Debug(4)
+		// c.ctx.Debug(4)
 	}
 
 	c.dev, err = c.ctx.OpenDeviceWithVIDPID(c.driver.VendorId(), c.driver.ProductId())
@@ -96,7 +102,7 @@ func (c *Client) Connect() error {
 	}
 
 	// Pass control to the driver now.
-	go c.driver.Drive(c, c.in.Desc.PollInterval, c.in.Desc.MaxPacketSize)
+	go c.driver.Drive(c)
 
 	return nil
 }
@@ -134,7 +140,18 @@ func (c *Client) Out() *gousb.OutEndpoint {
 	return c.out
 }
 
-// Events returns the read only events channel. The caller can use this channel to listen for
+// PollInterval returns the poll interval for the NFC portal.
+func (c *Client) PollInterval() time.Duration {
+	return c.in.Desc.PollInterval
+}
+
+// MaxPacketSize returns the maximum packet size the NFC portal will accept. Use a multiple of this
+// value for optimal sending speed.
+func (c *Client) MaxPacketSize() int {
+	return c.in.Desc.MaxPacketSize
+}
+
+// Events returns the read only events channel. The caller MUST use this channel to listen for
 // device events and act accordingly.
 func (c *Client) Events() <-chan *Event {
 	return c.events
@@ -143,6 +160,25 @@ func (c *Client) Events() <-chan *Event {
 // PublishEvent places an event on the event channel.
 func (c *Client) PublishEvent(e *Event) {
 	c.events <- e
+}
+
+// Terminate returns the termination channel which a Driver MUST use to cleanly terminate any
+// goroutines. The channel is closed by the Disconnect function signaling the listeners to halt.
+func (c *Client) Terminate() <-chan struct{} {
+	return c.terminate
+}
+
+// Commands returns the read only commands channel. The Driver MUST use this channel to listen for
+// client commands and act accordingly.
+func (c *Client) Commands() <-chan ClientCommand {
+	return c.commands
+}
+
+// SendCommand sends a ClientCommand to the internal commands channel. The Driver can act on
+// this command when implemented by publishing an Event.
+// When not implemented, the Driver should publish an error Event.
+func (c *Client) SendCommand(cc ClientCommand) {
+	c.commands <- cc
 }
 
 // VendorId returns the vendor ID the client is using.

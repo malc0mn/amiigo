@@ -23,7 +23,7 @@ func TestGetDriverByVendorAndDeviceAlias(t *testing.T) {
 	}
 	check := map[string]map[string]expect{
 		VendorDatelElextronicsLtd: {
-			ProductPowerSavesForAmiibo: expect{vid: 0x1c1a, pid: 0x03d9, err: nil},
+			PS4A_Product: expect{vid: 0x1c1a, pid: 0x03d9, err: nil},
 		},
 		"vendor": {
 			"device": expect{vid: 0, pid: 0, err: DriverNotFoundError{"vendor", "device"}},
