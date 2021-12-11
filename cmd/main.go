@@ -44,7 +44,7 @@ func main() {
 		close(quit)
 	}()
 
-	client, err := nfcptl.NewClient(conf.vendor, conf.device, quit, verbose)
+	client, err := nfcptl.NewClient(conf.vendor, conf.device, verbose)
 	if err != nil {
 		log.Fatalf("Error initialising client: %s", err)
 	}

@@ -20,14 +20,14 @@ type Client struct {
 	in    *gousb.InEndpoint  // The device-to-host endpoint
 	out   *gousb.OutEndpoint // The host-to-device endpoint
 
-	terminate <-chan struct{} // A channel telling the client to terminate as soon as the channel is closed.
-	events chan *Event // Device events will be received on this channel.
-	commands chan ClientCommand // ClientCommands will be sent on this channel for the driver to act upon.
+	// TODO: do we need to use a context instead of a terminate channel?
+	terminate chan struct{} // A channel telling the Driver to terminate as soon as the channel is closed.
+	events    chan *Event   // Device events will be received on this channel.
+	commands  chan Command  // Command structs will be sent on this channel for the driver to act upon.
 }
 
 // NewClient builds a new Client struct.
-// TODO: do we need to use a context instead of a terminate channel?
-func NewClient(vendor, device string, terminate <-chan struct{}, debug bool) (*Client, error) {
+func NewClient(vendor, device string, debug bool) (*Client, error) {
 	// TODO: add auto detection when vendor and device are empty strings.
 	d, err := GetDriverByVendorAndProductAlias(vendor, device)
 	if err != nil {
@@ -35,11 +35,11 @@ func NewClient(vendor, device string, terminate <-chan struct{}, debug bool) (*C
 	}
 
 	c := &Client{
-		driver: d,
-		debug:  debug,
-		terminate: terminate,
-		events: make(chan *Event, 10),
-		commands: make(chan ClientCommand, 1),
+		driver:    d,
+		debug:     debug,
+		terminate: make(chan struct{}),
+		events:    make(chan *Event, 10),
+		commands:  make(chan Command, 1),
 	}
 
 	if c.debug {
@@ -110,6 +110,8 @@ func (c *Client) Connect() error {
 
 // Disconnect cleanly disconnects the client and frees up all resources.
 func (c *Client) Disconnect() error {
+	close(c.terminate)
+
 	if c.iface != nil {
 		c.iface.Close()
 	}
@@ -178,15 +180,15 @@ func (c *Client) Terminate() <-chan struct{} {
 // Commands returns the read only commands channel. The Driver MUST use this channel to listen for
 // client commands and act accordingly.
 // This function is exposed to allow Driver implementations outside the nfcptl package.
-func (c *Client) Commands() <-chan ClientCommand {
+func (c *Client) Commands() <-chan Command {
 	return c.commands
 }
 
 // SendCommand sends a ClientCommand to the internal commands channel. The Driver can act on
 // this command when implemented by publishing an Event.
 // When not implemented, the Driver should publish an error Event.
-func (c *Client) SendCommand(cc ClientCommand) {
-	c.commands <- cc
+func (c *Client) SendCommand(cmd Command) {
+	c.commands <- cmd
 }
 
 // VendorId returns the vendor ID the client is using.

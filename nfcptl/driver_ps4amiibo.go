@@ -1,6 +1,7 @@
 package nfcptl
 
 import (
+	"bytes"
 	"encoding/hex"
 	"fmt"
 	"github.com/google/gousb"
@@ -27,8 +28,20 @@ const (
 	//   00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 	//   00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 	//   00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-	//PS4A_GetDeviceName DriverCommand = 0x02
-	PS4A_GetDeviceName DriverCommand = 0x1e
+	PS4A_GetDeviceName DriverCommand = 0x02
+
+	// PS4A_Poll2 is the second command sent when polling for a token. It is unknown exactly what
+	// this command does, but it MUST DIRECTLY precede PS4A_GetTokenUid for PS4A_GetTokenUid to
+	// return a token UID.
+	PS4A_Poll2 DriverCommand = 0x10
+	// PS4A_Poll1 is the first command sent when polling for a token. It is unknown exactly what
+	// this command does but omitting it from the polling sequence makes the return value of
+	// PS4A_GetTokenUid alternate between an actual UID and 0x01 0x02 which is an error code of
+	// sorts.
+	PS4A_Poll1 DriverCommand = 0x11
+	// PS4A_GetTokenUid is the third command sent when polling for a token. It MUST be preceded by
+	// PS4A_Poll2 or the command will never return a token UID.
+	PS4A_GetTokenUid DriverCommand = 0x12
 
 	// PS4A_ReadPage reads the specified page from the token. Takes one argument being the page to
 	// read.
@@ -38,16 +51,15 @@ const (
 	PS4A_WritePage DriverCommand = 0x1d
 
 	// PS4A_Unknown4 is used after a token has been detected on the portal after command 0x30. It
-	// takes data as arguments
-	// from a previous command.
+	// takes data from PS4A_Unknown3 as arguments:
+	//   0x00 + the answer from PS4A_Unknown3
 	PS4A_Unknown4 DriverCommand = 0x1e
 
-	// PS4A_Unknown1 without token on portal returns:
-	//   00000000  01 02 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	// PS4A_Unknown1 with a token on the portal always returns:
+	//   00000000  00 00 00 04 04 02 01 00  11 03 00 00 00 00 00 00  |................|
 	//   00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 	//   00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 	//   00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-	// Calling other random commands also returns  0x01 0x02, so seems to be an error of some kind?
 	// This is used after detecting a token on the portal, right after enabling the LED with
 	// PS4A_SetLedState.
 	PS4A_Unknown1 DriverCommand = 0x1f
@@ -60,16 +72,18 @@ const (
 	// and 0xff is max brightness thus giving 255 steps of control.
 	PS4A_SetLedState DriverCommand = 0x20
 
-	// PS4A_Unknown2 without token on portal returns:
-	//   00000000  01 02 60 3c 00 00 00 00  00 00 00 00 00 00 00 00  |..`<............|
-	//   00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-	//   00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	// PS4A_Unknown2 with a token on the portal always returns:
+	//   00000000  00 00 21 3c 65 44 49 01  60 29 85 e9 f6 b5 0c ac  |..!<eDI.`)......|
+	//   00000010  b9 c8 ca 3c 4b cd 13 14  27 11 ff 57 1c f0 1e 66  |...<K...'..W...f|
+	//   00000020  bd 6f 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |.o..............|
 	//   00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 	// It is used after a token has been detected after calling 0x1f
 	PS4A_Unknown2 DriverCommand = 0x21
 
-	// PS4A_Unknown3 is called after a token has been detected on the portal, after page 16 has been
-	// read. It takes data from a previous command as arguments.
+	// PS4A_Unknown3 is called after a token has been detected on the portal, after page 16 has
+	// been read. It takes data from two previous commands as arguments:
+	//   the answer to PS4A_GetTokenUid being the token UID + the answer to PS4A_ReadPage called
+	//   with argument 0x10 (page 16)
 	PS4A_Unknown3 DriverCommand = 0x30
 
 	// PS4A_GenerateApiPassword is used to generate an API password using the Vuid received by doing
@@ -169,11 +183,11 @@ const (
 //           wMaxPacketSize     0x0040  1x 64 bytes
 //           bInterval               1
 type ps4amiibo struct {
-	ledState bool // Keeps the state of the LED at the front of the NFC portal.
+	ledState   bool         // Keeps the state of the LED at the front of the NFC portal.
 	ledStateMu sync.RWMutex // Make led state concurrency safe
 }
 
-func (p *ps4amiibo) setLedState(s bool)  {
+func (p *ps4amiibo) setLedState(s bool) {
 	p.ledStateMu.Lock()
 	defer p.ledStateMu.Unlock()
 	p.ledState = s
@@ -212,26 +226,46 @@ func (p *ps4amiibo) Setup() DeviceSetup {
 }
 
 func (p *ps4amiibo) Drive(c *Client) {
-	fmt.Println("Driving ps4amiibo")
+	if c.Debug() {
+		log.Println("nfcptl: driving ps4amiibo")
+	}
 	go p.commandListener(c)
-	//p.init(c, interval, maxSize)
-	p.poll(c)
+	p.pollForToken(c)
+}
+
+func (p *ps4amiibo) commandMapping(cc ClientCommand) (DriverCommand, *UnsupportedCommandError) {
+	dc, ok := map[ClientCommand]DriverCommand{
+		GetDeviceName:   PS4A_GetDeviceName,
+		GetHardwareInfo: PS4A_GetHardwareInfo,
+		GetApiPassword:  PS4A_GenerateApiPassword,
+		FetchTokenData:  PS4A_ReadPage,
+		WriteTokenData:  PS4A_WritePage,
+		SetLedState:     PS4A_SetLedState,
+	}[cc]
+	if !ok {
+		return 0, &UnsupportedCommandError{cc}
+	}
+
+	return dc, nil
+}
+
+func (p *ps4amiibo) eventMapping(dc DriverCommand) EventType {
+	return map[DriverCommand]EventType{
+		PS4A_GetDeviceName:       DeviceName,
+		PS4A_GetHardwareInfo:     HardwareInfo,
+		PS4A_GenerateApiPassword: ApiPassword,
+		PS4A_SetLedState:         OK,
+	}[dc]
 }
 
 func (p *ps4amiibo) commandListener(c *Client) {
 	for {
 		select {
 		case cmd := <-c.Commands():
-			switch cmd {
-			// TODO: add method to Driver interface for ClientCommand <-> DriverCommand mapping!
-			case GetDeviceName:
-				p.sendCommand(c, PS4A_GetDeviceName)
-			case GetHardwareInfo:
-				p.sendCommand(c, PS4A_GetHardwareInfo)
-			case GetApiPassword:
-				p.sendCommand(c, PS4A_GenerateApiPassword)
-			case SetLedState:
-				p.sendCommand(c, PS4A_SetLedState)
+			if dc, err := p.commandMapping(cmd.Command); err != nil {
+				c.PublishEvent(NewEvent(UnknownCommand, []byte{}))
+			} else {
+				p.sendCommand(c, dc, cmd.Arguments)
 			}
 		case <-c.Terminate():
 			return
@@ -239,153 +273,143 @@ func (p *ps4amiibo) commandListener(c *Client) {
 	}
 }
 
-// init preps the NFC portal for usage by doing a custom initialisation dance.
-// host to device:
-// init? 02
-// init? 90
-// init? 80 78 2e c5 f5 b0 fb 7b 20 40 29 ae 60 f2 88 46 3c
-func (p *ps4amiibo) init(c *Client, interval time.Duration, maxSize int) {
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
-
-	// Would be nice to know what the init procedure actually "means".
-	payloads := [][]byte{
-		{byte(PS4A_GetDeviceName)},
-		{byte(PS4A_GetHardwareInfo)},
-		// TODO: use UsbCommand here and fill in the arguments by calling the Powersaves API.
-		{byte(PS4A_GenerateApiPassword), 0x78, 0x2e, 0xc5, 0xf5, 0xb0, 0xfb, 0x7b, 0x20, 0x40, 0x29, 0xae, 0x60, 0xf2, 0x88, 0x46, 0x3c},
-	}
-
-	events := []EventType{
-		DeviceName,
-		HardwareInfo,
-		ApiPassword,
-	}
-
-	c.SetIdle(0, 0)
-
-	for i, pl := range payloads {
-		select {
-		case <-ticker.C:
-			n, _ := c.Out().Write(p.createPacket(pl, maxSize))
-			if c.Debug() {
-				log.Printf("nfcptl: written %d bytes", n)
-			}
-			b := make([]byte, maxSize)
-			c.In().Read(b)
-			c.PublishEvent(NewEvent(events[i], b))
-		}
-	}
-}
-
-// poll
-// host to device:
-// ka? 11
-// ka? 10
-// ka? 12
-// 11 .. 10 .. 12 keeps repeating now
-// BREAKTHROUGH!!! When a token is placed on the portal, this message is returned as a response to
-// the 0x10 message:
-//   00000000  00 00 00 00 07 04 f4 b9  02 8d 4b 80 00 00 00 00  |..........K.....|
-//   00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-//   00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-//   00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-// Different amiibo on the token:
-//   00000000  00 00 00 00 07 04 fd 16  3a fc 73 80 00 00 00 00  |........:.s.....|
-//   00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-//   00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-//   00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-// So this is something like 'Get token ID'.
-func (p *ps4amiibo) poll(c *Client) {
+func (p *ps4amiibo) pollForToken(c *Client) {
 	ticker := time.NewTicker(c.PollInterval())
 	defer ticker.Stop()
 
-	var packet []byte
+	var cmd *UsbCommand
 	next := 0
 	maxSize := c.MaxPacketSize()
 
 	for {
 		select {
 		case <-ticker.C:
-			println("--------- packet:")
-			println(hex.Dump(packet))
-			next, packet = p.buildPollPacket(next, maxSize)
-			n, _ := c.Out().Write(packet)
+			next, cmd = p.buildPollCommand(next, maxSize)
+			if c.Debug() {
+				log.Println("nfcptl: polling:")
+				fmt.Print(hex.Dump(cmd.Marshal())) // No Println here!
+			}
+			n, _ := c.Out().Write(cmd.Marshal())
 			log.Printf("nfcptl: written %d bytes", n)
 			buff := make([]byte, maxSize)
 			c.In().Read(buff)
-			println("--------- reply:")
-			println(hex.Dump(buff))
+			if c.Debug() {
+				log.Println("nfcptl: poll reply:")
+				fmt.Println(hex.Dump(buff))
+			}
+			// TODO: implement real error checking (0x01 0x02 as first two bytes indicate an error)
+			if cmd.DriverCommand() == PS4A_GetTokenUid && bytes.Equal(buff[:4], []byte{0x00, 0x00, 0x00, 0x00}) {
+				p.readToken(c, buff)
+				// TODO: the return here is just for testing, it will need to go!
+				return
+			}
 		case <-c.Terminate():
 			return
 		}
 	}
 }
 
-func (p *ps4amiibo) sendCommand(c *Client, cmd DriverCommand) {
-	// TODO: add method to Driver interface for DriverCommand <-> Event mapping.
-	events := map[DriverCommand]EventType{
-		PS4A_GetDeviceName: DeviceName,
-		PS4A_GetHardwareInfo: HardwareInfo,
-		PS4A_GenerateApiPassword: ApiPassword,
-		PS4A_SetLedState: OK,
+func (p *ps4amiibo) buildPollCommand(pos, size int) (int, *UsbCommand) {
+	// This polling sequence is what the original software does. Tinkering with it shows that
+	// shifting the sequence to the right or to the left will still work which makes sense.
+	// After playing around with it some more, it became clear that PS4A_Poll2 MUST DIRECTLY
+	// precede PS4A_GetTokenUid or PS4A_GetTokenUid will never return a token UID.
+	// Dropping PS4A_Poll1 will make the return value of PS4A_GetTokenUid alternate between the
+	// actual UID and 0x01 0x02 which is an error code of sorts.
+	sequence := []DriverCommand{PS4A_Poll1, PS4A_Poll2, PS4A_GetTokenUid}
+	if pos > len(sequence)-1 {
+		pos = 0
 	}
+	cmd := sequence[pos]
+	next := pos + 1
 
 	usbCmd := NewUsbCommand(
 		cmd,
-		p.createBasePacket(c.MaxPacketSize()-1),
+		p.createArguments(size-1, []byte{}),
 	)
-//usbCmd.args[0] = 0xff
-fmt.Println("----------------------")
-fmt.Println(hex.Dump(usbCmd.Marshal()))
-fmt.Println("----------------------")
+
+	return next, usbCmd
+}
+
+func (p *ps4amiibo) readToken(c *Client, buff []byte) {
+	maxSize := c.MaxPacketSize()
+	uid := buff[4:12]
+
+	log.Printf("nfcptl: token detected with id %#x", uid)
+	//MsgOneAfterTokenDetect = []byte{0x20, 0xff} // set led to full brightness
+	//MsgTwoAfterTokenDetect byte = 0x1f // unknown
+	//MsgThreeAfterTokenDetect byte = 0x21 // read token?
+	//MsgFourAfterTokenDetect = []byte{0x1c, 0x10} // Read NFC page 16?
+	//MsgFiveAfterTokenDetect = []byte{30 04 f4 b9 02 8d 4b 80 f0 8e fd 17 b3 52 75 6f 70 77 da 29 45 b4 24 f2} // the data here contains the result of the 0x1c 0x10 call
+	//  the arguments for 0x30 are the answer to 0x12 being the token UID + the answer to 0x1c 0x10 (page 10?)
+	//MsgSixAfterTokenDetect = []byte{1e 00 0c 10 fe 86 87 33 f7 16 08 b5 01 78 d4 f3 b8 b9} // The data here contains the response of an earlier request starting from 0c onwards
+	//  the arguments for 0x1e are 0x00 + the answer from 0x30
+	//MsgSevenAfterTokenDetect byte = 0x1f // unknown
+	//   => answer like 0x01 0xfe always like this??
+	//
+	// then it seems to start reading NFC pages: 1c 00 .. 1c 04 .. 1c 08 .. 1c 0c .. 1c 10 .. 1c 14 .. etc .. 1c 84
+	// => this is done twice, verification?
+	// now it's only polling with msg 0x12 which returns 01 02 while the token is on the portal. 01 02 seems to indicate
+	// an error.
+	cmds := map[DriverCommand][]byte{
+		PS4A_SetLedState: {0xff},
+		PS4A_Unknown1:    {},
+		PS4A_Unknown2:    {},
+		PS4A_ReadPage:    {0x10},
+	}
+
+	for cmd, args := range cmds {
+		pkt := NewUsbCommand(
+			cmd,
+			p.createArguments(maxSize-1, args),
+		).Marshal()
+		log.Println("nfcptl: sending command:")
+		fmt.Println(hex.Dump(pkt))
+		c.Out().Write(pkt)
+		if cmd == PS4A_SetLedState {
+			continue
+		}
+		b := make([]byte, maxSize)
+		c.In().Read(b)
+		if c.Debug() {
+			log.Println("nfcptl: led state reply:")
+			fmt.Println(hex.Dump(b))
+		}
+	}
+}
+
+func (p *ps4amiibo) sendCommand(c *Client, cmd DriverCommand, args []byte) {
+	// Send command.
+	usbCmd := NewUsbCommand(
+		cmd,
+		p.createArguments(c.MaxPacketSize()-1, args),
+	)
+	if c.Debug() {
+		log.Println("nfcptl: sending command:")
+		log.Println(hex.Dump(usbCmd.Marshal()))
+	}
 	n, _ := c.Out().Write(usbCmd.Marshal())
 	if c.Debug() {
 		log.Printf("nfcptl: written %d bytes", n)
 	}
+
+	// Read response.
 	b := make([]byte, c.MaxPacketSize())
 	c.In().Read(b)
-	c.PublishEvent(NewEvent(events[cmd], b))
+	c.PublishEvent(NewEvent(p.eventMapping(cmd), b))
 }
 
-func (p *ps4amiibo) buildPollPacket(pos, size int) (int, []byte) {
-	// This polling sequence is what the original software does. Tinkering with it shows that
-	// shifting the sequence to the right or to the left will still work which makes sense.
-	// Taking it out of order breaks token detection as does leaving out 0x11 or 0x12 which was
-	// attempted because 0x10 is the one that retrieves the token UID when a token is present.
-	sequence := []byte{0x11, 0x10, 0x12}
-	if pos > len(sequence)-1 {
-		pos = 0
-	}
-	first := sequence[pos]
-	next := pos + 1
-
-	packet := p.createBasePacket(size)
-
-	// Now set the first element
-	packet[0] = first
-
-	return next, packet
-}
-
-// createPacket creates a padded packet of the given size with the given payload.
-func (p *ps4amiibo) createPacket(pld []byte, size int) []byte {
-	pkt := p.createBasePacket(size)
-	copy(pkt, pld)
-
-	return pkt
-}
-
-func (p *ps4amiibo) createBasePacket(size int) []byte {
+func (p *ps4amiibo) createArguments(size int, args []byte) []byte {
 	packet := make([]byte, size)
 	// Fill out packet with 0xcd. This is not needed at all. Using just 0x00 works just as well but
 	// let's stick to how the original software does it. One never knows what might change in the
-	// futre which could then break our driver.
+	// future which could then break our driver.
 	packet[0] = 0xcd
 	for n := 1; n < len(packet); n *= 2 {
 		copy(packet[n:], packet[:n])
 	}
 
+	copy(packet, args)
+
 	return packet
 }
-

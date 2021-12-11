@@ -34,7 +34,7 @@ func TestGetDriverByVendorAndDeviceAlias(t *testing.T) {
 		for device, want := range devices {
 			d, err := GetDriverByVendorAndProductAlias(vendor, device)
 			if d != nil && (d.VendorId() != want.vid || d.ProductId() != want.pid || err != nil) {
-				t.Errorf("GetDriverByVendorAndProductAlias() return = '0x%x,0x%x,%v', want '0x%x,0x%x,%v'", d.VendorId(), d.ProductId(), err, want.vid, want.pid, want.err)
+				t.Errorf("GetDriverByVendorAndProductAlias() return = '%#x,%#x,%v', want '%#x,%#x,%v'", d.VendorId(), d.ProductId(), err, want.vid, want.pid, want.err)
 			}
 			if !errors.Is(err, want.err) {
 				t.Errorf("GetDriverByVendorAndProductAlias() return = '%s', want '%s'", err, want.err)

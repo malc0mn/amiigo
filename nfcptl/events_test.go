@@ -3,10 +3,10 @@ package nfcptl
 import "testing"
 
 func TestString(t *testing.T) {
-	list := map[EventType]string {
-		DeviceName: "deviceName",
+	list := map[EventType]string{
+		DeviceName:   "deviceName",
 		HardwareInfo: "hardwareInfo",
-		ApiPassword: "apiPassword",
+		ApiPassword:  "apiPassword",
 	}
 
 	for typ, want := range list {
