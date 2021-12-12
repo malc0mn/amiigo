@@ -27,7 +27,9 @@ type Driver interface {
 	ProductId() gousb.ID
 	// ProductAlias returns the product alias to allow easy reference for the end users.
 	ProductAlias() string
-	// Setup returns the parameters needed to initialise the device, so it's ready for use.
+	// Setup returns the parameters needed to initialise the device, so it's ready for use. We're
+	// forcing the driver to hardcode it since it will give the most flexibility in writing other
+	// drivers where autodetection might be harder or simply incorrect.
 	Setup() DeviceSetup
 	// Drive is where the main driver logic sits. The client starts this function as a goroutine
 	// after the USB connection is established and the driver must take over to control the device.

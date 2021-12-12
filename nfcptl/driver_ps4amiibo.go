@@ -70,6 +70,7 @@ const (
 	// calls PS4A_SetLedState with argument 0xff being full brightness.
 	// Passing an argument will allow you to control the brightness of the LED where 0x00 is off
 	// and 0xff is max brightness thus giving 255 steps of control.
+	// Beware: do NOT expect a reply from the device after sending this command!
 	PS4A_SetLedState DriverCommand = 0x20
 
 	// PS4A_Unknown2 with a token on the portal always returns:
@@ -101,18 +102,12 @@ const (
 	//   00000010  c1 32 80 ad 41 00 00 00  00 00 00 00 00 00 00 00  |.2..A...........|
 	//   00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 	//   00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	// An older device:
+	//   00000000  00 00 01 ff ff 16 a3 66  30 43 62 6c 23 bd 69 5d  |.......f0Cbl#.i]|
+	//   00000010  c3 33 f0 2d 3f 00 00 00  00 00 00 00 00 00 00 00  |.3.-?...........|
+	//   00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	//   00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 	PS4A_GetHardwareInfo DriverCommand = 0x90
-
-	//MsgOneAfterTokenDetect = []byte{0x20, 0xff} // set led to full brightness
-	//MsgTwoAfterTokenDetect byte = 0x1f // unknown
-	//MsgThreeAfterTokenDetect byte = 0x21 // read token?
-	//MsgFourAfterTokenDetect = []byte{0x1c, 0x10} // Read NFC page 16?
-	//MsgFiveAfterTokenDetect = []byte{30 04 f4 b9 02 8d 4b 80 f0 8e fd 17 b3 52 75 6f 70 77 da 29 45 b4 24 f2} // the data here contains the result of the 0x1c 0x10 call
-	//MsgSixAfterTokenDetect = []byte{1e 00 0c 10 fe 86 87 33 f7 16 08 b5 01 78 d4 f3 b8 b9} // The data here contains the response of an earlier request starting from 0c onwards
-	// then it seems to star reading NFC pages: 1c 00 .. 1c 04 .. 1c 08 .. 1c 0c .. 1c 10 .. 1c 14 .. etc .. 1c 84
-	// (this is sent twice, verification?)
-	// now it's only poll with msg 0x12 which returns 01 02 while the token is on the portal. 01 02 seems to indicate
-	// an error.
 )
 
 // ps4amiibo implements the Driver interface for the following USB device:
@@ -331,49 +326,88 @@ func (p *ps4amiibo) buildPollCommand(pos, size int) (int, *UsbCommand) {
 	return next, usbCmd
 }
 
+// TODO: make this look nice, it works but it's a total mess.
 func (p *ps4amiibo) readToken(c *Client, buff []byte) {
 	maxSize := c.MaxPacketSize()
-	uid := buff[4:12]
+	// It SEEMS that byte 5 in the sequence is the UID length, so we start after that.
+	// TODO: use byte 5 to read x number of bytes...?
+	uid := buff[5:12]
 
 	log.Printf("nfcptl: token detected with id %#x", uid)
-	//MsgOneAfterTokenDetect = []byte{0x20, 0xff} // set led to full brightness
-	//MsgTwoAfterTokenDetect byte = 0x1f // unknown
-	//MsgThreeAfterTokenDetect byte = 0x21 // read token?
-	//MsgFourAfterTokenDetect = []byte{0x1c, 0x10} // Read NFC page 16?
-	//MsgFiveAfterTokenDetect = []byte{30 04 f4 b9 02 8d 4b 80 f0 8e fd 17 b3 52 75 6f 70 77 da 29 45 b4 24 f2} // the data here contains the result of the 0x1c 0x10 call
-	//  the arguments for 0x30 are the answer to 0x12 being the token UID + the answer to 0x1c 0x10 (page 10?)
-	//MsgSixAfterTokenDetect = []byte{1e 00 0c 10 fe 86 87 33 f7 16 08 b5 01 78 d4 f3 b8 b9} // The data here contains the response of an earlier request starting from 0c onwards
+
+	pkt := NewUsbCommand(
+		PS4A_SetLedState,
+		p.createArguments(maxSize-1, []byte{0xff}),
+	).Marshal()
+	log.Println("nfcptl: enabling front led:")
+	fmt.Println(hex.Dump(pkt))
+	c.Out().Write(pkt)
+
+	//MsgOneAfterTokenDetect = []byte{0x20, 0xff}
+	//  set led to full brightness
+	//MsgTwoAfterTokenDetect byte = 0x1f
+	//  unknown but returns 00 00 00 04 04 02 01 00 11 03 and when the sequence below is done correctly, will return
+	//  01 fe
+	//MsgThreeAfterTokenDetect byte = 0x21
+	//  No clue what it's used for. Maybe we'll discover it's used in the API calls later on?
+	//  Since the return data of this command is not used further down the sequence, omitting it from the sequence
+	//  makes no difference to the outcome.
+	//MsgFourAfterTokenDetect = []byte{0x1c, 0x10}
+	//  Read NFC page 16, feed the return data to the next command
+	//MsgFiveAfterTokenDetect = []byte{30 04 f4 b9 02 8d 4b 80 f0 8e fd 17 b3 52 75 6f 70 77 da 29 45 b4 24 f2}
+	//  the arguments for 0x30 are the answer to 0x12 being the token UID + the answer to 0x1c 0x10 (page 16)
+	//  the return date from this method is never the same, even with the same arguments, so it's some form of
+	//  encryption or seeded hashing.
+	//MsgSixAfterTokenDetect = []byte{1e 00 0c 10 fe 86 87 33 f7 16 08 b5 01 78 d4 f3 b8 b9}
 	//  the arguments for 0x1e are 0x00 + the answer from 0x30
-	//MsgSevenAfterTokenDetect byte = 0x1f // unknown
-	//   => answer like 0x01 0xfe always like this??
+	//  When the arguments to 0x30 are incorrect, the return is 01 02: an error.
+	//MsgSevenAfterTokenDetect byte = 0x1f
+	//   => the answer is 0x01 0xfe when the above calls have been made correctly, otherwise it returns:
+	//      00 00 00 04 04 02 01 00 11 03 as it does when it gets called for the first time.
 	//
 	// then it seems to start reading NFC pages: 1c 00 .. 1c 04 .. 1c 08 .. 1c 0c .. 1c 10 .. 1c 14 .. etc .. 1c 84
-	// => this is done twice, verification?
+	//   => this is done twice, verification?
 	// now it's only polling with msg 0x12 which returns 01 02 while the token is on the portal. 01 02 seems to indicate
 	// an error.
-	cmds := map[DriverCommand][]byte{
-		PS4A_SetLedState: {0xff},
-		PS4A_Unknown1:    {},
-		PS4A_Unknown2:    {},
-		PS4A_ReadPage:    {0x10},
+	cmds := []map[DriverCommand][]byte{
+		{PS4A_Unknown1: {}},
+		{PS4A_Unknown2: {}},
+		{PS4A_ReadPage: {0x10}},
+		{PS4A_Unknown3: {}},
+		{PS4A_Unknown4: {}},
+		{PS4A_Unknown1: {}},
 	}
 
-	for cmd, args := range cmds {
-		pkt := NewUsbCommand(
-			cmd,
-			p.createArguments(maxSize-1, args),
-		).Marshal()
-		log.Println("nfcptl: sending command:")
-		fmt.Println(hex.Dump(pkt))
-		c.Out().Write(pkt)
-		if cmd == PS4A_SetLedState {
-			continue
-		}
-		b := make([]byte, maxSize)
-		c.In().Read(b)
-		if c.Debug() {
-			log.Println("nfcptl: led state reply:")
-			fmt.Println(hex.Dump(b))
+	page16 := make([]byte, 16)
+	answ30 := make([]byte, 16)
+
+	for _, item := range cmds {
+		for cmd, args := range item {
+			switch cmd {
+			case PS4A_Unknown3:
+				args = append(uid, page16...)
+			case PS4A_Unknown4:
+				args = append([]byte{0x00}, answ30...)
+			}
+			pkt := NewUsbCommand(
+				cmd,
+				p.createArguments(maxSize-1, args),
+			).Marshal()
+			log.Println("nfcptl: sending command:")
+			fmt.Println(hex.Dump(pkt))
+			c.Out().Write(pkt)
+			b := make([]byte, maxSize)
+			c.In().Read(b)
+			switch cmd {
+			case PS4A_ReadPage:
+				copy(page16, b[2:])
+			case PS4A_Unknown3:
+				copy(answ30, b[2:])
+			}
+			if c.Debug() {
+				log.Println("nfcptl: cmd reply:")
+				fmt.Println(hex.Dump(b))
+			}
 		}
 	}
 }
