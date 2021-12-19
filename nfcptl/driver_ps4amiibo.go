@@ -356,7 +356,7 @@ func (p *ps4amiibo) readToken(c *Client, buff []byte) {
 	//  Read NFC page 16, feed the return data to the next command
 	//MsgFiveAfterTokenDetect = []byte{30 04 f4 b9 02 8d 4b 80 f0 8e fd 17 b3 52 75 6f 70 77 da 29 45 b4 24 f2}
 	//  the arguments for 0x30 are the answer to 0x12 being the token UID + the answer to 0x1c 0x10 (page 16)
-	//  the return date from this method is never the same, even with the same arguments, so it's some form of
+	//  the return data from this call is never the same, even with the same arguments, so it's some form of
 	//  encryption or seeded hashing.
 	//MsgSixAfterTokenDetect = []byte{1e 00 0c 10 fe 86 87 33 f7 16 08 b5 01 78 d4 f3 b8 b9}
 	//  the arguments for 0x1e are 0x00 + the answer from 0x30
