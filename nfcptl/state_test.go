@@ -16,29 +16,29 @@ const (
 
 type testTokenPlacedAction struct{}
 
-func (a testTokenPlacedAction) execute(_ context.Context) StateEventType {
+func (a testTokenPlacedAction) Execute(_ context.Context) StateEventType {
 	fmt.Println("The LED has been switched ON")
 	return NoOp
 }
 
 type testTokenRemovedAction struct{}
 
-func (a testTokenRemovedAction) execute(_ context.Context) StateEventType {
+func (a testTokenRemovedAction) Execute(_ context.Context) StateEventType {
 	fmt.Println("The LED has been switched OFF")
 	return NoOp
 }
 
-func newPortalState() (*stateMachine, error) {
+func newPortalState() (*StateMachine, error) {
 	return NewStateMachine(testTokenAbsent, States{
 		testTokenAbsent: State{
-			action: &testTokenPlacedAction{},
-			events: Events{
+			Action: &testTokenPlacedAction{},
+			Events: Events{
 				testTokenPlaced: testTokenPresent,
 			},
 		},
 		testTokenPresent: State{
-			action: &testTokenRemovedAction{},
-			events: Events{
+			Action: &testTokenRemovedAction{},
+			Events: Events{
 				testTokenRemoved: testTokenAbsent,
 			},
 		},

@@ -26,7 +26,7 @@ type StateEventType string
 
 // Action represents the action to be executed in a given state. E.g. 'switchOffAction'.
 type Action interface {
-	execute(ctx context.Context) StateEventType
+	Execute(ctx context.Context) StateEventType
 }
 
 // Events represents a mapping of StateEventTypes and StateTypes. E.g. 'switchOff: off' can be read
@@ -35,15 +35,15 @@ type Events map[StateEventType]StateType
 
 // State binds a state with an action and a set of events it can handle.
 type State struct {
-	action Action
-	events Events
+	Action Action
+	Events Events
 }
 
 // States represents a mapping of StateTypes and their implementations.
 type States map[StateType]State
 
-// stateMachine represents the State machine.
-type stateMachine struct {
+// StateMachine represents the State machine.
+type StateMachine struct {
 	// prev represents the previous state.
 	prev StateType
 
@@ -58,23 +58,18 @@ type stateMachine struct {
 }
 
 // NewStateMachine builds a new state machine set to the given initial state.
-func NewStateMachine(initial StateType, states States) (*stateMachine, error) {
+func NewStateMachine(initial StateType, states States) (*StateMachine, error) {
 	if states == nil {
 		return nil, errors.New("states cannot be nil")
 	}
 
-	sm := &stateMachine{
-		curr: initial,
-		states: states,
-	}
-
 	var foundInitial bool
-	for st, s := range sm.states {
+	for st, s := range states {
 		if st == initial {
 			foundInitial = true
 		}
-		if s.action == nil {
-			return nil, fmt.Errorf("%s has no action", st)
+		if s.Action == nil {
+			return nil, fmt.Errorf("%s has no Action", st)
 		}
 	}
 
@@ -82,15 +77,18 @@ func NewStateMachine(initial StateType, states States) (*stateMachine, error) {
 		return nil, fmt.Errorf("initial state %s not found in states", initial)
 	}
 
-	return sm, nil
+	return &StateMachine{
+		curr: initial,
+		states: states,
+	}, nil
 }
 
 // getNextState returns the next state for the event based on the current state, or an error if the
 // event cannot be handled in the current state.
-func (sm *stateMachine) getNextState(event StateEventType) (StateType, error) {
+func (sm *StateMachine) getNextState(event StateEventType) (StateType, error) {
 	if s, ok := sm.states[sm.curr]; ok {
-		if s.events != nil {
-			if next, ok := s.events[event]; ok {
+		if s.Events != nil {
+			if next, ok := s.Events[event]; ok {
 				return next, nil
 			}
 		}
@@ -100,7 +98,7 @@ func (sm *stateMachine) getNextState(event StateEventType) (StateType, error) {
 }
 
 // SendEvent sends an event to the state machine.
-func (sm *stateMachine) SendEvent(event StateEventType, ctx context.Context) error {
+func (sm *StateMachine) SendEvent(event StateEventType, ctx context.Context) error {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
 
@@ -111,14 +109,14 @@ func (sm *stateMachine) SendEvent(event StateEventType, ctx context.Context) err
 		}
 
 		s, ok := sm.states[nextState]
-		if !ok || s.action == nil {
-			panic(fmt.Sprintf("%s not found or has no action", nextState))
+		if !ok || s.Action == nil {
+			panic(fmt.Sprintf("%s not found or has no Action", nextState))
 		}
 
 		sm.prev = sm.curr
 		sm.curr = nextState
 
-		nextEvent := s.action.execute(ctx)
+		nextEvent := s.Action.Execute(ctx)
 		if nextEvent == NoOp {
 			return nil
 		}
