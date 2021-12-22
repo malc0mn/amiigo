@@ -1,33 +1,33 @@
 package nfcptl
 
-type EventType int
+type EventType string
 
 const (
 	// DeviceName is published when the driver has received data after sending the GetDeviceName
 	// command.
-	DeviceName EventType = iota
+	DeviceName EventType = "DeviceName"
 	// HardwareInfo is published when the driver has received data after sending the
 	// GetHardwareInfo command.
-	HardwareInfo
+	HardwareInfo EventType = "HardwareInfo"
 	// ApiPassword is sent when the driver has received data after sending the GetApiPassword
 	// command.
-	ApiPassword
+	ApiPassword EventType = "ApiPassword"
 	// TokenDetected is sent when the driver has detected a token on the device. The token ID will
 	// be present in the event data.
-	TokenDetected
+	TokenDetected EventType = "TokenDetected"
 	// TokenRemoved is sent when the driver has detected the token has been removed from the
 	// device. The event data will be empty.
-	TokenRemoved
+	TokenRemoved EventType = "TokenRemoved"
 	// TokenTagData is sent when the driver has read the full token tag data which will be present
 	// in the event data.
-	TokenTagData
+	TokenTagData EventType = "TokenTagData"
 	// OK is sent when the driver has successfully executed a command without specific return data.
-	OK
+	OK EventType = "OK"
 	// Error is sent when the driver has received an error from the device after having executed a
 	// command.
-	Error
+	Error EventType = "Error"
 	// UnknownCommand is sent when the driver has received an unknown command.
-	UnknownCommand
+	UnknownCommand EventType = "UnknownCommand"
 )
 
 type Event struct {

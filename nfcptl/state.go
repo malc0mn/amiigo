@@ -3,35 +3,54 @@ package nfcptl
 // Derived from Venil Noronha's simple state machine framework.
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"sync"
 )
 
-// ErrEventRejected is the error returned when the state machine cannot process an event in the
-// state that it is in.
-var ErrEventRejected = errors.New("invalid State for event")
+var (
+	// ErrEventRejected is the error returned when the state machine cannot process an event in the
+	// state that it is in.
+	ErrEventRejected = errors.New("invalid State for event")
+
+	// ErrNoInitEvent is the error when you have not supplied an init event to NewStateMachine.
+	ErrNoInitEvent = errors.New("no init event")
+	// ErrNilState is the error when you have not supplied states to NewStateMachine.
+	ErrNilState = errors.New("states cannot be nil")
+	// ErrNoStateMapping is the error when you have supplied an empty States struct to
+	// NewStateMachine.
+	ErrNoStateMapping = errors.New("states cannot be empty")
+	// ErrDefaultAction is the error reported by NewStateMachine when you have attached an action
+	// to the Default state.
+	ErrDefaultAction = errors.New("the default state cannot have an action")
+	// ErrNoAction is the error reported by NewStateMachine when you have supplied a state
+	// transition without an Action.
+	ErrNoAction = errors.New("no action")
+	// ErrInitNotFound is the error reported by NewStateMachine when you have supplied an init
+	// event that is not present in your state mappings.
+	ErrInitNotFound = errors.New("init event not found in state events")
+)
 
 const (
-	// NoOp represents a no-op event.
-	NoOp StateEventType = "NoOp"
+	// Default represents the initial state of the state machine.
+	Default StateType = ""
+	// TokenAbsent represents the state of where there is no token on the NFC portal.
+	TokenAbsent StateType = "TokenAbsent"
+	// TokenPresent represents the state of where there is a token on the NFC portal.
+	TokenPresent StateType = "TokenPresent"
 )
 
 // StateType represents a state type in the state machine. E.g. 'off'.
 type StateType string
 
-// StateEventType represents an event type in the state machine. E.g. 'switchOff'.
-type StateEventType string
-
 // Action represents the action to be executed in a given state. E.g. 'switchOffAction'.
 type Action interface {
-	Execute(ctx context.Context) StateEventType
+	Execute(d *Driver) EventType
 }
 
 // Events represents a mapping of StateEventTypes and StateTypes. E.g. 'switchOff: off' can be read
 // as: the 'switchOff' event will bring the machine in state 'off'.
-type Events map[StateEventType]StateType
+type Events map[EventType]StateType
 
 // State binds a state with an action and a set of events it can handle.
 type State struct {
@@ -44,6 +63,10 @@ type States map[StateType]State
 
 // StateMachine represents the State machine.
 type StateMachine struct {
+	// init represents the first event to be triggered to bring the state machine in its initial
+	// state.
+	init EventType
+
 	// prev represents the previous state.
 	prev StateType
 
@@ -57,35 +80,63 @@ type StateMachine struct {
 	mu sync.Mutex
 }
 
-// NewStateMachine builds a new state machine set to the given initial state.
-func NewStateMachine(initial StateType, states States) (*StateMachine, error) {
+// NewStateMachine builds a new state machine. The init event is the event that will be fired to
+// set the state machine to its initial state ready for operation. The init event must be part of
+// states passed in as second argument!
+func NewStateMachine(init EventType, states States) (*StateMachine, error) {
+	if init == "" {
+		return nil, ErrNoInitEvent
+	}
+
 	if states == nil {
-		return nil, errors.New("states cannot be nil")
+		return nil, ErrNilState
 	}
 
-	var foundInitial bool
+	if len(states) == 0 {
+		return nil, ErrNoStateMapping
+	}
+
+	var foundInit bool
 	for st, s := range states {
-		if st == initial {
-			foundInitial = true
+		if st == Default {
+			if s.Action != nil {
+				return nil, ErrDefaultAction
+
+			}
+		} else if s.Action == nil {
+			return nil, fmt.Errorf("%s: %w", st, ErrNoAction)
 		}
-		if s.Action == nil {
-			return nil, fmt.Errorf("%s has no Action", st)
+
+		for e := range s.Events {
+			if e == init {
+				foundInit = true
+			}
 		}
 	}
 
-	if !foundInitial {
-		return nil, fmt.Errorf("initial state %s not found in states", initial)
+	if !foundInit {
+		return nil, fmt.Errorf("%s: %w", init, ErrInitNotFound)
 	}
 
 	return &StateMachine{
-		curr: initial,
+		init:   init,
 		states: states,
 	}, nil
 }
 
+// Init will initialise the state machine by sending the init event provided to the NewStateMachine call.
+// The init event must be part of the state definition.
+func (sm *StateMachine) Init(d *Driver) error {
+	if sm.curr == Default {
+		return sm.SendEvent(sm.init, d)
+	}
+
+	return nil
+}
+
 // getNextState returns the next state for the event based on the current state, or an error if the
 // event cannot be handled in the current state.
-func (sm *StateMachine) getNextState(event StateEventType) (StateType, error) {
+func (sm *StateMachine) getNextState(event EventType) (StateType, error) {
 	if s, ok := sm.states[sm.curr]; ok {
 		if s.Events != nil {
 			if next, ok := s.Events[event]; ok {
@@ -94,11 +145,11 @@ func (sm *StateMachine) getNextState(event StateEventType) (StateType, error) {
 		}
 	}
 
-	return "", ErrEventRejected
+	return Default, ErrEventRejected
 }
 
 // SendEvent sends an event to the state machine.
-func (sm *StateMachine) SendEvent(event StateEventType, ctx context.Context) error {
+func (sm *StateMachine) SendEvent(event EventType, d *Driver) error {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
 
@@ -116,8 +167,8 @@ func (sm *StateMachine) SendEvent(event StateEventType, ctx context.Context) err
 		sm.prev = sm.curr
 		sm.curr = nextState
 
-		nextEvent := s.Action.Execute(ctx)
-		if nextEvent == NoOp {
+		nextEvent := s.Action.Execute(d)
+		if nextEvent == OK {
 			return nil
 		}
 		event = nextEvent
