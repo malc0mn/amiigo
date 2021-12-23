@@ -29,7 +29,7 @@ func (a testTokenRemovedAction) Execute(_ *Driver) EventType {
 }
 
 func TestStateMachineErrNoStateMapping(t *testing.T) {
-	sm, err := NewStateMachine( nil)
+	sm, err := NewStateMachine(nil)
 
 	if !errors.Is(err, ErrNoStateMapping) {
 		t.Errorf("Expected error %s, got %s", ErrNoStateMapping, err)
@@ -120,7 +120,7 @@ func TestStateMachineErrDefaultEvent(t *testing.T) {
 	sm, err = NewStateMachine(States{
 		Default: State{
 			Events: Events{
-				testTokenPlaced: testTokenPresent,
+				testTokenPlaced:  testTokenPresent,
 				testTokenRemoved: testTokenAbsent,
 			},
 		},
