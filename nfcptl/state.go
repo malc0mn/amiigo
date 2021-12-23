@@ -64,11 +64,11 @@ type States map[StateType]State
 
 // StateMachine represents the State machine.
 type StateMachine struct {
-	// prev represents the previous state.
-	prev StateType
+	// previous represents the previous state.
+	previous StateType
 
-	// curr represents the current state.
-	curr StateType
+	// current represents the current state.
+	current StateType
 
 	// states holds the configuration of states and events handled by the state machine.
 	states States
@@ -104,9 +104,14 @@ func NewStateMachine(states States) (*StateMachine, error) {
 	return &StateMachine{states: states}, nil
 }
 
+// Current returns the current state of the state machine.
+func (sm *StateMachine) Current() StateType {
+	return sm.current
+}
+
 // Init will initialise the state machine by sending the event set for the Default state.
 func (sm *StateMachine) Init(d Driver) error {
-	if sm.curr == Default {
+	if sm.current == Default {
 		if s, ok := sm.states[Default]; ok {
 			for e, _ := range s.Events {
 				return sm.SendEvent(e, d)
@@ -120,7 +125,7 @@ func (sm *StateMachine) Init(d Driver) error {
 // getNextState returns the next state for the event based on the current state, or an error if the
 // event cannot be handled in the current state.
 func (sm *StateMachine) getNextState(event EventType) (StateType, error) {
-	if s, ok := sm.states[sm.curr]; ok {
+	if s, ok := sm.states[sm.current]; ok {
 		if s.Events != nil {
 			if next, ok := s.Events[event]; ok {
 				return next, nil
@@ -147,8 +152,8 @@ func (sm *StateMachine) SendEvent(event EventType, d Driver) error {
 			panic(fmt.Sprintf("%s not found or has no Action", nextState))
 		}
 
-		sm.prev = sm.curr
-		sm.curr = nextState
+		sm.previous = sm.current
+		sm.current = nextState
 
 		nextEvent := s.Action.Execute(d)
 		if nextEvent == OK {

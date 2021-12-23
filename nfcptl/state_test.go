@@ -204,9 +204,19 @@ func TestStateMachine(t *testing.T) {
 		t.Errorf("Expected nil, got err: %v", err)
 	}
 
+	got := sm.Current()
+	if got != testTokenAbsent {
+		t.Errorf("Expected %s, got %s", testTokenAbsent, got)
+	}
+
 	err = sm.SendEvent(testTokenRemoved, nil)
 	if err == nil {
 		t.Error("Expected error, got nil")
+	}
+
+	got = sm.Current()
+	if got != testTokenAbsent {
+		t.Errorf("Expected %s, got %s", testTokenAbsent, got)
 	}
 
 	err = sm.SendEvent(testTokenPlaced, nil)
@@ -214,13 +224,28 @@ func TestStateMachine(t *testing.T) {
 		t.Errorf("Couldn't switch the LED on, err: %v", err)
 	}
 
+	got = sm.Current()
+	if got != testTokenPresent {
+		t.Errorf("Expected %s, got %s", testTokenPresent, got)
+	}
+
 	err = sm.SendEvent(testTokenPlaced, nil)
 	if err != ErrEventRejected {
 		t.Error("Expected the event rejected error, got nil")
 	}
 
+	got = sm.Current()
+	if got != testTokenPresent {
+		t.Errorf("Expected %s, got %s", testTokenPresent, got)
+	}
+
 	err = sm.SendEvent(testTokenRemoved, nil)
 	if err != nil {
 		t.Errorf("Couldn't switch the LED off, err: %v", err)
+	}
+
+	got = sm.Current()
+	if got != testTokenAbsent {
+		t.Errorf("Expected %s, got %s", testTokenAbsent, got)
 	}
 }
