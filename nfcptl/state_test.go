@@ -28,32 +28,18 @@ func (a testTokenRemovedAction) Execute(_ *Driver) EventType {
 	return OK
 }
 
-func TestStateMachineErrNoInitEvent(t *testing.T) {
-	sm, err := NewStateMachine("", States{})
-
-	if !errors.Is(err, ErrNoInitEvent) {
-		t.Errorf("Expected error %s, got %s", ErrNoInitEvent, err)
-	}
-
-	if sm != nil {
-		t.Errorf("Expected nil, got %v", sm)
-	}
-}
-
-func TestStateMachineErrNilState(t *testing.T) {
-	sm, err := NewStateMachine("test", nil)
-
-	if !errors.Is(err, ErrNilState) {
-		t.Errorf("Expected error %s, got %s", ErrNilState, err)
-	}
-
-	if sm != nil {
-		t.Errorf("Expected nil, got %v", sm)
-	}
-}
-
 func TestStateMachineErrNoStateMapping(t *testing.T) {
-	sm, err := NewStateMachine("test", States{})
+	sm, err := NewStateMachine( nil)
+
+	if !errors.Is(err, ErrNoStateMapping) {
+		t.Errorf("Expected error %s, got %s", ErrNoStateMapping, err)
+	}
+
+	if sm != nil {
+		t.Errorf("Expected nil, got %v", sm)
+	}
+
+	sm, err = NewStateMachine(States{})
 
 	if !errors.Is(err, ErrNoStateMapping) {
 		t.Errorf("Expected error %s, got %s", ErrNoStateMapping, err)
@@ -64,8 +50,27 @@ func TestStateMachineErrNoStateMapping(t *testing.T) {
 	}
 }
 
+func TestStateMachineErrNoDefaultState(t *testing.T) {
+	sm, err := NewStateMachine(States{
+		TokenAbsent: State{
+			Action: &testTokenPlacedAction{},
+			Events: Events{
+				testTokenPlaced: testTokenPresent,
+			},
+		},
+	})
+
+	if !errors.Is(err, ErrNoDefaultState) {
+		t.Errorf("Expected error %s, got: %s", ErrNoDefaultState, err)
+	}
+
+	if sm != nil {
+		t.Errorf("Expected nil, got %v", sm)
+	}
+}
+
 func TestStateMachineErrDefaultAction(t *testing.T) {
-	sm, err := NewStateMachine(testTokenRemoved, States{
+	sm, err := NewStateMachine(States{
 		Default: State{
 			Action: &testTokenPlacedAction{},
 			Events: Events{
@@ -83,8 +88,76 @@ func TestStateMachineErrDefaultAction(t *testing.T) {
 	}
 }
 
+func TestStateMachineErrDefaultEvent(t *testing.T) {
+	sm, err := NewStateMachine(States{
+		Default: State{
+			Events: nil,
+		},
+	})
+
+	if !errors.Is(err, ErrDefaultEvent) {
+		t.Errorf("Expected error %s, got: %s", ErrDefaultEvent, err)
+	}
+
+	if sm != nil {
+		t.Errorf("Expected nil, got %v", sm)
+	}
+
+	sm, err = NewStateMachine(States{
+		Default: State{
+			Events: Events{},
+		},
+	})
+
+	if !errors.Is(err, ErrDefaultEvent) {
+		t.Errorf("Expected error %s, got: %s", ErrDefaultEvent, err)
+	}
+
+	if sm != nil {
+		t.Errorf("Expected nil, got %v", sm)
+	}
+
+	sm, err = NewStateMachine(States{
+		Default: State{
+			Events: Events{
+				testTokenPlaced: testTokenPresent,
+				testTokenRemoved: testTokenAbsent,
+			},
+		},
+	})
+
+	if !errors.Is(err, ErrDefaultEvent) {
+		t.Errorf("Expected error %s, got: %s", ErrDefaultEvent, err)
+	}
+
+	if sm != nil {
+		t.Errorf("Expected nil, got %v", sm)
+	}
+
+	sm, err = NewStateMachine(States{
+		Default: State{
+			Events: Events{
+				testTokenPlaced: testTokenPresent,
+			},
+		},
+	})
+
+	if errors.Is(err, ErrDefaultEvent) {
+		t.Errorf("Expected nil, got: %s", err)
+	}
+
+	if sm == nil {
+		t.Errorf("Expected StateMachine , got %v", sm)
+	}
+}
+
 func TestStateMachineErrNoAction(t *testing.T) {
-	sm, err := NewStateMachine(testTokenPlaced, States{
+	sm, err := NewStateMachine(States{
+		Default: State{
+			Events: Events{
+				testTokenRemoved: TokenAbsent,
+			},
+		},
 		TokenAbsent: State{
 			Events: Events{
 				testTokenPlaced: testTokenPresent,
@@ -101,27 +174,8 @@ func TestStateMachineErrNoAction(t *testing.T) {
 	}
 }
 
-func TestStateMachineErrInitNotFound(t *testing.T) {
-	sm, err := NewStateMachine(testTokenRemoved, States{
-		testTokenAbsent: State{
-			Action: &testTokenPlacedAction{},
-			Events: Events{
-				testTokenPlaced: testTokenPresent,
-			},
-		},
-	})
-
-	if !errors.Is(err, ErrInitNotFound) {
-		t.Errorf("Expected error %s, got: %s", ErrInitNotFound, err)
-	}
-
-	if sm != nil {
-		t.Errorf("Expected nil, got %v", sm)
-	}
-}
-
 func TestStateMachine(t *testing.T) {
-	sm, err := NewStateMachine(testTokenRemoved, States{
+	sm, err := NewStateMachine(States{
 		Default: State{
 			Events: Events{
 				testTokenRemoved: testTokenAbsent,

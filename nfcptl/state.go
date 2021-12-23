@@ -9,26 +9,27 @@ import (
 )
 
 var (
-	// ErrEventRejected is the error returned when the state machine cannot process an event in the
-	// state that it is in.
-	ErrEventRejected = errors.New("invalid State for event")
-
-	// ErrNoInitEvent is the error when you have not supplied an init event to NewStateMachine.
-	ErrNoInitEvent = errors.New("no init event")
-	// ErrNilState is the error when you have not supplied states to NewStateMachine.
-	ErrNilState = errors.New("states cannot be nil")
-	// ErrNoStateMapping is the error when you have supplied an empty States struct to
-	// NewStateMachine.
+	// ErrNoStateMapping is the error reported when you have supplied nil or an empty States struct
+	// to NewStateMachine.
 	ErrNoStateMapping = errors.New("states cannot be empty")
+	// ErrNoDefaultState is the error reported when you have not defined the Default state in the
+	// States struct.
+	ErrNoDefaultState = errors.New("no default state")
 	// ErrDefaultAction is the error reported by NewStateMachine when you have attached an action
 	// to the Default state.
 	ErrDefaultAction = errors.New("the default state cannot have an action")
+	// ErrDefaultEvent is the error reported by NewStateMachine when you have supplied an incorrect
+	// amount of events for the Default state.
+	ErrDefaultEvent = errors.New("the default state must have a single event")
 	// ErrNoAction is the error reported by NewStateMachine when you have supplied a state
 	// transition without an Action.
 	ErrNoAction = errors.New("no action")
-	// ErrInitNotFound is the error reported by NewStateMachine when you have supplied an init
-	// event that is not present in your state mappings.
-	ErrInitNotFound = errors.New("init event not found in state events")
+
+	// ErrInitFailed is the error returned by Init if the call to init failed.
+	ErrInitFailed = errors.New("state machine init failed")
+	// ErrEventRejected is the error returned when the state machine cannot process an event in the
+	// state that it is in.
+	ErrEventRejected = errors.New("invalid State for event")
 )
 
 const (
@@ -63,10 +64,6 @@ type States map[StateType]State
 
 // StateMachine represents the State machine.
 type StateMachine struct {
-	// init represents the first event to be triggered to bring the state machine in its initial
-	// state.
-	init EventType
-
 	// prev represents the previous state.
 	prev StateType
 
@@ -80,58 +77,44 @@ type StateMachine struct {
 	mu sync.Mutex
 }
 
-// NewStateMachine builds a new state machine. The init event is the event that will be fired to
-// set the state machine to its initial state ready for operation. The init event must be part of
-// states passed in as second argument!
-func NewStateMachine(init EventType, states States) (*StateMachine, error) {
-	if init == "" {
-		return nil, ErrNoInitEvent
-	}
-
-	if states == nil {
-		return nil, ErrNilState
-	}
-
-	if len(states) == 0 {
+// NewStateMachine builds a new state machine. It performs basic validation on your configured
+// states. It will still be possible to pass in inconsistent mappings so take care.
+func NewStateMachine(states States) (*StateMachine, error) {
+	if states == nil || len(states) == 0 {
 		return nil, ErrNoStateMapping
 	}
 
-	var foundInit bool
+	if _, ok := states[Default]; !ok {
+		return nil, ErrNoDefaultState
+	}
+
 	for st, s := range states {
 		if st == Default {
 			if s.Action != nil {
 				return nil, ErrDefaultAction
-
+			}
+			if s.Events == nil || len(s.Events) == 0 || len(s.Events) > 1 {
+				return nil, ErrDefaultEvent
 			}
 		} else if s.Action == nil {
 			return nil, fmt.Errorf("%s: %w", st, ErrNoAction)
 		}
+	}
 
-		for e := range s.Events {
-			if e == init {
-				foundInit = true
+	return &StateMachine{states: states}, nil
+}
+
+// Init will initialise the state machine by sending the event set for the Default state.
+func (sm *StateMachine) Init(d *Driver) error {
+	if sm.curr == Default {
+		if s, ok := sm.states[Default]; ok {
+			for e, _ := range s.Events {
+				return sm.SendEvent(e, d)
 			}
 		}
 	}
 
-	if !foundInit {
-		return nil, fmt.Errorf("%s: %w", init, ErrInitNotFound)
-	}
-
-	return &StateMachine{
-		init:   init,
-		states: states,
-	}, nil
-}
-
-// Init will initialise the state machine by sending the init event provided to the NewStateMachine call.
-// The init event must be part of the state definition.
-func (sm *StateMachine) Init(d *Driver) error {
-	if sm.curr == Default {
-		return sm.SendEvent(sm.init, d)
-	}
-
-	return nil
+	return ErrInitFailed
 }
 
 // getNextState returns the next state for the event based on the current state, or an error if the
