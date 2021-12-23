@@ -16,14 +16,14 @@ const (
 
 type testTokenPlacedAction struct{}
 
-func (a testTokenPlacedAction) Execute(_ *Driver) EventType {
+func (a testTokenPlacedAction) Execute(_ Driver) EventType {
 	fmt.Println("testTokenPlacedAction: The LED has been switched ON")
 	return OK
 }
 
 type testTokenRemovedAction struct{}
 
-func (a testTokenRemovedAction) Execute(_ *Driver) EventType {
+func (a testTokenRemovedAction) Execute(_ Driver) EventType {
 	fmt.Println("testTokenRemovedAction: The LED has been switched OFF")
 	return OK
 }

@@ -46,7 +46,7 @@ type StateType string
 
 // Action represents the action to be executed in a given state. E.g. 'switchOffAction'.
 type Action interface {
-	Execute(d *Driver) EventType
+	Execute(d Driver) EventType
 }
 
 // Events represents a mapping of StateEventTypes and StateTypes. E.g. 'switchOff: off' can be read
@@ -105,7 +105,7 @@ func NewStateMachine(states States) (*StateMachine, error) {
 }
 
 // Init will initialise the state machine by sending the event set for the Default state.
-func (sm *StateMachine) Init(d *Driver) error {
+func (sm *StateMachine) Init(d Driver) error {
 	if sm.curr == Default {
 		if s, ok := sm.states[Default]; ok {
 			for e, _ := range s.Events {
@@ -132,7 +132,7 @@ func (sm *StateMachine) getNextState(event EventType) (StateType, error) {
 }
 
 // SendEvent sends an event to the state machine.
-func (sm *StateMachine) SendEvent(event EventType, d *Driver) error {
+func (sm *StateMachine) SendEvent(event EventType, d Driver) error {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
 
