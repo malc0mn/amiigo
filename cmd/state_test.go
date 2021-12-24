@@ -1,8 +1,9 @@
-package nfcptl
+package main
 
 import (
 	"errors"
 	"fmt"
+	"github.com/malc0mn/amiigo/nfcptl"
 	"testing"
 )
 
@@ -10,22 +11,22 @@ const (
 	testTokenAbsent  StateType = "testTokenAbsent"
 	testTokenPresent StateType = "testTokenPresent"
 
-	testTokenPlaced  EventType = "testTokenPlaced"
-	testTokenRemoved EventType = "testTokenRemoved"
+	testTokenPlaced  nfcptl.EventType = "testTokenPlaced"
+	testTokenRemoved nfcptl.EventType = "testTokenRemoved"
 )
 
 type testTokenPlacedAction struct{}
 
-func (a testTokenPlacedAction) Execute(_ Driver) EventType {
+func (a testTokenPlacedAction) Execute(_ EventContext) nfcptl.EventType {
 	fmt.Println("testTokenPlacedAction: The LED has been switched ON")
-	return OK
+	return nfcptl.OK
 }
 
 type testTokenRemovedAction struct{}
 
-func (a testTokenRemovedAction) Execute(_ Driver) EventType {
+func (a testTokenRemovedAction) Execute(_ EventContext) nfcptl.EventType {
 	fmt.Println("testTokenRemovedAction: The LED has been switched OFF")
-	return OK
+	return nfcptl.OK
 }
 
 func TestStateMachineErrNoStateMapping(t *testing.T) {

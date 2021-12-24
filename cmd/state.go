@@ -1,10 +1,11 @@
-package nfcptl
+package main
 
 // Derived from Venil Noronha's simple state machine framework.
 
 import (
 	"errors"
 	"fmt"
+	"github.com/malc0mn/amiigo/nfcptl"
 	"sync"
 )
 
@@ -41,17 +42,20 @@ const (
 	TokenPresent StateType = "TokenPresent"
 )
 
+// EventContext represents the context to be passed to state machine action implementations.
+type EventContext interface{}
+
 // StateType represents a state type in the state machine. E.g. 'off'.
 type StateType string
 
 // Action represents the action to be executed in a given state. E.g. 'switchOffAction'.
 type Action interface {
-	Execute(d Driver) EventType
+	Execute(ctx EventContext) nfcptl.EventType
 }
 
 // Events represents a mapping of StateEventTypes and StateTypes. E.g. 'switchOff: off' can be read
 // as: the 'switchOff' event will bring the machine in state 'off'.
-type Events map[EventType]StateType
+type Events map[nfcptl.EventType]StateType
 
 // State binds a state with an action and a set of events it can handle.
 type State struct {
@@ -110,11 +114,11 @@ func (sm *StateMachine) Current() StateType {
 }
 
 // Init will initialise the state machine by sending the event set for the Default state.
-func (sm *StateMachine) Init(d Driver) error {
+func (sm *StateMachine) Init(ctx EventContext) error {
 	if sm.current == Default {
 		if s, ok := sm.states[Default]; ok {
 			for e, _ := range s.Events {
-				return sm.SendEvent(e, d)
+				return sm.SendEvent(e, ctx)
 			}
 		}
 	}
@@ -124,7 +128,7 @@ func (sm *StateMachine) Init(d Driver) error {
 
 // getNextState returns the next state for the event based on the current state, or an error if the
 // event cannot be handled in the current state.
-func (sm *StateMachine) getNextState(event EventType) (StateType, error) {
+func (sm *StateMachine) getNextState(event nfcptl.EventType) (StateType, error) {
 	if s, ok := sm.states[sm.current]; ok {
 		if s.Events != nil {
 			if next, ok := s.Events[event]; ok {
@@ -137,7 +141,7 @@ func (sm *StateMachine) getNextState(event EventType) (StateType, error) {
 }
 
 // SendEvent sends an event to the state machine.
-func (sm *StateMachine) SendEvent(event EventType, d Driver) error {
+func (sm *StateMachine) SendEvent(event nfcptl.EventType, ctx EventContext) error {
 	sm.mu.Lock()
 	defer sm.mu.Unlock()
 
@@ -155,8 +159,8 @@ func (sm *StateMachine) SendEvent(event EventType, d Driver) error {
 		sm.previous = sm.current
 		sm.current = nextState
 
-		nextEvent := s.Action.Execute(d)
-		if nextEvent == OK {
+		nextEvent := s.Action.Execute(ctx)
+		if nextEvent == nfcptl.OK {
 			return nil
 		}
 		event = nextEvent
