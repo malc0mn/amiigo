@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/google/gousb"
 	"log"
-	"sync"
 	"time"
 )
 
@@ -177,22 +176,7 @@ const (
 //             Usage Type               Data
 //           wMaxPacketSize     0x0040  1x 64 bytes
 //           bInterval               1
-type ps4amiibo struct {
-	ledState   bool         // Keeps the state of the LED at the front of the NFC portal.
-	ledStateMu sync.RWMutex // Make led state concurrency safe
-}
-
-func (p *ps4amiibo) setLedState(s bool) {
-	p.ledStateMu.Lock()
-	defer p.ledStateMu.Unlock()
-	p.ledState = s
-}
-
-func (p *ps4amiibo) LedState() bool {
-	p.ledStateMu.RLock()
-	defer p.ledStateMu.RUnlock()
-	return p.ledState
-}
+type ps4amiibo struct {}
 
 func (p *ps4amiibo) VendorId() gousb.ID {
 	return VIDDatelElectronicsLtd

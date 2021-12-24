@@ -17,8 +17,6 @@ var (
 // Driver defines the interface for an NFC portal driver. All drivers must implement the Driver
 // interface to be usable by the Client.
 type Driver interface {
-	// LedState returns the state of the LED: true for on, false for off.
-	LedState() bool
 	// VendorId returns the vendor ID the driver should search for.
 	VendorId() gousb.ID
 	// VendorAlias returns the vendor alias to allow easy reference for the end users.
