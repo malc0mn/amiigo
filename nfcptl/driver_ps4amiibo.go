@@ -228,6 +228,7 @@ func (p *ps4amiibo) Drive(c *Client) {
 	p.pollForToken(c)
 }
 
+// commandMapping returns the corresponding DriverCommand for the given ClientCommand.
 func (p *ps4amiibo) commandMapping(cc ClientCommand) (DriverCommand, *UnsupportedCommandError) {
 	dc, ok := map[ClientCommand]DriverCommand{
 		GetDeviceName:   PS4A_GetDeviceName,
@@ -433,9 +434,10 @@ func (p *ps4amiibo) sendCommand(c *Client, cmd DriverCommand, args []byte) {
 	c.PublishEvent(NewEvent(p.eventMapping(cmd), b))
 }
 
+// createArguments builds the arguments for a command and pads the remaining bytes with 0xcd.
 func (p *ps4amiibo) createArguments(size int, args []byte) []byte {
 	packet := make([]byte, size)
-	// Fill out packet with 0xcd. This is not needed at all. Using just 0x00 works just as well but
+	// Fill out packet with 0xcd. This is not needed at all. Using 0x00 works just as well but
 	// let's stick to how the original software does it. One never knows what might change in the
 	// future which could then break our driver.
 	packet[0] = 0xcd
