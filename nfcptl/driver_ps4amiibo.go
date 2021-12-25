@@ -333,11 +333,6 @@ func (p *ps4amiibo) pollForToken(c *Client, ticker *time.Ticker) {
 		case <-ticker.C:
 			next, cmd = p.getNextPollCommand(next)
 			r, isErr := p.sendCommand(c, cmd, []byte{})
-
-			if c.Debug() {
-				log.Println("ps4amiibo: poll reply:")
-				fmt.Fprintln(os.Stderr, hex.Dump(r))
-			}
 			if cmd == PS4A_GetTokenUid {
 				if isErr {
 					if p.wasTokenRemoved() {
@@ -446,10 +441,6 @@ func (p *ps4amiibo) readToken(c *Client, buff []byte) {
 			case PS4A_Unknown3:
 				copy(answ30, r[2:])
 			}
-			if c.Debug() {
-				log.Println("ps4amiibo: cmd reply:")
-				fmt.Fprintln(os.Stderr, hex.Dump(r))
-			}
 		}
 	}
 }
@@ -496,6 +487,10 @@ func (p *ps4amiibo) sendCommand(c *Client, cmd DriverCommand, args []byte) ([]by
 	// PS4A_SetLedState does not get a response!
 	if cmd != PS4A_SetLedState {
 		c.In().Read(b)
+		if c.Debug() {
+			log.Println("ps4amiibo: command reply:")
+			fmt.Fprintln(os.Stderr, hex.Dump(b))
+		}
 	}
 	if event := p.getEventForDriverCommand(cmd, args); event != NoEvent {
 		c.PublishEvent(NewEvent(event, b))
