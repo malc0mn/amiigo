@@ -3,15 +3,26 @@ package nfcptl
 type EventType string
 
 const (
-	// DeviceName is published when the driver has received data after sending the GetDeviceName
-	// command.
-	DeviceName EventType = "DeviceName"
-	// HardwareInfo is published when the driver has received data after sending the
-	// GetHardwareInfo command.
-	HardwareInfo EventType = "HardwareInfo"
+	// NoEvent can be used when there is no event for a given DriverCommand.
+	NoEvent EventType = ""
 	// ApiPassword is sent when the driver has received data after sending the GetApiPassword
 	// command.
 	ApiPassword EventType = "ApiPassword"
+	// DeviceName is published when the driver has received data after sending the GetDeviceName
+	// command.
+	DeviceName EventType = "DeviceName"
+	// Error is sent when the driver has received an error from the device after having executed a
+	// command.
+	Error EventType = "Error"
+	// HardwareInfo is published when the driver has received data after sending the
+	// GetHardwareInfo command.
+	HardwareInfo EventType = "HardwareInfo"
+	// FrontLedOn is published when the front LED is turned on.
+	FrontLedOn EventType = "FrontLedOn"
+	// FrontLedOff is published when the front LED is turned off.
+	FrontLedOff EventType = "FrontLedOff"
+	// OK is sent when the driver has successfully executed a command without specific return data.
+	OK EventType = "OK"
 	// TokenDetected is sent when the driver has detected a token on the device. The token ID will
 	// be present in the event data.
 	TokenDetected EventType = "TokenDetected"
@@ -21,11 +32,6 @@ const (
 	// TokenTagData is sent when the driver has read the full token tag data which will be present
 	// in the event data.
 	TokenTagData EventType = "TokenTagData"
-	// OK is sent when the driver has successfully executed a command without specific return data.
-	OK EventType = "OK"
-	// Error is sent when the driver has received an error from the device after having executed a
-	// command.
-	Error EventType = "Error"
 	// UnknownCommand is sent when the driver has received an unknown command.
 	UnknownCommand EventType = "UnknownCommand"
 )
@@ -43,11 +49,7 @@ func NewEvent(name EventType, data []byte) *Event {
 }
 
 func (e *Event) String() string {
-	return map[EventType]string{
-		DeviceName:   "deviceName",
-		HardwareInfo: "hardwareInfo",
-		ApiPassword:  "apiPassword",
-	}[e.name]
+	return string(e.name)
 }
 
 func (e *Event) Name() EventType {

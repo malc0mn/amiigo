@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"github.com/google/gousb"
 	"log"
+	"os"
+	"sync"
 	"time"
 )
 
@@ -107,6 +109,13 @@ const (
 	//   00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 	//   00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 	PS4A_GetHardwareInfo DriverCommand = 0x90
+
+	// PS4A_LedOff represents the off state of the front LED.
+	PS4A_LedOff = 0x00
+
+	// PS4A_LedOn represents the on state of the front LED in full brightness. Any value starting
+	// from 0x01 will turn the LED on.
+	PS4A_LedOn = 0xff
 )
 
 // ps4amiibo implements the Driver interface for the following USB device:
@@ -176,7 +185,11 @@ const (
 //             Usage Type               Data
 //           wMaxPacketSize     0x0040  1x 64 bytes
 //           bInterval               1
-type ps4amiibo struct {}
+type ps4amiibo struct {
+	tokenMu     sync.Mutex
+	tokenPlaced bool
+	tokenErrors uint8
+}
 
 func (p *ps4amiibo) VendorId() gousb.ID {
 	return VIDDatelElectronicsLtd
@@ -206,14 +219,63 @@ func (p *ps4amiibo) Setup() DeviceSetup {
 
 func (p *ps4amiibo) Drive(c *Client) {
 	if c.Debug() {
-		log.Println("nfcptl: driving ps4amiibo")
+		log.Println("ps4amiibo: driving")
 	}
-	go p.commandListener(c)
-	p.pollForToken(c)
+	p.commandListener(c)
 }
 
-// commandMapping returns the corresponding DriverCommand for the given ClientCommand.
-func (p *ps4amiibo) commandMapping(cc ClientCommand) (DriverCommand, *UnsupportedCommandError) {
+// wasTokenPlaced will update the tokenPlaced state if the return of the PS4A_GetTokenUid message
+// was not an error. Its purpose is to notify us when a token has been placed on the NFC portal. If
+// it detects a token being placed, it will return true.
+// wasTokenPlaced is thread safe.
+func (p *ps4amiibo) wasTokenPlaced() bool {
+	p.tokenMu.Lock()
+	defer p.tokenMu.Unlock()
+
+	p.tokenErrors = 0
+	if !p.tokenPlaced {
+		p.tokenPlaced = true
+		return true
+	}
+
+	// tokenPlaced state has NOT changed.
+	return false
+}
+
+// wasTokenRemoved will keep track of the consecutive errors returned by PS4A_GetTokenUid when a
+// token is placed on the portal. Its purpose is to notify us when a token has been removed from
+// the NFC portal. If it detects a token removal, it will return true.
+// wasTokenRemoved is thread safe.
+func (p *ps4amiibo) wasTokenRemoved() bool {
+	p.tokenMu.Lock()
+	defer p.tokenMu.Unlock()
+
+	// Once a token is placed on the portal, we will be polling only with message PS4A_GetTokenUid
+	// which will alternate between an error and a token present in that order.
+	// As soon as we know a token is present on the portal we need to check for two consecutive
+	// errors to know the token has been removed again!
+	// The original software turns the front LED off after 10 consecutive errors.
+	if p.tokenPlaced {
+		if p.tokenErrors++; p.tokenErrors >= 10 {
+			p.tokenPlaced = false
+			p.tokenErrors = 0
+			return true
+		}
+	}
+
+	// tokenPlaced state has NOT changed.
+	return false
+}
+
+// isTokenPlaced returns the value of tokenPlaced in a thread safe way.
+func (p *ps4amiibo) isTokenPlaced() bool {
+	p.tokenMu.Lock()
+	defer p.tokenMu.Unlock()
+	return p.tokenPlaced
+}
+
+// getDriverCommandForClientCommand returns the corresponding DriverCommand for the given ClientCommand.
+func (p *ps4amiibo) getDriverCommandForClientCommand(cc ClientCommand) (DriverCommand, *UnsupportedCommandError) {
 	dc, ok := map[ClientCommand]DriverCommand{
 		GetDeviceName:   PS4A_GetDeviceName,
 		GetHardwareInfo: PS4A_GetHardwareInfo,
@@ -229,59 +291,61 @@ func (p *ps4amiibo) commandMapping(cc ClientCommand) (DriverCommand, *Unsupporte
 	return dc, nil
 }
 
-func (p *ps4amiibo) eventMapping(dc DriverCommand) EventType {
-	return map[DriverCommand]EventType{
-		PS4A_GetDeviceName:       DeviceName,
-		PS4A_GetHardwareInfo:     HardwareInfo,
-		PS4A_GenerateApiPassword: ApiPassword,
-		PS4A_SetLedState:         OK,
-	}[dc]
-}
-
+// commandListener listens for commands sent by the Client. If no commands are received it will
+// execute a single three-step poll sequence to check if a token is placed on the device.
+// commandListener uses a ticker to ensure command intervals adhere to the poll interval as defined
+// by the device.
 func (p *ps4amiibo) commandListener(c *Client) {
-	for {
-		select {
-		case cmd := <-c.Commands():
-			if dc, err := p.commandMapping(cmd.Command); err != nil {
-				c.PublishEvent(NewEvent(UnknownCommand, []byte{}))
-			} else {
-				p.sendCommand(c, dc, cmd.Arguments)
-			}
-		case <-c.Terminate():
-			return
-		}
-	}
-}
-
-func (p *ps4amiibo) pollForToken(c *Client) {
 	ticker := time.NewTicker(c.PollInterval())
 	defer ticker.Stop()
-
-	var cmd *UsbCommand
-	next := 0
-	maxSize := c.MaxPacketSize()
 
 	for {
 		select {
 		case <-ticker.C:
-			next, cmd = p.buildPollCommand(next, maxSize)
-			if c.Debug() {
-				log.Println("nfcptl: polling:")
-				fmt.Print(hex.Dump(cmd.Marshal())) // No Println here!
+			select {
+			case cmd := <-c.Commands():
+				if dc, err := p.getDriverCommandForClientCommand(cmd.Command); err != nil {
+					c.PublishEvent(NewEvent(UnknownCommand, []byte{}))
+				} else {
+					p.sendCommand(c, dc, cmd.Arguments)
+				}
+			default:
+				p.pollForToken(c, ticker)
 			}
-			n, _ := c.Out().Write(cmd.Marshal())
-			log.Printf("nfcptl: written %d bytes", n)
-			buff := make([]byte, maxSize)
-			c.In().Read(buff)
+		case <-c.Terminate():
+			// TODO: actually make this work properly, seems we're not cleanly shutting down!
+			// Ensure front LED is off before termination.
+			p.sendCommand(c, PS4A_SetLedState, []byte{PS4A_LedOff})
+			return
+		}
+	}
+}
+
+// pollForToken executes a single three-step poll sequence to check if a token is present on the
+// NFC portal. When a token is detected, it will read the token contents and send a TokenDetected
+// event to the client.
+func (p *ps4amiibo) pollForToken(c *Client, ticker *time.Ticker) {
+	var cmd DriverCommand
+	next := 0
+
+	for i := 0; i < 3; i++ {
+		select {
+		case <-ticker.C:
+			next, cmd = p.getNextPollCommand(next)
+			r, isErr := p.sendCommand(c, cmd, []byte{})
+
 			if c.Debug() {
-				log.Println("nfcptl: poll reply:")
-				fmt.Println(hex.Dump(buff))
+				log.Println("ps4amiibo: poll reply:")
+				fmt.Fprintln(os.Stderr, hex.Dump(r))
 			}
-			// TODO: implement real error checking (0x01 0x02 as first two bytes indicate an error)
-			if cmd.DriverCommand() == PS4A_GetTokenUid && bytes.Equal(buff[:4], []byte{0x00, 0x00, 0x00, 0x00}) {
-				p.readToken(c, buff)
-				// TODO: the return here is just for testing, it will need to go!
-				return
+			if cmd == PS4A_GetTokenUid {
+				if isErr {
+					if p.wasTokenRemoved() {
+						p.sendCommand(c, PS4A_SetLedState, []byte{PS4A_LedOff})
+					}
+				} else if p.wasTokenPlaced() {
+					p.readToken(c, r)
+				}
 			}
 		case <-c.Terminate():
 			return
@@ -289,44 +353,43 @@ func (p *ps4amiibo) pollForToken(c *Client) {
 	}
 }
 
-func (p *ps4amiibo) buildPollCommand(pos, size int) (int, *UsbCommand) {
+// getNextPollCommand returns the correct DriverCommand given the current poll sequence position.
+func (p *ps4amiibo) getNextPollCommand(pos int) (int, DriverCommand) {
 	// This polling sequence is what the original software does. Tinkering with it shows that
 	// shifting the sequence to the right or to the left will still work which makes sense.
 	// After playing around with it some more, it became clear that PS4A_Poll2 MUST DIRECTLY
 	// precede PS4A_GetTokenUid or PS4A_GetTokenUid will never return a token UID.
 	// Dropping PS4A_Poll1 will make the return value of PS4A_GetTokenUid alternate between the
-	// actual UID and 0x01 0x02 which is an error code of sorts.
+	// actual UID and 0x01 0x02 which is an error code.
 	sequence := []DriverCommand{PS4A_Poll1, PS4A_Poll2, PS4A_GetTokenUid}
-	if pos > len(sequence)-1 {
+
+	// Basic poll when a token is present on the portal.
+	if p.isTokenPlaced() {
+		return 0, sequence[2]
+	}
+
+	// Full three-step sequence.
+	if pos > len(sequence)-1 || pos < 0 {
 		pos = 0
 	}
 	cmd := sequence[pos]
 	next := pos + 1
 
-	usbCmd := NewUsbCommand(
-		cmd,
-		p.createArguments(size-1, []byte{}),
-	)
-
-	return next, usbCmd
+	return next, cmd
 }
 
-// TODO: make this look nice, it works but it's a total mess.
+// TODO: Can still use some cleanup and we need to actually start reading token pages!
 func (p *ps4amiibo) readToken(c *Client, buff []byte) {
-	maxSize := c.MaxPacketSize()
 	// It SEEMS that byte 5 in the sequence is the UID length, so we start after that.
 	// TODO: use byte 5 to read x number of bytes...?
 	uid := buff[5:12]
 
-	log.Printf("nfcptl: token detected with id %#x", uid)
+	log.Printf("ps4amiibo: token detected with id %#x", uid)
 
-	pkt := NewUsbCommand(
-		PS4A_SetLedState,
-		p.createArguments(maxSize-1, []byte{0xff}),
-	).Marshal()
-	log.Println("nfcptl: enabling front led:")
-	fmt.Println(hex.Dump(pkt))
-	c.Out().Write(pkt)
+	if c.Debug() {
+		log.Println("ps4amiibo: enabling front led")
+	}
+	p.sendCommand(c, PS4A_SetLedState, []byte{PS4A_LedOn})
 
 	//MsgOneAfterTokenDetect = []byte{0x20, 0xff}
 	//  set led to full brightness
@@ -374,48 +437,71 @@ func (p *ps4amiibo) readToken(c *Client, buff []byte) {
 			case PS4A_Unknown4:
 				args = append([]byte{0x00}, answ30...)
 			}
-			pkt := NewUsbCommand(
-				cmd,
-				p.createArguments(maxSize-1, args),
-			).Marshal()
-			log.Println("nfcptl: sending command:")
-			fmt.Println(hex.Dump(pkt))
-			c.Out().Write(pkt)
-			b := make([]byte, maxSize)
-			c.In().Read(b)
+
+			r, _ := p.sendCommand(c, cmd, args)
+
 			switch cmd {
 			case PS4A_ReadPage:
-				copy(page16, b[2:])
+				copy(page16, r[2:])
 			case PS4A_Unknown3:
-				copy(answ30, b[2:])
+				copy(answ30, r[2:])
 			}
 			if c.Debug() {
-				log.Println("nfcptl: cmd reply:")
-				fmt.Println(hex.Dump(b))
+				log.Println("ps4amiibo: cmd reply:")
+				fmt.Fprintln(os.Stderr, hex.Dump(r))
 			}
 		}
 	}
 }
 
-func (p *ps4amiibo) sendCommand(c *Client, cmd DriverCommand, args []byte) {
+// getEventForDriverCommand returns the corresponding EventType for the given DriverCommand.
+// If there is no event for the given DriverCommand, NoEvent will be returned.
+func (p *ps4amiibo) getEventForDriverCommand(dc DriverCommand, args []byte) EventType {
+	if dc == PS4A_SetLedState {
+		if args[0] == PS4A_LedOff {
+			return FrontLedOff
+		}
+		return FrontLedOn
+	}
+
+	return map[DriverCommand]EventType{
+		PS4A_GetDeviceName:       DeviceName,
+		PS4A_GetHardwareInfo:     HardwareInfo,
+		PS4A_GenerateApiPassword: ApiPassword,
+	}[dc]
+}
+
+// sendCommand sends a command to the device and reads the response. It will return the response
+// together with a boolean value indicating if the response contains an error (first two bytes 0x01
+// 0x02) or not.
+func (p *ps4amiibo) sendCommand(c *Client, cmd DriverCommand, args []byte) ([]byte, bool) {
+	maxSize := c.MaxPacketSize()
+
 	// Send command.
 	usbCmd := NewUsbCommand(
 		cmd,
-		p.createArguments(c.MaxPacketSize()-1, args),
+		p.createArguments(maxSize-1, args),
 	)
 	if c.Debug() {
-		log.Println("nfcptl: sending command:")
-		log.Println(hex.Dump(usbCmd.Marshal()))
+		log.Println("ps4amiibo: sending command:")
+		fmt.Fprint(os.Stderr, hex.Dump(usbCmd.Marshal())) // No Println here since hex.Dump() prints a newline.
 	}
 	n, _ := c.Out().Write(usbCmd.Marshal())
 	if c.Debug() {
-		log.Printf("nfcptl: written %d bytes", n)
+		log.Printf("ps4amiibo: written %d bytes", n)
 	}
 
 	// Read response.
-	b := make([]byte, c.MaxPacketSize())
-	c.In().Read(b)
-	c.PublishEvent(NewEvent(p.eventMapping(cmd), b))
+	b := make([]byte, maxSize)
+	// PS4A_SetLedState does not get a response!
+	if cmd != PS4A_SetLedState {
+		c.In().Read(b)
+	}
+	if event := p.getEventForDriverCommand(cmd, args); event != NoEvent {
+		c.PublishEvent(NewEvent(event, b))
+	}
+
+	return b, bytes.Equal(b[:2], []byte{0x01, 0x02})
 }
 
 // createArguments builds the arguments for a command and pads the remaining bytes with 0xcd.
