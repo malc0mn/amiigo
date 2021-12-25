@@ -424,6 +424,7 @@ func (p *ps4amiibo) readToken(c *Client, buff []byte) {
 	page16 := make([]byte, 16)
 	answ30 := make([]byte, 16)
 
+	// Prepare read.
 	for _, item := range cmds {
 		for cmd, args := range item {
 			switch cmd {
@@ -442,6 +443,25 @@ func (p *ps4amiibo) readToken(c *Client, buff []byte) {
 				copy(answ30, r[2:])
 			}
 		}
+	}
+	// Actual read.
+	var i byte
+	token := make([]byte, 540)
+	n := 0
+	for i = 0; i < 0x88; i += 4 {
+		r, isErr := p.sendCommand(c, PS4A_ReadPage, []byte{i})
+		if isErr {
+			// TODO: add proper error handling here
+			break
+		}
+		// Note that page 0x84 contains only 12 bytes but copy is clever and will not cause a
+		// buffer overflow, which is nice.
+		copy(token[n:], r[2:18])
+		n += 16
+	}
+	if c.Debug() {
+		log.Println("amiigo: full token data:")
+		fmt.Fprintln(os.Stderr, hex.Dump(token))
 	}
 }
 
