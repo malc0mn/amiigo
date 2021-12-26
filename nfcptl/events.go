@@ -32,6 +32,10 @@ const (
 	// TokenTagData is sent when the driver has read the full token tag data which will be present
 	// in the event data.
 	TokenTagData EventType = "TokenTagData"
+	// TokenTagDataError is sent when the driver encountered an error reading the token tag data.
+	// The token tag data that has been read will be present in the event data but will be
+	// incomplete or corrupted.
+	TokenTagDataError EventType = "TokenTagDataError"
 	// UnknownCommand is sent when the driver has received an unknown command.
 	UnknownCommand EventType = "UnknownCommand"
 )

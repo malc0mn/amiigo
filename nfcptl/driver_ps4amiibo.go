@@ -189,6 +189,10 @@ type ps4amiibo struct {
 	tokenMu     sync.Mutex
 	tokenPlaced bool  // Keeps track of token state.
 	tokenErrors uint8 // Used in polling to detect if a token has been removed.
+
+	totalErrors uint8 // Total consecutive errors before a token is to be considered removed.
+
+	optimised bool // Defines the driver behavior. Setting to false mimics the original software as closely as possible.
 }
 
 func (p *ps4amiibo) VendorId() gousb.ID {
@@ -221,6 +225,13 @@ func (p *ps4amiibo) Drive(c *Client) {
 	if c.Debug() {
 		log.Println("ps4amiibo: driving")
 	}
+
+	// TODO: how to set optimised to true? Another interface function SetOptimised?
+	p.totalErrors = 10
+	if p.optimised {
+		p.totalErrors = 2
+	}
+
 	p.commandListener(c)
 }
 
@@ -256,7 +267,7 @@ func (p *ps4amiibo) wasTokenRemoved() bool {
 	// errors to know the token has been removed again!
 	// The original software turns the front LED off after 10 consecutive errors.
 	if p.tokenPlaced {
-		if p.tokenErrors++; p.tokenErrors >= 10 {
+		if p.tokenErrors++; p.tokenErrors >= p.totalErrors {
 			p.tokenPlaced = false
 			p.tokenErrors = 0
 			return true
@@ -373,8 +384,8 @@ func (p *ps4amiibo) getNextPollCommand(pos int) (int, DriverCommand) {
 	return next, cmd
 }
 
-// TODO: Can still use some cleanup and we need to actually start reading token pages!
-func (p *ps4amiibo) readToken(c *Client, buff []byte) {
+// handleToken processes the token placed on the NFC portal.
+func (p *ps4amiibo) handleToken(c *Client, buff []byte) {
 	// It SEEMS that byte 5 in the sequence is the UID length, so we start after that.
 	// TODO: use byte 5 to read x number of bytes...?
 	uid := buff[5:12]
@@ -444,25 +455,50 @@ func (p *ps4amiibo) readToken(c *Client, buff []byte) {
 			}
 		}
 	}
+
 	// Actual read.
-	var i byte
-	token := make([]byte, 540)
-	n := 0
-	for i = 0; i < 0x88; i += 4 {
-		r, isErr := p.sendCommand(c, PS4A_ReadPage, []byte{i})
-		if isErr {
-			// TODO: add proper error handling here
-			break
+	token, err := p.readToken(c)
+	if err == nil && !p.optimised {
+		// The original software reads the token twice, probably for validation purposes.
+		verify, _ := p.readToken(c)
+		if !bytes.Equal(token, verify) {
+			c.PublishEvent(NewEvent(TokenTagDataError, token))
+			return
 		}
-		// Note that page 0x84 contains only 12 bytes but copy is clever and will not cause a
-		// buffer overflow, which is nice.
-		copy(token[n:], r[2:18])
-		n += 16
+	} else {
+		c.PublishEvent(NewEvent(TokenTagDataError, token))
 	}
 	if c.Debug() {
 		log.Println("amiigo: full token data:")
 		fmt.Fprintln(os.Stderr, hex.Dump(token))
 	}
+	c.PublishEvent(NewEvent(TokenTagData, token))
+}
+
+// readToken actually reads the token data and returns it as a byte slice.
+func (p *ps4amiibo) readToken(c *Client) ([]byte, error) {
+	var i byte
+	token := make([]byte, 540)
+	n := 0
+	for i = 0; i < 0x88; i += 4 {
+		pageErrors := 0
+	read:
+		res, isErr := p.sendCommand(c, PS4A_ReadPage, []byte{i})
+		if isErr {
+			if pageErrors++; pageErrors > 2 {
+				return token, fmt.Errorf("ps4amiibo: failed to read page %#02x", i)
+			} else {
+				// Try reading the same page again.
+				goto read
+			}
+		}
+		// Note that page 0x84 contains only 12 bytes we actually need but copy is clever and will
+		// not cause a buffer overflow, which is nice.
+		copy(token[n:], res[2:18])
+		n += 16
+	}
+
+	return token, nil
 }
 
 // getEventForDriverCommand returns the corresponding EventType for the given DriverCommand.
