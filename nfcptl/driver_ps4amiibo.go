@@ -332,14 +332,14 @@ func (p *ps4amiibo) pollForToken(c *Client, ticker *time.Ticker) {
 		select {
 		case <-ticker.C:
 			next, cmd = p.getNextPollCommand(next)
-			r, isErr := p.sendCommand(c, cmd, []byte{})
+			res, isErr := p.sendCommand(c, cmd, []byte{})
 			if cmd == PS4A_GetTokenUid {
 				if isErr {
 					if p.wasTokenRemoved() {
 						p.sendCommand(c, PS4A_SetLedState, []byte{PS4A_LedOff})
 					}
 				} else if p.wasTokenPlaced() {
-					p.readToken(c, r)
+					p.handleToken(c, res)
 				}
 			}
 		case <-c.Terminate():

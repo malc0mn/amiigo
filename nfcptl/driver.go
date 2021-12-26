@@ -89,5 +89,5 @@ func GetDriverByVendorAndProductAlias(vendor, product string) (Driver, error) {
 	if d, ok := drivers[vendor][product]; ok {
 		return d, nil
 	}
-	return nil, DriverNotFoundError{vendor, product}
+	return nil, DriverNotFoundError{Vendor: vendor, Product: product}
 }
