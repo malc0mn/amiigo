@@ -458,18 +458,21 @@ func (p *ps4amiibo) handleToken(c *Client, buff []byte) {
 
 	// Actual read.
 	token, err := p.readToken(c)
-	if err == nil && !p.optimised {
+	if err != nil {
+		if c.Debug() {
+			log.Printf("%s", err)
+		}
+		c.PublishEvent(NewEvent(TokenTagDataError, token))
+	} else if !p.optimised {
 		// The original software reads the token twice, probably for validation purposes.
 		verify, _ := p.readToken(c)
 		if !bytes.Equal(token, verify) {
 			c.PublishEvent(NewEvent(TokenTagDataError, token))
 			return
 		}
-	} else {
-		c.PublishEvent(NewEvent(TokenTagDataError, token))
 	}
 	if c.Debug() {
-		log.Println("amiigo: full token data:")
+		log.Println("ps4amiibo: full token data:")
 		fmt.Fprintln(os.Stderr, hex.Dump(token))
 	}
 	c.PublishEvent(NewEvent(TokenTagData, token))
