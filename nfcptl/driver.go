@@ -52,8 +52,8 @@ type DeviceSetup struct {
 
 // DriverNotFoundError defines the error structure returned when a requested driver is not found.
 type DriverNotFoundError struct {
-	Vendor  string // Vendor holds the vendor alias that was used to request the driver
-	Product string // Product holds the device alias that was used to request the driver
+	Vendor  string // Vendor holds the vendor alias that was used to request the driver.
+	Product string // Product holds the device alias that was used to request the driver.
 }
 
 // Error implements the error interface

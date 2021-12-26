@@ -187,8 +187,8 @@ const (
 //           bInterval               1
 type ps4amiibo struct {
 	tokenMu     sync.Mutex
-	tokenPlaced bool
-	tokenErrors uint8
+	tokenPlaced bool  // Keeps track of token state.
+	tokenErrors uint8 // Used in polling to detect if a token has been removed.
 }
 
 func (p *ps4amiibo) VendorId() gousb.ID {
