@@ -318,6 +318,10 @@ func (p *ps4amiibo) commandListener(c *Client) {
 	ticker := time.NewTicker(c.PollInterval())
 	defer ticker.Stop()
 
+	if p.optimised {
+		p.sendCommand(c, PS4A_FieldOn, []byte{})
+	}
+
 	for {
 		select {
 		case <-ticker.C:
@@ -333,6 +337,8 @@ func (p *ps4amiibo) commandListener(c *Client) {
 			}
 		case <-c.Terminate():
 			// TODO: actually make this work properly, seems we're not cleanly shutting down!
+			// Ensure the NFC field is off before termination.
+			p.sendCommand(c, PS4A_FieldOff, []byte{})
 			// Ensure front LED is off before termination.
 			p.sendCommand(c, PS4A_SetLedState, []byte{PS4A_LedOff})
 			return
@@ -340,10 +346,18 @@ func (p *ps4amiibo) commandListener(c *Client) {
 	}
 }
 
-// pollForToken executes a single three-step poll sequence to check if a token is present on the
-// NFC portal. When a token is detected, it will read the token contents and send a TokenDetected
-// event to the client.
+// pollForToken executes an optimised token poll or a single three-step poll sequence to check if a
+// token is present on the NFC portal. The original software does a three step token poll but after
+// experimenting, this can be optimised to a single message on each poll.
+// When a token is detected, it will read the token contents  and send a TokenDetected event to the
+// client.
 func (p *ps4amiibo) pollForToken(c *Client, ticker *time.Ticker) {
+	if p.optimised {
+		res, isErr := p.sendCommand(c, PS4A_GetTokenUid, []byte{})
+		p.handleGetTokenUidReturn(c, res, isErr)
+		return
+	}
+
 	var cmd DriverCommand
 	next := 0
 
@@ -353,17 +367,22 @@ func (p *ps4amiibo) pollForToken(c *Client, ticker *time.Ticker) {
 			next, cmd = p.getNextPollCommand(next)
 			res, isErr := p.sendCommand(c, cmd, []byte{})
 			if cmd == PS4A_GetTokenUid {
-				if isErr {
-					if p.wasTokenRemoved() {
-						p.sendCommand(c, PS4A_SetLedState, []byte{PS4A_LedOff})
-					}
-				} else if p.wasTokenPlaced() {
-					p.handleToken(c, res)
-				}
+				p.handleGetTokenUidReturn(c, res, isErr)
 			}
 		case <-c.Terminate():
 			return
 		}
+	}
+}
+
+// handleGetTokenUidReturn will handle the result returned by the PS4A_GetTokenUid command.
+func (p *ps4amiibo) handleGetTokenUidReturn(c *Client, res []byte, isErr bool) {
+	if isErr {
+		if p.wasTokenRemoved() {
+			p.sendCommand(c, PS4A_SetLedState, []byte{PS4A_LedOff})
+		}
+	} else if p.wasTokenPlaced() {
+		p.handleToken(c, res)
 	}
 }
 
