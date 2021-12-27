@@ -16,7 +16,7 @@ const (
 	// defaultVendor is the default vendor alias to use for vendor ID lookup
 	defaultVendor = nfcptl.VendorDatelElextronicsLtd
 	// defaultDevice is the default device alias to use for vendor ID lookup
-	defaultDevice = nfcptl.PS4A_Product
+	defaultDevice = nfcptl.ProductPowerSavesForAmiibo
 )
 
 var conf = config{}

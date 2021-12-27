@@ -17,11 +17,6 @@ func init() {
 }
 
 const (
-	// PS4A_Product holds the alias for the 'PowerSaves for Amiibo' product
-	PS4A_Product = "ps4amiibo"
-	// PS4A_PID holds the USB product ID for the 'PowerSaves for Amiibo' product
-	PS4A_PID uint16 = 0x03d9
-
 	// PS4A_GetDeviceName used as the payload in an interrupt message returns the device name
 	// "NFC-Portal". This is the first command send when the device has been detected.
 	//   00000000  4e 46 43 2d 50 6f 72 74  61 6c 00 00 00 00 00 00  |NFC-Portal......|
@@ -203,11 +198,11 @@ func (p *ps4amiibo) VendorAlias() string {
 }
 
 func (p *ps4amiibo) ProductId() uint16 {
-	return PS4A_PID
+	return PIDPowerSavesForAmiibo
 }
 
 func (p *ps4amiibo) ProductAlias() string {
-	return PS4A_Product
+	return ProductPowerSavesForAmiibo
 }
 
 func (p *ps4amiibo) Setup() DeviceSetup {

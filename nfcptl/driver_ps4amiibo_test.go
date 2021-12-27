@@ -26,7 +26,7 @@ func TestPs4amiibo_VendorAlias(t *testing.T) {
 func TestPs4amiibo_ProductId(t *testing.T) {
 	p := &ps4amiibo{}
 	got := p.ProductId()
-	want := PS4A_PID
+	want := PIDPowerSavesForAmiibo
 	if got != want {
 		t.Errorf("got %#04x, want %#04x", got, want)
 	}
@@ -35,7 +35,7 @@ func TestPs4amiibo_ProductId(t *testing.T) {
 func TestPs4amiibo_ProductAlias(t *testing.T) {
 	p := &ps4amiibo{}
 	got := p.ProductAlias()
-	want := PS4A_Product
+	want := ProductPowerSavesForAmiibo
 	if got != want {
 		t.Errorf("got %s, want %s", got, want)
 	}
