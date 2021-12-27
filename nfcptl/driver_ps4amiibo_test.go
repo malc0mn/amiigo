@@ -156,11 +156,11 @@ func TestPs4amiibo_getNextPollCommand_NoToken(t *testing.T) {
 
 	tests := []test{
 		{
-			dc:   PS4A_Poll1,
+			dc:   PS4A_FieldOff,
 			next: 1,
 		},
 		{
-			dc:   PS4A_Poll2,
+			dc:   PS4A_FieldOn,
 			next: 2,
 		},
 		{
@@ -168,11 +168,11 @@ func TestPs4amiibo_getNextPollCommand_NoToken(t *testing.T) {
 			next: 3,
 		},
 		{
-			dc:   PS4A_Poll1,
+			dc:   PS4A_FieldOff,
 			next: 1,
 		},
 		{
-			dc:   PS4A_Poll1,
+			dc:   PS4A_FieldOff,
 			next: 1,
 		},
 	}

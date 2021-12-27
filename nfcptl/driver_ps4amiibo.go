@@ -25,18 +25,30 @@ const (
 	//   00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 	PS4A_GetDeviceName DriverCommand = 0x02
 
-	// PS4A_Poll2 is the second command sent when polling for a token. It is unknown exactly what
-	// this command does, but it MUST DIRECTLY precede PS4A_GetTokenUid for PS4A_GetTokenUid to
-	// return a token UID.
-	PS4A_Poll2 DriverCommand = 0x10
-	// PS4A_Poll1 is the first command sent when polling for a token. It is unknown exactly what
-	// this command does but omitting it from the polling sequence makes the return value of
-	// PS4A_GetTokenUid alternate between an actual UID and 0x01 0x02 which is an error code of
-	// sorts.
-	PS4A_Poll1 DriverCommand = 0x11
+	// PS4A_FieldOn is the second command sent when polling for a token. It turns on the NFC
+	// detection field and obviously must precede PS4A_GetTokenUid for PS4A_GetTokenUid to be able
+	// to return a token UID.
+	PS4A_FieldOn DriverCommand = 0x10
+	// PS4A_FieldOff is the first command sent when polling for a token. It turns off the NFC
+	// detection field. To detect a token, the field must obviously be turned on.
+	// Omitting this command from the polling sequence makes no difference in the token detection
+	// effectiveness.
+	PS4A_FieldOff DriverCommand = 0x11
 	// PS4A_GetTokenUid is the third command sent when polling for a token. It MUST be preceded by
-	// PS4A_Poll2 or the command will never return a token UID.
+	// PS4A_FieldOn or the command will never return a token UID.
 	PS4A_GetTokenUid DriverCommand = 0x12
+
+	// PS4A_ReadPageAlt1 is an alternative for PS4A_ReadPage.
+	PS4A_ReadPageAlt1 DriverCommand = 0x14
+	// PS4A_WritePageAlt1 is an alternative for PS4A_WritePage.
+	PS4A_WritePageAlt1 DriverCommand = 0x15
+	// PS4A_ReadPageAlt2 is another alternative for PS4A_ReadPage.
+	PS4A_ReadPageAlt2 DriverCommand = 0x17
+	// PS4A_WritePageAlt2 is another alternative for PS4A_WritePage.
+	PS4A_WritePageAlt2 DriverCommand = 0x18
+
+	// PS4A_Status seems to return the last registered error code.
+	PS4A_Status DriverCommand = 0x19
 
 	// PS4A_ReadPage reads the specified page from the token. Takes one argument being the page to
 	// read.
@@ -46,8 +58,8 @@ const (
 	PS4A_WritePage DriverCommand = 0x1d
 
 	// PS4A_Unknown4 is used after a token has been detected on the portal after command 0x30. It
-	// takes data from PS4A_Unknown3 as arguments:
-	//   0x00 + the answer from PS4A_Unknown3
+	// takes data from PS4A_MakeKey as arguments:
+	//   0x00 + the answer from PS4A_MakeKey
 	PS4A_Unknown4 DriverCommand = 0x1e
 
 	// PS4A_Unknown1 with a token on the portal always returns:
@@ -76,11 +88,11 @@ const (
 	// It is used after a token has been detected after calling 0x1f
 	PS4A_Unknown2 DriverCommand = 0x21
 
-	// PS4A_Unknown3 is called after a token has been detected on the portal, after page 16 has
+	// PS4A_MakeKey is called after a token has been detected on the portal, after page 16 has
 	// been read. It takes data from two previous commands as arguments:
 	//   the answer to PS4A_GetTokenUid being the token UID + the answer to PS4A_ReadPage called
 	//   with argument 0x10 (page 16)
-	PS4A_Unknown3 DriverCommand = 0x30
+	PS4A_MakeKey DriverCommand = 0x30
 
 	// PS4A_GenerateApiPassword is used to generate an API password using the Vuid received by doing
 	// a GET call to https://psaapp.powersaves.net/api/Authorisation. The base64 decrypted Vuid must
@@ -357,13 +369,8 @@ func (p *ps4amiibo) pollForToken(c *Client, ticker *time.Ticker) {
 
 // getNextPollCommand returns the correct DriverCommand given the current poll sequence position.
 func (p *ps4amiibo) getNextPollCommand(pos int) (int, DriverCommand) {
-	// This polling sequence is what the original software does. Tinkering with it shows that
-	// shifting the sequence to the right or to the left will still work which makes sense.
-	// After playing around with it some more, it became clear that PS4A_Poll2 MUST DIRECTLY
-	// precede PS4A_GetTokenUid or PS4A_GetTokenUid will never return a token UID.
-	// Dropping PS4A_Poll1 will make the return value of PS4A_GetTokenUid alternate between the
-	// actual UID and 0x01 0x02 which is an error code.
-	sequence := []DriverCommand{PS4A_Poll1, PS4A_Poll2, PS4A_GetTokenUid}
+	// This polling sequence is what the original software does.
+	sequence := []DriverCommand{PS4A_FieldOff, PS4A_FieldOn, PS4A_GetTokenUid}
 
 	// Basic poll when a token is present on the portal.
 	if p.isTokenPlaced() {
@@ -419,26 +426,29 @@ func (p *ps4amiibo) handleToken(c *Client, buff []byte) {
 	//   => this is done twice, verification?
 	// now it's only polling with msg 0x12 which returns 01 02 while the token is on the portal. 01 02 seems to indicate
 	// an error.
+	//
+	// IMPORTANT: it is unsure what this sequence is used for. We can drop this entirely and still read the token data
+	//  just fine.
 	cmds := []map[DriverCommand][]byte{
 		{PS4A_Unknown1: {}},
 		{PS4A_Unknown2: {}},
 		{PS4A_ReadPage: {0x10}},
-		{PS4A_Unknown3: {}},
+		{PS4A_MakeKey: {}},
 		{PS4A_Unknown4: {}},
 		{PS4A_Unknown1: {}},
 	}
 
 	page16 := make([]byte, 16)
-	answ30 := make([]byte, 16)
+	key := make([]byte, 16)
 
 	// Prepare read.
 	for _, item := range cmds {
 		for cmd, args := range item {
 			switch cmd {
-			case PS4A_Unknown3:
+			case PS4A_MakeKey:
 				args = append(uid, page16...)
 			case PS4A_Unknown4:
-				args = append([]byte{0x00}, answ30...)
+				args = append([]byte{0x00}, key...)
 			}
 
 			r, _ := p.sendCommand(c, cmd, args)
@@ -446,8 +456,8 @@ func (p *ps4amiibo) handleToken(c *Client, buff []byte) {
 			switch cmd {
 			case PS4A_ReadPage:
 				copy(page16, r[2:])
-			case PS4A_Unknown3:
-				copy(answ30, r[2:])
+			case PS4A_MakeKey:
+				copy(key, r[2:])
 			}
 		}
 	}
