@@ -10,7 +10,7 @@ func TestPs4amiibo_VendorId(t *testing.T) {
 	got := p.VendorId()
 	want := VIDDatelElectronicsLtd
 	if got != want {
-		t.Errorf("got %#x, want %#x", got, want)
+		t.Errorf("got %#04x, want %#04x", got, want)
 	}
 }
 
@@ -28,7 +28,7 @@ func TestPs4amiibo_ProductId(t *testing.T) {
 	got := p.ProductId()
 	want := PS4A_PID
 	if got != want {
-		t.Errorf("got %#x, want %#x", got, want)
+		t.Errorf("got %#04x, want %#04x", got, want)
 	}
 }
 

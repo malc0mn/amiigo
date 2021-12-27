@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"github.com/google/gousb"
 	"log"
 	"os"
 	"sync"
@@ -21,7 +20,7 @@ const (
 	// PS4A_Product holds the alias for the 'PowerSaves for Amiibo' product
 	PS4A_Product = "ps4amiibo"
 	// PS4A_PID holds the USB product ID for the 'PowerSaves for Amiibo' product
-	PS4A_PID gousb.ID = 0x03d9
+	PS4A_PID uint16 = 0x03d9
 
 	// PS4A_GetDeviceName used as the payload in an interrupt message returns the device name
 	// "NFC-Portal". This is the first command send when the device has been detected.
@@ -195,7 +194,7 @@ type ps4amiibo struct {
 	optimised bool // Defines the driver behavior. Setting to false mimics the original software as closely as possible.
 }
 
-func (p *ps4amiibo) VendorId() gousb.ID {
+func (p *ps4amiibo) VendorId() uint16 {
 	return VIDDatelElectronicsLtd
 }
 
@@ -203,7 +202,7 @@ func (p *ps4amiibo) VendorAlias() string {
 	return VendorDatelElextronicsLtd
 }
 
-func (p *ps4amiibo) ProductId() gousb.ID {
+func (p *ps4amiibo) ProductId() uint16 {
 	return PS4A_PID
 }
 
@@ -390,7 +389,7 @@ func (p *ps4amiibo) handleToken(c *Client, buff []byte) {
 	// TODO: use byte 5 to read x number of bytes...?
 	uid := buff[5:12]
 
-	log.Printf("ps4amiibo: token detected with id %#x", uid)
+	log.Printf("ps4amiibo: token detected with id %#07x", uid)
 
 	if c.Debug() {
 		log.Println("ps4amiibo: enabling front led")

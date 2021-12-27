@@ -1,14 +1,13 @@
 package nfcptl
 
 import (
-	"github.com/google/gousb"
 	"testing"
 )
 
 func TestDatelValues(t *testing.T) {
-	wantVid := gousb.ID(0x1c1a)
+	wantVid := uint16(0x1c1a)
 	if VIDDatelElectronicsLtd != wantVid {
-		t.Errorf("VIDDatelElectronicsLtd value was %s, want %s", VIDDatelElectronicsLtd, wantVid)
+		t.Errorf("VIDDatelElectronicsLtd value was %#04x, want %#04x", VIDDatelElectronicsLtd, wantVid)
 	}
 
 	wantAlias := "datel"

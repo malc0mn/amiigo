@@ -3,6 +3,7 @@ package nfcptl
 import (
 	"fmt"
 	"github.com/google/gousb"
+	"io"
 	"log"
 	"time"
 )
@@ -43,7 +44,7 @@ func NewClient(vendor, device string, debug bool) (*Client, error) {
 	}
 
 	if c.debug {
-		log.Printf("Using vendor ID 0x%s and product ID 0x%s", c.driver.VendorId(), c.driver.ProductId())
+		log.Printf("Using vendor ID %#04x and product ID %#04x", c.driver.VendorId(), c.driver.ProductId())
 	}
 
 	return c, nil
@@ -58,12 +59,12 @@ func (c *Client) Connect() error {
 		// c.ctx.Debug(4)
 	}
 
-	c.dev, err = c.ctx.OpenDeviceWithVIDPID(c.driver.VendorId(), c.driver.ProductId())
+	c.dev, err = c.ctx.OpenDeviceWithVIDPID(gousb.ID(c.driver.VendorId()), gousb.ID(c.driver.ProductId()))
 	if err != nil {
 		return fmt.Errorf("could not open device: %v", err)
 	}
 	if c.dev == nil {
-		return fmt.Errorf("no device found for vid=%s,pid=%s", c.driver.VendorId(), c.driver.ProductId())
+		return fmt.Errorf("no device found for vid=%#04x,pid=%#04x", c.driver.VendorId(), c.driver.ProductId())
 	}
 
 	// AutoDetach is mandatory: it will detach the kernel driver before attempting to claim the
@@ -135,13 +136,13 @@ func (c *Client) Disconnect() error {
 
 // In returns the USB in endpoint for device-to-host communications.
 // This function is exposed to allow Driver implementations outside the nfcptl package.
-func (c *Client) In() *gousb.InEndpoint {
+func (c *Client) In() io.Reader {
 	return c.in
 }
 
 // Out returns the USB out endpoint for host-to-device communications.
 // This function is exposed to allow Driver implementations outside the nfcptl package.
-func (c *Client) Out() *gousb.OutEndpoint {
+func (c *Client) Out() io.Writer {
 	return c.out
 }
 
@@ -192,12 +193,12 @@ func (c *Client) SendCommand(cmd Command) {
 }
 
 // VendorId returns the vendor ID the client is using.
-func (c *Client) VendorId() gousb.ID {
+func (c *Client) VendorId() uint16 {
 	return c.driver.VendorId()
 }
 
 // ProductId returns the product ID the client is using.
-func (c *Client) ProductId() gousb.ID {
+func (c *Client) ProductId() uint16 {
 	return c.driver.ProductId()
 }
 

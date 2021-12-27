@@ -1,7 +1,6 @@
 package nfcptl
 
 import (
-	"github.com/google/gousb"
 	"sync"
 )
 
@@ -18,11 +17,11 @@ var (
 // interface to be usable by the Client.
 type Driver interface {
 	// VendorId returns the vendor ID the driver should search for.
-	VendorId() gousb.ID
+	VendorId() uint16
 	// VendorAlias returns the vendor alias to allow easy reference for the end users.
 	VendorAlias() string
 	// ProductId returns the product ID the driver should search for.
-	ProductId() gousb.ID
+	ProductId() uint16
 	// ProductAlias returns the product alias to allow easy reference for the end users.
 	ProductAlias() string
 	// Setup returns the parameters needed to initialise the device, so it's ready for use. We're

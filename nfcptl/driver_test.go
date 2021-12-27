@@ -2,7 +2,6 @@ package nfcptl
 
 import (
 	"errors"
-	"github.com/google/gousb"
 	"testing"
 )
 
@@ -17,8 +16,8 @@ func TestRegisterDriverPanic(t *testing.T) {
 
 func TestGetDriverByVendorAndDeviceAlias(t *testing.T) {
 	type expect struct {
-		vid gousb.ID
-		pid gousb.ID
+		vid uint16
+		pid uint16
 		err error
 	}
 	check := map[string]map[string]expect{
@@ -34,7 +33,7 @@ func TestGetDriverByVendorAndDeviceAlias(t *testing.T) {
 		for device, want := range devices {
 			d, err := GetDriverByVendorAndProductAlias(vendor, device)
 			if d != nil && (d.VendorId() != want.vid || d.ProductId() != want.pid || err != nil) {
-				t.Errorf("GetDriverByVendorAndProductAlias() return = '%#x,%#x,%v', want '%#x,%#x,%v'", d.VendorId(), d.ProductId(), err, want.vid, want.pid, want.err)
+				t.Errorf("GetDriverByVendorAndProductAlias() return = '%#04x,%#04x,%v', want '%#04x,%#04x,%v'", d.VendorId(), d.ProductId(), err, want.vid, want.pid, want.err)
 			}
 			if !errors.Is(err, want.err) {
 				t.Errorf("GetDriverByVendorAndProductAlias() return = '%s', want '%s'", err, want.err)
