@@ -56,13 +56,13 @@ func (uc *UsbCommand) Marshal() []byte {
 	return append([]byte{byte(uc.cmd)}, uc.args...)
 }
 
-// UnsupportedCommandError defines the error structure returned when a requested ClientCommand is
+// ErrUnsupportedCommand defines the error structure returned when a requested ClientCommand is
 // not supported by the driver.
-type UnsupportedCommandError struct {
+type ErrUnsupportedCommand struct {
 	Command ClientCommand
 }
 
 // Error implements the error interface
-func (e UnsupportedCommandError) Error() string {
-	return fmt.Sprintf("nfcptl: received unsupported command %s", e.Command)
+func (e ErrUnsupportedCommand) Error() string {
+	return fmt.Sprintf("received unsupported command %d", e.Command)
 }

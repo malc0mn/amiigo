@@ -13,7 +13,7 @@ import (
 // init MUST be used in drivers to register the driver by calling RegisterDriver. If the driver is not registered, it
 // will not be recognised!
 func init() {
-	RegisterDriver(&ps4amiibo{})
+	RegisterDriver(&ps4amiibo{totalErrors: 10})
 }
 
 const (
@@ -225,8 +225,10 @@ func (p *ps4amiibo) Drive(c *Client) {
 		log.Println("ps4amiibo: driving")
 	}
 
+	// TODO: double check if the original software does a setIdle call.
+	// c.SetIdle(0,0)
+
 	// TODO: how to set optimised to true? Another interface function SetOptimised?
-	p.totalErrors = 10
 	if p.optimised {
 		p.totalErrors = 2
 	}
@@ -285,7 +287,7 @@ func (p *ps4amiibo) isTokenPlaced() bool {
 }
 
 // getDriverCommandForClientCommand returns the corresponding DriverCommand for the given ClientCommand.
-func (p *ps4amiibo) getDriverCommandForClientCommand(cc ClientCommand) (DriverCommand, *UnsupportedCommandError) {
+func (p *ps4amiibo) getDriverCommandForClientCommand(cc ClientCommand) (DriverCommand, error) {
 	dc, ok := map[ClientCommand]DriverCommand{
 		GetDeviceName:   PS4A_GetDeviceName,
 		GetHardwareInfo: PS4A_GetHardwareInfo,
@@ -295,7 +297,7 @@ func (p *ps4amiibo) getDriverCommandForClientCommand(cc ClientCommand) (DriverCo
 		SetLedState:     PS4A_SetLedState,
 	}[cc]
 	if !ok {
-		return 0, &UnsupportedCommandError{cc}
+		return 0, &ErrUnsupportedCommand{Command: cc}
 	}
 
 	return dc, nil
