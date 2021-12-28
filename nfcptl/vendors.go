@@ -7,7 +7,7 @@ const (
 
 	// Vendor IDs
 	VIDDatelElectronicsLtd uint16 = 0x1c1a
-	VIDMaxlander                  = 0x5C60
+	VIDMaxlander                  = 0x5c60
 
 	// Product aliases
 	ProductPowerSavesForAmiibo = "ps4amiibo"
@@ -17,3 +17,16 @@ const (
 	PIDPowerSavesForAmiibo uint16 = 0x03d9
 	PIDMaxLander                  = 0xdead
 )
+
+// Vendor describes a vendor and its products as supported by the Driver.
+type Vendor struct {
+	ID       uint16
+	Alias    string
+	Products []Product
+}
+
+// Product describes a product supported by the driver.
+type Product struct {
+	ID    uint16
+	Alias string
+}

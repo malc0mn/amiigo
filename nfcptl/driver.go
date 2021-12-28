@@ -16,14 +16,12 @@ var (
 // Driver defines the interface for an NFC portal driver. All drivers must implement the Driver
 // interface to be usable by the Client.
 type Driver interface {
-	// VendorId returns the vendor ID the driver should search for.
-	VendorId() uint16
-	// VendorAlias returns the vendor alias to allow easy reference for the end users.
-	VendorAlias() string
-	// ProductId returns the product ID the driver should search for.
-	ProductId() uint16
-	// ProductAlias returns the product alias to allow easy reference for the end users.
-	ProductAlias() string
+	// Supports returns a list of vendors and products supported by the driver.
+	Supports() []Vendor
+	// VendorId returns the USB vendor ID for the given alias which the client should search for.
+	VendorId(alias string) (uint16, error)
+	// ProductId returns the USB product ID for the given alias which the client should search for.
+	ProductId(alias string) (uint16, error)
 	// Setup returns the parameters needed to initialise the device, so it's ready for use. We're
 	// forcing the driver to hardcode it since it will give the most flexibility in writing other
 	// drivers where auto-detection might be harder or simply incorrect.
@@ -49,14 +47,14 @@ type DeviceSetup struct {
 	OutEndpoint int
 }
 
-// DriverNotFoundError defines the error structure returned when a requested driver is not found.
-type DriverNotFoundError struct {
+// ErrDriverNotFound defines the error structure returned when a requested driver is not found.
+type ErrDriverNotFound struct {
 	Vendor  string // Vendor holds the vendor alias that was used to request the driver.
 	Product string // Product holds the device alias that was used to request the driver.
 }
 
 // Error implements the error interface
-func (e DriverNotFoundError) Error() string {
+func (e ErrDriverNotFound) Error() string {
 	return "nfcptl: no driver found for vendor=" + e.Vendor + "and product=" + e.Product
 }
 
@@ -70,23 +68,26 @@ func RegisterDriver(d Driver) {
 		panic("nfcptl: RegisterDriver driver is nil")
 	}
 
-	va := d.VendorAlias()
-	if _, hasMap := drivers[va]; !hasMap {
-		drivers[va] = make(map[string]Driver)
+	for _, v := range d.Supports() {
+		va := v.Alias
+		if _, hasMap := drivers[va]; !hasMap {
+			drivers[va] = make(map[string]Driver)
+		}
+		for _, p := range v.Products {
+			pa := p.Alias
+			if _, dup := drivers[va][pa]; dup {
+				panic("nfcptl: RegisterDriver called twice for vendor '" + va + "' product '" + pa + "'")
+			}
+			drivers[va][pa] = d
+		}
 	}
-
-	pa := d.ProductAlias()
-	if _, dup := drivers[va][pa]; dup {
-		panic("nfcptl: RegisterDriver called twice for vendor '" + va + "' product '" + pa + "'")
-	}
-	drivers[va][pa] = d
 }
 
 // GetDriverByVendorAndProductAlias searches for a driver based on the given vendor and device
-// alias. If no driver is found, a DriverNotFoundError error will be returned.
+// alias. If no driver is found, an ErrDriverNotFound error will be returned.
 func GetDriverByVendorAndProductAlias(vendor, product string) (Driver, error) {
 	if d, ok := drivers[vendor][product]; ok {
 		return d, nil
 	}
-	return nil, DriverNotFoundError{Vendor: vendor, Product: product}
+	return nil, ErrDriverNotFound{Vendor: vendor, Product: product}
 }

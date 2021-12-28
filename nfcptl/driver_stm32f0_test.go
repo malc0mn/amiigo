@@ -5,44 +5,53 @@ import (
 	"testing"
 )
 
-func TestPs4amiibo_VendorId(t *testing.T) {
-	p := &ps4amiibo{}
-	got := p.VendorId()
-	want := VIDDatelElectronicsLtd
-	if got != want {
-		t.Errorf("got %#04x, want %#04x", got, want)
+func TestStm32f0_VendorId(t *testing.T) {
+	p := &stm32f0{}
+
+	tests := map[string]uint16{
+		VendorDatelElextronicsLtd: VIDDatelElectronicsLtd,
+		VendorMaxlander:           VIDMaxlander,
 	}
+
+	for va, vid := range tests {
+		got, err := p.VendorId(va)
+		want := vid
+		if got != want {
+			t.Errorf("got %#04x, want %#04x", got, want)
+		}
+
+		if err != nil {
+			t.Errorf("got %s, want nil", err)
+		}
+	}
+
+	// TODO: test error return
 }
 
-func TestPs4amiibo_VendorAlias(t *testing.T) {
-	p := &ps4amiibo{}
-	got := p.VendorAlias()
-	want := VendorDatelElextronicsLtd
-	if got != want {
-		t.Errorf("got %s, want %s", got, want)
+func TestStm32f0_ProductId(t *testing.T) {
+	p := &stm32f0{}
+	tests := map[string]uint16{
+		ProductPowerSavesForAmiibo: PIDPowerSavesForAmiibo,
+		ProductMaxLander:           PIDMaxLander,
 	}
+
+	for pa, pid := range tests {
+		got, err := p.ProductId(pa)
+		want := pid
+		if got != want {
+			t.Errorf("got %#04x, want %#04x", got, want)
+		}
+
+		if err != nil {
+			t.Errorf("got %s, want nil", err)
+		}
+	}
+
+	// TODO: test error return
 }
 
-func TestPs4amiibo_ProductId(t *testing.T) {
-	p := &ps4amiibo{}
-	got := p.ProductId()
-	want := PIDPowerSavesForAmiibo
-	if got != want {
-		t.Errorf("got %#04x, want %#04x", got, want)
-	}
-}
-
-func TestPs4amiibo_ProductAlias(t *testing.T) {
-	p := &ps4amiibo{}
-	got := p.ProductAlias()
-	want := ProductPowerSavesForAmiibo
-	if got != want {
-		t.Errorf("got %s, want %s", got, want)
-	}
-}
-
-func TestPs4amiibo_Setup(t *testing.T) {
-	p := &ps4amiibo{}
+func TestStm32f0_Setup(t *testing.T) {
+	p := &stm32f0{}
 	got := p.Setup()
 	want := DeviceSetup{
 		Config:           1,
@@ -56,8 +65,8 @@ func TestPs4amiibo_Setup(t *testing.T) {
 	}
 }
 
-func TestPs4amiibo_wasTokenPlaced(t *testing.T) {
-	p := &ps4amiibo{tokenErrors: 10}
+func TestStm32f0_wasTokenPlaced(t *testing.T) {
+	p := &stm32f0{tokenErrors: 10}
 	if !p.wasTokenPlaced() {
 		t.Errorf("wasTokenPlaced() returned true, want false")
 	}
@@ -72,8 +81,8 @@ func TestPs4amiibo_wasTokenPlaced(t *testing.T) {
 	}
 }
 
-func TestPs4amiibo_wasTokenRemoved(t *testing.T) {
-	p := &ps4amiibo{totalErrors: 2}
+func TestStm32f0_wasTokenRemoved(t *testing.T) {
+	p := &stm32f0{totalErrors: 2}
 	if p.wasTokenRemoved() {
 		t.Errorf("wasTokenRemoved() returned true, want false")
 	}
@@ -102,8 +111,8 @@ func TestPs4amiibo_wasTokenRemoved(t *testing.T) {
 	}
 }
 
-func TestPs4amiibo_isTokenPlaced(t *testing.T) {
-	p := &ps4amiibo{}
+func TestStm32f0_isTokenPlaced(t *testing.T) {
+	p := &stm32f0{}
 	if p.isTokenPlaced() {
 		t.Errorf("isTokenPlaced() returned true, want false")
 	}
@@ -113,16 +122,16 @@ func TestPs4amiibo_isTokenPlaced(t *testing.T) {
 	}
 }
 
-func TestPs4amiibo_getDriverCommandForClientCommand(t *testing.T) {
-	p := &ps4amiibo{}
+func TestStm32f0_getDriverCommandForClientCommand(t *testing.T) {
+	p := &stm32f0{}
 
 	tests := map[ClientCommand]DriverCommand{
-		GetDeviceName:   PS4A_GetDeviceName,
-		GetHardwareInfo: PS4A_GetHardwareInfo,
-		GetApiPassword:  PS4A_GenerateApiPassword,
-		FetchTokenData:  PS4A_ReadPage,
-		WriteTokenData:  PS4A_WritePage,
-		SetLedState:     PS4A_SetLedState,
+		GetDeviceName:   STM32F0_GetDeviceName,
+		GetHardwareInfo: STM32F0_GetHardwareInfo,
+		GetApiPassword:  STM32F0_GenerateApiPassword,
+		FetchTokenData:  STM32F0_ReadPage,
+		WriteTokenData:  STM32F0_WritePage,
+		SetLedState:     STM32F0_SetLedState,
 	}
 
 	for cc, want := range tests {
@@ -146,8 +155,8 @@ func TestPs4amiibo_getDriverCommandForClientCommand(t *testing.T) {
 	}
 }
 
-func TestPs4amiibo_getNextPollCommand_NoToken(t *testing.T) {
-	p := &ps4amiibo{}
+func TestStm32f0_getNextPollCommand_NoToken(t *testing.T) {
+	p := &stm32f0{}
 
 	type test struct {
 		dc   DriverCommand
@@ -156,23 +165,23 @@ func TestPs4amiibo_getNextPollCommand_NoToken(t *testing.T) {
 
 	tests := []test{
 		{
-			dc:   PS4A_FieldOff,
+			dc:   STM32F0_FieldOff,
 			next: 1,
 		},
 		{
-			dc:   PS4A_FieldOn,
+			dc:   STM32F0_FieldOn,
 			next: 2,
 		},
 		{
-			dc:   PS4A_GetTokenUid,
+			dc:   STM32F0_GetTokenUid,
 			next: 3,
 		},
 		{
-			dc:   PS4A_FieldOff,
+			dc:   STM32F0_FieldOff,
 			next: 1,
 		},
 		{
-			dc:   PS4A_FieldOff,
+			dc:   STM32F0_FieldOff,
 			next: 1,
 		},
 	}
@@ -188,8 +197,8 @@ func TestPs4amiibo_getNextPollCommand_NoToken(t *testing.T) {
 	}
 }
 
-func TestPs4amiibo_getNextPollCommand_TokenPlaced(t *testing.T) {
-	p := &ps4amiibo{tokenPlaced: true}
+func TestStm32f0_getNextPollCommand_TokenPlaced(t *testing.T) {
+	p := &stm32f0{tokenPlaced: true}
 
 	type test struct {
 		dc   DriverCommand
@@ -198,23 +207,23 @@ func TestPs4amiibo_getNextPollCommand_TokenPlaced(t *testing.T) {
 
 	tests := []test{
 		{
-			dc:   PS4A_GetTokenUid,
+			dc:   STM32F0_GetTokenUid,
 			next: 0,
 		},
 		{
-			dc:   PS4A_GetTokenUid,
+			dc:   STM32F0_GetTokenUid,
 			next: 0,
 		},
 		{
-			dc:   PS4A_GetTokenUid,
+			dc:   STM32F0_GetTokenUid,
 			next: 0,
 		},
 		{
-			dc:   PS4A_GetTokenUid,
+			dc:   STM32F0_GetTokenUid,
 			next: 0,
 		},
 		{
-			dc:   PS4A_GetTokenUid,
+			dc:   STM32F0_GetTokenUid,
 			next: 0,
 		},
 	}
@@ -230,8 +239,8 @@ func TestPs4amiibo_getNextPollCommand_TokenPlaced(t *testing.T) {
 	}
 }
 
-func TestPs4amiibo_getEventForDriverCommand(t *testing.T) {
-	p := &ps4amiibo{}
+func TestStm32f0_getEventForDriverCommand(t *testing.T) {
+	p := &stm32f0{}
 
 	type test struct {
 		dc   DriverCommand
@@ -241,27 +250,27 @@ func TestPs4amiibo_getEventForDriverCommand(t *testing.T) {
 
 	tests := []test{
 		{
-			dc:   PS4A_SetLedState,
-			args: []byte{PS4A_LedOff},
+			dc:   STM32F0_SetLedState,
+			args: []byte{STM32F0_LedOff},
 			want: FrontLedOff,
 		},
 		{
-			dc:   PS4A_SetLedState,
-			args: []byte{PS4A_LedOn},
+			dc:   STM32F0_SetLedState,
+			args: []byte{STM32F0_LedOn},
 			want: FrontLedOn,
 		},
 		{
-			dc:   PS4A_GetDeviceName,
+			dc:   STM32F0_GetDeviceName,
 			args: []byte{},
 			want: DeviceName,
 		},
 		{
-			dc:   PS4A_GetHardwareInfo,
+			dc:   STM32F0_GetHardwareInfo,
 			args: []byte{},
 			want: HardwareInfo,
 		},
 		{
-			dc:   PS4A_GenerateApiPassword,
+			dc:   STM32F0_GenerateApiPassword,
 			args: []byte{},
 			want: ApiPassword,
 		},
@@ -275,7 +284,7 @@ func TestPs4amiibo_getEventForDriverCommand(t *testing.T) {
 	}
 }
 
-func TestPs4amiibo_createArguments(t *testing.T) {
+func TestStm32f0_createArguments(t *testing.T) {
 	want := []byte{
 		0x58, 0x98, 0x10, 0x38, 0xcd,
 		0xcd, 0xcd, 0xcd, 0xcd, 0xcd,
@@ -284,7 +293,7 @@ func TestPs4amiibo_createArguments(t *testing.T) {
 		0xcd, 0xcd, 0xcd, 0xcd, 0xcd,
 	}
 
-	p := &ps4amiibo{}
+	p := &stm32f0{}
 	got := p.createArguments(25, []byte{0x58, 0x98, 0x10, 0x38})
 
 	if !bytes.Equal(got, want) {

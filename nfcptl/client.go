@@ -10,6 +10,9 @@ import (
 
 // Client allows easy communications with an NFC portal connected over USB.
 type Client struct {
+	va string // The vendor alias to use
+	pa string // The product alias to use
+
 	driver Driver // The driver to use for communicating with the NFC portal
 
 	debug bool // Will enable verbose logging
@@ -36,6 +39,8 @@ func NewClient(vendor, device string, debug bool) (*Client, error) {
 	}
 
 	c := &Client{
+		va:        vendor,
+		pa:        device,
 		driver:    d,
 		debug:     debug,
 		terminate: make(chan struct{}),
@@ -44,7 +49,7 @@ func NewClient(vendor, device string, debug bool) (*Client, error) {
 	}
 
 	if c.debug {
-		log.Printf("Using vendor ID %#04x and product ID %#04x", c.driver.VendorId(), c.driver.ProductId())
+		log.Printf("Using vendor ID %#04x and product ID %#04x", c.VendorId(), c.ProductId())
 	}
 
 	return c, nil
@@ -59,12 +64,12 @@ func (c *Client) Connect() error {
 		// c.ctx.Debug(4)
 	}
 
-	c.dev, err = c.ctx.OpenDeviceWithVIDPID(gousb.ID(c.driver.VendorId()), gousb.ID(c.driver.ProductId()))
+	c.dev, err = c.ctx.OpenDeviceWithVIDPID(gousb.ID(c.VendorId()), gousb.ID(c.ProductId()))
 	if err != nil {
 		return fmt.Errorf("could not open device: %v", err)
 	}
 	if c.dev == nil {
-		return fmt.Errorf("no device found for vid=%#04x,pid=%#04x", c.driver.VendorId(), c.driver.ProductId())
+		return fmt.Errorf("no device found for vid=%#04x,pid=%#04x", c.VendorId(), c.ProductId())
 	}
 
 	// AutoDetach is mandatory: it will detach the kernel driver before attempting to claim the
@@ -194,12 +199,20 @@ func (c *Client) SendCommand(cmd Command) {
 
 // VendorId returns the vendor ID the client is using.
 func (c *Client) VendorId() uint16 {
-	return c.driver.VendorId()
+	id, err := c.driver.VendorId(c.va)
+	if err != nil {
+		panic("nfcptl: invalid driver loaded")
+	}
+	return id
 }
 
 // ProductId returns the product ID the client is using.
 func (c *Client) ProductId() uint16 {
-	return c.driver.ProductId()
+	id, err := c.driver.ProductId(c.pa)
+	if err != nil {
+		panic("nfcptl: invalid driver loaded")
+	}
+	return id
 }
 
 // Debug returns whether the client is running in debug mode.
