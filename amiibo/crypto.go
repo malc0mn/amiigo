@@ -1,6 +1,6 @@
 package amiibo
 
-// This file is derived from these code source codes:
+// This file is derived from these source codes:
 //  - https://github.com/socram8888/amiitool (c) 2015-2017 Marcos Del Sol Vives
 //  - https://gist.github.com/anonymous/0a3e16f8f814deb2a056#file-amiibo-py-L126
 
@@ -155,11 +155,11 @@ func Seed(key *MasterKey, data []byte) []byte {
 	seed = append(seed, magicBytes[:MaxMagicByteSize-int(key.MagicBytesSize)]...)
 	// Append all bytes from magicBytes.
 	seed = append(seed, key.MagicBytes[:int(key.MagicBytesSize)]...)
-	// Append 8 bytes of the tag UID.
+	// Append 8 bytes of the tag UID...
 	seed = append(seed, data[0:8]...)
-	// Twice.
+	// ..twice.
 	seed = append(seed, data[0:8]...)
-	// Xor bytes 96-128 of amiibo data with AES XOR pad and append them
+	// Xor bytes 96-127 of amiibo data with AES XOR pad and append them.
 	for i := 0; i < 32; i++ {
 		seed = append(seed, data[96+i]^key.XorPad[i])
 	}
