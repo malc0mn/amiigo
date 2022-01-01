@@ -100,7 +100,7 @@ func NewDerivedKey(key *MasterKey, amiibo *Amiibo) *DerivedKey {
 	var b []byte
 	pass := 0
 	for len(b) < 48 { // 48 = 3 * 16 bytes which is the size of DerivedKey, but we'll end up with more.
-		binary.BigEndian.PutUint16(buf[0:2], uint16(pass)) // Prepend counter.
+		binary.BigEndian.PutUint16(buf[:2], uint16(pass)) // Prepend counter.
 		if _, err := h.Write(buf); err != nil {
 			panic("amiibo: could not hash buffer")
 		}
@@ -171,9 +171,9 @@ func Seed(key *MasterKey, amiibo *Amiibo) []byte {
 	seed = append(seed, key.MagicBytes[:int(key.MagicBytesSize)]...)
 	// Append 8 bytes of the tag UID...
 	fullUid := amiibo.FullUID()
-	seed = append(seed, fullUid[0:8]...)
+	seed = append(seed, fullUid[:8]...)
 	// ..twice.
-	seed = append(seed, fullUid[0:8]...)
+	seed = append(seed, fullUid[:8]...)
 	// Xor bytes 96-127 of amiibo data with AES XOR pad and append them.
 	salt := amiibo.Salt()
 	for i := 0; i < 32; i++ {
