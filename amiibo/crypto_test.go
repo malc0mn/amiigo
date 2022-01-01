@@ -67,9 +67,14 @@ func TestEncrypt(t *testing.T) {
 		t.Fatalf("Encrypt failed to load file %s, provide a decrypted amiibo dump for testing", file)
 	}
 
-	got := Encrypt(key, data)
-	if !bytes.Equal(got, want) {
-		t.Errorf("Encrypt expected:\n%s got:\n%s", hex.Dump(want), hex.Dump(got[:]))
+	amiibo, err := NewAmiibo(data)
+	if err != nil {
+		t.Fatalf("NewAmiibo failed, expected nil, got %s", err)
+	}
+
+	got := Encrypt(key, amiibo)
+	if !bytes.Equal(got.Raw(), want) {
+		t.Errorf("Encrypt expected:\n%s got:\n%s", hex.Dump(want), hex.Dump(got.Raw()))
 	}
 }
 
@@ -92,9 +97,14 @@ func TestDecrypt(t *testing.T) {
 		t.Fatalf("Encrypt failed to load file %s, provide a real amiibo dump for testing", file)
 	}
 
-	got, err := Decrypt(key, data)
-	if !bytes.Equal(got, want) {
-		t.Errorf("Decrypt expected:\n%s got:\n%s", hex.Dump(want), hex.Dump(got[:]))
+	amiibo, err := NewAmiibo(data)
+	if err != nil {
+		t.Fatalf("NewAmiibo failed, expected nil, got %s", err)
+	}
+
+	got, err := Decrypt(key, amiibo)
+	if !bytes.Equal(got.Raw(), want) {
+		t.Errorf("Decrypt expected:\n%s got:\n%s", hex.Dump(want), hex.Dump(got.Raw()))
 	}
 	if err != nil {
 		t.Errorf("Decrypt expected nil got: %s", err)

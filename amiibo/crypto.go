@@ -91,8 +91,8 @@ type DerivedKey struct {
 
 // NewDerivedKey is in essence a Deterministic Random Bit Generator that will generate a derived
 // key from the given data.
-func NewDerivedKey(key *MasterKey, data []byte) *DerivedKey {
-	seed := Seed(key, data)
+func NewDerivedKey(key *MasterKey, amiibo *Amiibo) *DerivedKey {
+	seed := Seed(key, amiibo)
 
 	buf := make([]byte, 2+len(seed)) // Add 2 bytes to store the counter.
 	copy(buf[2:], seed)              // The pass counter is prepended, so keep the first 2 bytes free.
@@ -120,28 +120,28 @@ func NewDerivedKey(key *MasterKey, data []byte) *DerivedKey {
 }
 
 // Encrypt signs and encrypts the given data.
-func Encrypt(key *RetailKey, data []byte) []byte {
+func Encrypt(key *RetailKey, amiibo *Amiibo) *Amiibo {
 	// First calculate signature from the unencrypted data. This signature is used to validate
 	// the data has been decrypted properly.
-	t := NewDerivedKey(&key.Tag, data)
-	d := NewDerivedKey(&key.Data, data)
+	t := NewDerivedKey(&key.Tag, amiibo)
+	d := NewDerivedKey(&key.Data, amiibo)
 
-	tHmac := NewTagHmac(t, data)
-	dHmac := NewDataHmac(d, data, tHmac)
+	tHmac := NewTagHmac(t, amiibo)
+	dHmac := NewDataHmac(d, amiibo, tHmac)
 
-	copy(data[52:84], tHmac)
-	copy(data[128:160], dHmac)
+	amiibo.SetTagHMAC(tHmac)
+	amiibo.SetDataHMAC(dHmac)
 
 	// Now actually encrypt.
-	return Crypt(d, data)
+	return Crypt(d, amiibo)
 }
 
 // Decrypt decrypts the given data.
-func Decrypt(key *RetailKey, data []byte) ([]byte, error) {
-	t := NewDerivedKey(&key.Tag, data)
-	d := NewDerivedKey(&key.Data, data)
+func Decrypt(key *RetailKey, amiibo *Amiibo) (*Amiibo, error) {
+	t := NewDerivedKey(&key.Tag, amiibo)
+	d := NewDerivedKey(&key.Data, amiibo)
 
-	dec := Crypt(d, data)
+	dec := Crypt(d, amiibo)
 
 	if !Verify(dec, t, d) {
 		return dec, errors.New("amiibo: HMAC signatures do not match")
@@ -150,50 +150,52 @@ func Decrypt(key *RetailKey, data []byte) ([]byte, error) {
 	return dec, nil
 }
 
-// Seed generates the seed needed to calculate a DerivedKey using the given MasterKey and data.
-func Seed(key *MasterKey, data []byte) []byte {
+// Seed generates the Seed needed to calculate a DerivedKey using the given MasterKey and data.
+func Seed(key *MasterKey, amiibo *Amiibo) []byte {
 	var seed []byte
 
 	// Create 16 magic bytes.
 	magicBytes := [MaxMagicByteSize]byte{}
 	// Start with bytes 0x11 and 0x12 from our amiibo data, leaving 14 zeroed bytes.
-	copy(magicBytes[:], data[17:19])
+	copy(magicBytes[:], amiibo.WriteCounter())
 
 	// Copy entire Type field.
 	seed = append(seed, key.Type[:]...)
-	// Append (MaxMagicByteSize - int(key.MagicBytesSize)) from the input seed.
+	// Append (MaxMagicByteSize - int(key.MagicBytesSize)) from the input Seed.
 	seed = append(seed, magicBytes[:MaxMagicByteSize-int(key.MagicBytesSize)]...)
 	// Append all bytes from magicBytes.
 	seed = append(seed, key.MagicBytes[:int(key.MagicBytesSize)]...)
 	// Append 8 bytes of the tag UID...
-	seed = append(seed, data[0:8]...)
+	fullUid := amiibo.FullUID()
+	seed = append(seed, fullUid[0:8]...)
 	// ..twice.
-	seed = append(seed, data[0:8]...)
+	seed = append(seed, fullUid[0:8]...)
 	// Xor bytes 96-127 of amiibo data with AES XOR pad and append them.
+	xor := amiibo.XorBytes()
 	for i := 0; i < 32; i++ {
-		seed = append(seed, data[96+i]^key.XorPad[i])
+		seed = append(seed, xor[i]^key.XorPad[i])
 	}
 
 	if len(seed) > MaxSeedSize {
-		panic(fmt.Sprintf("amiibo: seed size %d larger than max %d", len(seed), MaxSeedSize))
+		panic(fmt.Sprintf("amiibo: Seed size %d larger than max %d", len(seed), MaxSeedSize))
 	}
 
 	return seed
 }
 
 // Crypt encrypts or decrypts the given data using the provided DerivedKey.
-func Crypt(key *DerivedKey, in []byte) []byte {
+func Crypt(key *DerivedKey, amiibo *Amiibo) *Amiibo {
 	block, err := aes.NewCipher(key.AesKey[:]) // 16 bytes key = AES-128
 	if err != nil {
 		panic("amiibo: unable to create AES cypher")
 	}
 
-	out := make([]byte, len(in))
-	copy(out[:], in[:])
+	out := make([]byte, len(amiibo.Raw()))
+	copy(out, amiibo.Raw())
 
 	var dataIn []byte
-	dataIn = append(dataIn, in[20:52]...)
-	dataIn = append(dataIn, in[160:520]...)
+	dataIn = append(dataIn, amiibo.CryptoSection1()...)
+	dataIn = append(dataIn, amiibo.CryptoSection2()...)
 	dataOut := make([]byte, len(dataIn))
 
 	stream := cipher.NewCTR(block, key.AesIV[:])
@@ -202,38 +204,42 @@ func Crypt(key *DerivedKey, in []byte) []byte {
 	copy(out[20:52], dataOut[:32])
 	copy(out[160:520], dataOut[32:])
 
-	return out
+	c, _ := NewAmiibo(out)
+
+	return c
 }
 
 // NewTagHmac generates a new tag HMAC from the tag DerivedKey using unencrypted data.
-func NewTagHmac(tagKey *DerivedKey, data []byte) []byte {
+func NewTagHmac(tagKey *DerivedKey, amiibo *Amiibo) []byte {
 	// Generate and tag HMAC.
 	h := hmac.New(sha256.New, tagKey.HmacKey[:])
-	h.Write(data[0:8])
-	h.Write(data[84:128])
+	fullUid := amiibo.FullUID()
+	h.Write(fullUid[0:8])
+	h.Write(amiibo.TagHMACData())
 
 	return h.Sum(nil)
 }
 
 // NewDataHmac generates a new data HMAC from the data DerivedKey using unencrypted data AND the
 // tag HMAC generated by NewTagHmac.
-func NewDataHmac(dataKey *DerivedKey, data, tagHmac []byte) []byte {
+func NewDataHmac(dataKey *DerivedKey, amiibo *Amiibo, tagHmac []byte) []byte {
 	// Generate and tag HMAC.
 	h := hmac.New(sha256.New, dataKey.HmacKey[:])
-	h.Write(data[17:52])
-	h.Write(data[160:520])
+	h.Write(amiibo.DataHMACData1())
+	h.Write(amiibo.DataHMACData2())
 	h.Write(tagHmac)
-	h.Write(data[0:8])
-	h.Write(data[84:128])
+	fullUid := amiibo.FullUID()
+	h.Write(fullUid[0:8])
+	h.Write(amiibo.TagHMACData())
 
 	return h.Sum(nil)
 }
 
 // Verify checks if the decrypted data signature matches.
-func Verify(data []byte, tagKey, dataKey *DerivedKey) bool {
+func Verify(amiibo *Amiibo, tagKey, dataKey *DerivedKey) bool {
 	// Generate HMACs from data and compare.
-	tHmac := NewTagHmac(tagKey, data)
-	dHmac := NewDataHmac(dataKey, data, tHmac)
+	tHmac := NewTagHmac(tagKey, amiibo)
+	dHmac := NewDataHmac(dataKey, amiibo, tHmac)
 
-	return hmac.Equal(data[52:84], tHmac) && hmac.Equal(data[128:160], dHmac)
+	return hmac.Equal(amiibo.TagHMAC(), tHmac) && hmac.Equal(amiibo.DataHMAC(), dHmac)
 }
