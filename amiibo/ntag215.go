@@ -119,10 +119,16 @@ func (n *NTAG215) ValidateUID() bool {
 
 // RandomiseUid randomises the tag's UID or serial number so that it adheres to ISO/IEC 14443-3
 // standards.
-func (n *NTAG215) RandomiseUid() error {
+// uid0 can be passed in to set byte 0 of the uid. All amiibo seem to have 0x04 set as byte 0 of
+// the uid.
+func (n *NTAG215) RandomiseUid(uid0 byte) error {
 	uid := make([]byte, 7)
 	if _, err := rand.Read(uid); err != nil {
 		panic("amiibo: unable to generate random bytes")
+	}
+
+	if uid0 != 0x00 {
+		uid[0] = uid0
 	}
 
 	bcc := make([]byte, 2)
