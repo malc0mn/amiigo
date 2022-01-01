@@ -2,9 +2,9 @@ package amiibo
 
 import "fmt"
 
-// Ntag215ToAmiitool converts a full 540 byte Ntag215 dump to internal amiitool format.
-func Ntag215ToAmiitool(data []byte) ([Ntag215Size]byte, error) {
-	amiitool := [Ntag215Size]byte{}
+// NTAG215ToAmiitool converts a full 540 byte NTAG215 dump to internal amiitool format.
+func NTAG215ToAmiitool(data []byte) ([NTAG215Size]byte, error) {
+	amiitool := [NTAG215Size]byte{}
 	if len(data) < AmiiboSize {
 		return amiitool, fmt.Errorf("convert: expected minimal length of %d", AmiiboSize)
 	}
@@ -21,9 +21,9 @@ func Ntag215ToAmiitool(data []byte) ([Ntag215Size]byte, error) {
 	return amiitool, nil
 }
 
-// AmiitoolToNtag215 converts the internal amiitool format to a Ntag215 dump.
-func AmiitoolToNtag215(data []byte) ([Ntag215Size]byte, error) {
-	tag := [Ntag215Size]byte{}
+// AmiitoolToNTAG215 converts the internal amiitool format to a NTAG215 dump.
+func AmiitoolToNTAG215(data []byte) ([NTAG215Size]byte, error) {
+	tag := [NTAG215Size]byte{}
 	if len(data) < AmiiboSize {
 		return tag, fmt.Errorf("convert: expected minimal length of %d", AmiiboSize)
 	}
