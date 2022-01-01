@@ -43,7 +43,6 @@ func TestNtag215ToAmiitool(t *testing.T) {
 	}
 
 	got, err := Ntag215ToAmiitool(ntag215)
-	//os.WriteFile(TestDataDir + "convert_amiitool.bin---", got[:], 0666)
 	if !bytes.Equal(got[:], want) {
 		t.Errorf("Ntag215ToAmiitool expected:\n%s got:\n%s", hex.Dump(want), hex.Dump(got[:]))
 	}
