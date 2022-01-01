@@ -62,7 +62,6 @@ func TestEncrypt(t *testing.T) {
 	}
 
 	got := Encrypt(key, data)
-	// TODO: fix this test since it will fail because of the new HMACs!
 	if !bytes.Equal(got, want) {
 		t.Errorf("Encrypt expected:\n%s got:\n%s", hex.Dump(want), hex.Dump(got[:]))
 	}

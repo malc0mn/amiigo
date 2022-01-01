@@ -122,7 +122,7 @@ func NewDerivedKey(key *MasterKey, data []byte) *DerivedKey {
 func Encrypt(key *RetailKey, data []byte) []byte {
 	// First calculate signature from the unencrypted data. This signature is used to validate
 	// the data has been decrypted properly.
-	t := NewDerivedKey(&key.Data, data)
+	t := NewDerivedKey(&key.Tag, data)
 	d := NewDerivedKey(&key.Data, data)
 
 	tHmac := NewTagHmac(t, data)
