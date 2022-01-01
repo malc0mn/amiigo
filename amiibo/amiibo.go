@@ -114,3 +114,15 @@ func (a *Amiibo) CryptoSection2() []byte {
 	copy(cfg[:], a.data[160:520])
 	return cfg
 }
+
+func (a *Amiibo) GeneratePassword() {
+	pwd := [4]byte{
+		a.UID0() ^ a.UID2() ^ 0xaa,
+		a.UID1() ^ a.UID3() ^ 0x55,
+		a.UID2() ^ a.UID4() ^ 0xaa,
+		a.UID3() ^ a.UID6() ^ 0x55,
+	}
+
+	a.SetPassword(pwd)
+	a.SetPasswordAcknowledge([2]byte{0x80, 0x80})
+}

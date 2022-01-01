@@ -225,11 +225,21 @@ func (n *NTAG215) Password() [4]byte {
 	return pwd
 }
 
+// SetPassword writes the given password to the NFC tag.
+func (n *NTAG215) SetPassword(pwd [4]byte) {
+	copy(n.data[532:], pwd[:])
+}
+
 // PasswordAcknowledge returns the 16bit password acknowledge used during password verification.
 func (n *NTAG215) PasswordAcknowledge() [2]byte {
 	pack := [2]byte{}
 	copy(pack[:], n.data[536:538])
 	return pack
+}
+
+// SetPasswordAcknowledge writes the given password acknowledge to the NFC tag.
+func (n *NTAG215) SetPasswordAcknowledge(pack [2]byte) {
+	copy(n.data[536:], pack[:])
 }
 
 // RFUI stands for Reserved for future use - implemented. These should all be set to 0x00.
