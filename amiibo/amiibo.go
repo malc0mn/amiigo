@@ -30,14 +30,12 @@ func (a *Amiibo) WriteCounter() []byte {
 	return t
 }
 
-// TagHMACData returns the second part of the data needed to generate the 'tag' HMAC using the
-// DerivedKey generated from the 'tag' master key (usually in a file named locked-secret.bin).
-// This is also used as the fifth data part when generating the 'data' HMAC using key
-// locked-secret.bin.
-func (a *Amiibo) TagHMACData() []byte {
-	t := make([]byte, 44)
-	copy(t[:], a.data[84:128])
-	return t
+// ModelInfo returns the amiibo model info.
+// The model info is also used in the calculation of the 'tag' HMAC concatenated with the Salt.
+func (a *Amiibo) ModelInfo() []byte {
+	mi := make([]byte, 12)
+	copy(mi[:], a.data[84:96])
+	return mi
 }
 
 // TagHMAC returns the HMAC to be verified using a 'tag' DerivedKey (master key locked-secret.bin).
@@ -87,7 +85,8 @@ func (a *Amiibo) ID() []byte {
 	return id
 }
 
-func (a *Amiibo) XorBytes() []byte {
+// Salt returns the 32 bytes used as salt in the Seed.
+func (a *Amiibo) Salt() []byte {
 	x := make([]byte, 32)
 	copy(x, a.data[96:128])
 	return x

@@ -171,9 +171,9 @@ func Seed(key *MasterKey, amiibo *Amiibo) []byte {
 	// ..twice.
 	seed = append(seed, fullUid[0:8]...)
 	// Xor bytes 96-127 of amiibo data with AES XOR pad and append them.
-	xor := amiibo.XorBytes()
+	salt := amiibo.Salt()
 	for i := 0; i < 32; i++ {
-		seed = append(seed, xor[i]^key.XorPad[i])
+		seed = append(seed, salt[i]^key.XorPad[i])
 	}
 
 	if len(seed) > MaxSeedSize {
@@ -214,8 +214,10 @@ func NewTagHmac(tagKey *DerivedKey, amiibo *Amiibo) []byte {
 	// Generate and tag HMAC.
 	h := hmac.New(sha256.New, tagKey.HmacKey[:])
 	fullUid := amiibo.FullUID()
-	h.Write(fullUid[0:8])
-	h.Write(amiibo.TagHMACData())
+	h.Write(fullUid[:8])
+	modelSalt := amiibo.ModelInfo()
+	modelSalt = append(modelSalt, amiibo.Salt()...)
+	h.Write(modelSalt)
 
 	return h.Sum(nil)
 }
@@ -229,8 +231,10 @@ func NewDataHmac(dataKey *DerivedKey, amiibo *Amiibo, tagHmac []byte) []byte {
 	h.Write(amiibo.DataHMACData2())
 	h.Write(tagHmac)
 	fullUid := amiibo.FullUID()
-	h.Write(fullUid[0:8])
-	h.Write(amiibo.TagHMACData())
+	h.Write(fullUid[:8])
+	modelSalt := amiibo.ModelInfo()
+	modelSalt = append(modelSalt, amiibo.Salt()...)
+	h.Write(modelSalt)
 
 	return h.Sum(nil)
 }
