@@ -13,6 +13,7 @@ import (
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"os"
 )
@@ -136,8 +137,17 @@ func Encrypt(key *RetailKey, data []byte) []byte {
 }
 
 // Decrypt decrypts the given data.
-func Decrypt(key *RetailKey, data []byte) []byte {
-	return Crypt(NewDerivedKey(&key.Data, data), data)
+func Decrypt(key *RetailKey, data []byte) ([]byte, error) {
+	t := NewDerivedKey(&key.Tag, data)
+	d := NewDerivedKey(&key.Data, data)
+
+	dec := Crypt(d, data)
+
+	if !Verify(dec, t, d) {
+		return dec, errors.New("amiibo: HMAC signatures do not match")
+	}
+
+	return dec, nil
 }
 
 // Seed generates the seed needed to calculate a DerivedKey using the given MasterKey and data.
@@ -219,4 +229,11 @@ func NewDataHmac(dataKey *DerivedKey, data, tagHmac []byte) []byte {
 	return h.Sum(nil)
 }
 
-// TODO: add Verify()!
+// Verify checks if the decrypted data signature matches.
+func Verify(data []byte, tagKey, dataKey *DerivedKey) bool {
+	// Generate HMACs from data and compare.
+	tHmac := NewTagHmac(tagKey, data)
+	dHmac := NewDataHmac(dataKey, data, tHmac)
+
+	return hmac.Equal(data[52:84], tHmac) && hmac.Equal(data[128:160], dHmac)
+}

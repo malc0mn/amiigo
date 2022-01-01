@@ -92,8 +92,11 @@ func TestDecrypt(t *testing.T) {
 		t.Fatalf("Encrypt failed to load file %s, provide a real amiibo dump for testing", file)
 	}
 
-	got := Decrypt(key, data)
+	got, err := Decrypt(key, data)
 	if !bytes.Equal(got, want) {
 		t.Errorf("Decrypt expected:\n%s got:\n%s", hex.Dump(want), hex.Dump(got[:]))
+	}
+	if err != nil {
+		t.Errorf("Decrypt expected nil got: %s", err)
 	}
 }
