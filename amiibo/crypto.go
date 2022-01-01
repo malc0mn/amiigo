@@ -119,7 +119,8 @@ func NewDerivedKey(key *MasterKey, amiibo *Amiibo) *DerivedKey {
 	return d
 }
 
-// Encrypt signs and encrypts the given data.
+// Encrypt signs and encrypts the given amiibo. It returns a NEW amiibo struct. The original struct
+// remains unaltered.
 func Encrypt(key *RetailKey, amiibo *Amiibo) *Amiibo {
 	// First calculate signature from the unencrypted data. This signature is used to validate
 	// the data has been decrypted properly.
@@ -136,7 +137,10 @@ func Encrypt(key *RetailKey, amiibo *Amiibo) *Amiibo {
 	return Crypt(d, amiibo)
 }
 
-// Decrypt decrypts the given data.
+// Decrypt decrypts the given amiibo. It returns a NEW amiibo struct. The original struct remains
+// unaltered.
+// An error is returned if verification after decryption fails. You WILL receive a decrypted Amiibo
+// struct even if an error occured but beware that it might not contain valid amiibo data.
 func Decrypt(key *RetailKey, amiibo *Amiibo) (*Amiibo, error) {
 	t := NewDerivedKey(&key.Tag, amiibo)
 	d := NewDerivedKey(&key.Data, amiibo)
