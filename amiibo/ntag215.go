@@ -173,15 +173,15 @@ func (n *NTAG215) CapabilityContainer() [4]byte {
 	return cc
 }
 
-// Data returns the read/write memory of the NFC215 tag.
-func (n *NTAG215) Data() [504]byte {
+// UserData returns the read/write memory of the NFC215 tag.
+func (n *NTAG215) UserData() [504]byte {
 	d := [504]byte{}
 	copy(d[:], n.data[16:520])
 	return d
 }
 
-// SetData updates the entire user memory to the given byte array.
-func (n *NTAG215) SetData(d [504]byte) {
+// SetUserData updates the entire user memory to the given byte array.
+func (n *NTAG215) SetUserData(d [504]byte) {
 	copy(n.data[16:], d[:])
 }
 
