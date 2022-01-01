@@ -1,5 +1,11 @@
 package amiibo
 
+// Note that for these tests to succeed you will need to add these files to the testdata folder:
+//   - key_retail.bin: a file containing concatenated unfixed-info.bin and locked-secret.bin files
+//   - real_amiibo.bin: a real 540 byte NFC dump of an amiibo character
+//   - plain_amiibo.bin: the decrypted version of real_amiibo.bin in NFC format, not in amiitool
+//     format
+
 import (
 	"bytes"
 	"encoding/hex"
