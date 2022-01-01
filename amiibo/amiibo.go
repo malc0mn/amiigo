@@ -5,10 +5,9 @@ import "fmt"
 const NTAG215Size = 540
 const AmiiboSize = 520
 
-// Amiibo is a wrapper for binary amiibo data to allow easy amiibo manipulation.
-type Amiibo struct {
-	NTAG215
-}
+// Amiibo embeds NTAG215 which in turn contains binary amiibo data. Amiibo allows easy amiibo
+// manipulation.
+type Amiibo struct{ NTAG215 }
 
 // NewAmiibo builds a new Amiibo structure based on the given data.
 func NewAmiibo(data []byte) (*Amiibo, error) {
