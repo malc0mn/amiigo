@@ -231,7 +231,9 @@ func NewTagHmac(tagKey *DerivedKey, amiibo *Amiibo) []byte {
 func NewDataHmac(dataKey *DerivedKey, amiibo *Amiibo, tagHmac []byte) []byte {
 	// Generate and tag HMAC.
 	h := hmac.New(sha256.New, dataKey.HmacKey[:])
-	h.Write(amiibo.DataHMACData1())
+	cntHmac := amiibo.WriteCounter()
+	cntHmac = append(cntHmac, amiibo.DataHMACData1()...)
+	h.Write(cntHmac)
 	h.Write(amiibo.DataHMACData2())
 	h.Write(tagHmac)
 	fullUid := amiibo.FullUID()

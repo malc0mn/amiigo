@@ -29,6 +29,14 @@ func (a *Amiibo) WriteCounter() []byte {
 	return t
 }
 
+// DataHMACData1 returns the first part of the data needed to generate the 'data' HMAC using the
+// DerivedKey generated from the 'data' master key (usually in a file named unfixed-info.bin).
+func (a *Amiibo) DataHMACData1() []byte {
+	d := make([]byte, 33)
+	copy(d[:], a.data[19:52])
+	return d
+}
+
 // ModelInfo returns the amiibo model info.
 // The model info is also used in the calculation of the 'tag' HMAC concatenated with the Salt.
 func (a *Amiibo) ModelInfo() []byte {
@@ -47,14 +55,6 @@ func (a *Amiibo) TagHMAC() []byte {
 // SetTagHMAC sets the HMAC to sign the 'tag' data.
 func (a *Amiibo) SetTagHMAC(tHmac []byte) {
 	copy(a.data[52:84], tHmac[:])
-}
-
-// DataHMACData1 returns the first part of the data needed to generate the 'data' HMAC using the
-// DerivedKey generated from the 'data' master key (usually in a file named unfixed-info.bin).
-func (a *Amiibo) DataHMACData1() []byte {
-	d := make([]byte, 35)
-	copy(d[:], a.data[17:52])
-	return d
 }
 
 // DataHMACData2 returns the second part of the data needed to generate the 'data' HMAC using the
