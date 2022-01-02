@@ -1,24 +1,42 @@
 package amiibo
 
-import "fmt"
-
-const NTAG215Size = 540
-const AmiiboSize = 520
+import (
+	"errors"
+	"fmt"
+)
 
 // Amiibo embeds NTAG215 which in turn contains binary amiibo data. Amiibo allows easy amiibo
 // manipulation.
 type Amiibo struct{ NTAG215 }
 
-// NewAmiibo builds a new Amiibo structure based on the given data.
-func NewAmiibo(data []byte) (*Amiibo, error) {
-	if len(data) > NTAG215Size || len(data) < AmiiboSize {
-		return nil, fmt.Errorf("amiibo: data must be > %d and < %d", AmiiboSize, NTAG215Size)
+// NewAmiibo builds a new Amiibo structure based on the given raw NTAG215 data or by converting it
+// from a given Amiitool struct.
+func NewAmiibo(data []byte, amiibo *Amiitool) (Amiidump, error) {
+	if (data == nil && amiibo == nil) || (data != nil && amiibo != nil) {
+		return nil, errors.New("amiibo: provide either amiitool structured data or an Amiibo struct")
 	}
 
-	d := [NTAG215Size]byte{}
-	copy(d[:], data)
+	if data != nil {
+		if len(data) > NTAG215Size || len(data) < AmiiboSize {
+			return nil, fmt.Errorf("amiibo: data must be > %d and < %d", AmiiboSize, NTAG215Size)
+		}
 
-	return &Amiibo{NTAG215{data: d}}, nil
+		d := [NTAG215Size]byte{}
+		copy(d[:], data)
+
+		return &Amiibo{NTAG215{data: d}}, nil
+	}
+
+	return AmiitoolToAmiibo(amiibo), nil
+}
+
+func (a *Amiibo) Type() DumpType {
+	return TypeAmiibo
+}
+
+// Unknown1 is obviously unknown but always seems to be set to 0xa5.
+func (a *Amiibo) Unknown() byte {
+	return a.data[16]
 }
 
 // WriteCounter returns the amiibo write counter. This counter is also used as magic bytes to
@@ -37,6 +55,10 @@ func (a *Amiibo) DataHMACData1() []byte {
 	return d
 }
 
+func (a *Amiibo) SetEncrypt1(enc [32]byte) {
+	copy(a.data[20:], enc[:])
+}
+
 // TagHMAC returns the HMAC to be verified using a 'tag' DerivedKey (master key locked-secret.bin).
 func (a *Amiibo) TagHMAC() []byte {
 	t := make([]byte, 32)
@@ -49,19 +71,12 @@ func (a *Amiibo) SetTagHMAC(tHmac []byte) {
 	copy(a.data[52:84], tHmac[:])
 }
 
-// ModelInfo returns the amiibo model info.
+// ModelInfoRaw returns the raw amiibo model info.
 // The model info is also used in the calculation of the 'tag' HMAC concatenated with the Salt.
-func (a *Amiibo) ModelInfo() []byte {
+func (a *Amiibo) ModelInfoRaw() []byte {
 	mi := make([]byte, 12)
 	copy(mi[:], a.data[84:96])
 	return mi
-}
-
-// ID will grab the ID from the amiibo data and return it as a byte array.
-func (a *Amiibo) ID() []byte {
-	id := make([]byte, 8)
-	copy(id[:], a.data[84:92])
-	return id
 }
 
 // Salt returns the 32 bytes used as salt in the Seed.
@@ -89,6 +104,10 @@ func (a *Amiibo) CryptoSection() []byte {
 	cfg := make([]byte, 360)
 	copy(cfg[:], a.data[160:520])
 	return cfg
+}
+
+func (a *Amiibo) SetEncrypt2(enc [360]byte) {
+	copy(a.data[160:], enc[:])
 }
 
 // GeneratePassword generates the password based on the tag UID where uid byte 0 is skipped as it's

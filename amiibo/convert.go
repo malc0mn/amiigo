@@ -1,41 +1,45 @@
 package amiibo
 
-import "fmt"
+// AmiiboToAmiitool converts a full 540 byte NTAG215 dump to internal amiitool format.
+func AmiiboToAmiitool(amiibo *Amiibo) *Amiitool {
+	d := [NTAG215Size]byte{}
 
-// NTAG215ToAmiitool converts a full 540 byte NTAG215 dump to internal amiitool format.
-func NTAG215ToAmiitool(data []byte) ([NTAG215Size]byte, error) {
-	amiitool := [NTAG215Size]byte{}
-	if len(data) < AmiiboSize {
-		return amiitool, fmt.Errorf("convert: expected minimal length of %d", AmiiboSize)
-	}
-	copy(amiitool[:], data)
+	d[0] = amiibo.BCC1()
+	d[1] = amiibo.Int()
+	copy(d[2:4], amiibo.StaticLockBytes())
+	copy(d[4:8], amiibo.CapabilityContainer())
+	copy(d[8:40], amiibo.DataHMAC())
+	d[40] = amiibo.Unknown()
+	copy(d[41:43], amiibo.WriteCounter())
+	copy(d[43:76], amiibo.DataHMACData1())
+	copy(d[76:436], amiibo.CryptoSection())
+	copy(d[436:468], amiibo.TagHMAC())
+	copy(d[468:476], amiibo.FullUID()[0:8])
+	copy(d[476:488], amiibo.ModelInfoRaw())
+	copy(d[488:520], amiibo.Salt())
+	copy(d[520:], amiibo.Raw()[520:]) // Leftover NTAG215 data.
 
-	copy(amiitool[:], data[8:16])
-	copy(amiitool[8:], data[128:160])
-	copy(amiitool[40:], data[16:52])
-	copy(amiitool[76:], data[160:520])
-	copy(amiitool[436:], data[52:84])
-	copy(amiitool[468:], data[0:8])
-	copy(amiitool[476:], data[84:128])
-
-	return amiitool, nil
+	return &Amiitool{data: d}
 }
 
-// AmiitoolToNTAG215 converts the internal amiitool format to a NTAG215 dump.
-func AmiitoolToNTAG215(data []byte) ([NTAG215Size]byte, error) {
-	tag := [NTAG215Size]byte{}
-	if len(data) < AmiiboSize {
-		return tag, fmt.Errorf("convert: expected minimal length of %d", AmiiboSize)
-	}
-	copy(tag[:], data)
+// AmiitoolToAmiibo converts the internal amiitool format to a NTAG215 dump.
+func AmiitoolToAmiibo(amiibo *Amiitool) *Amiibo {
+	d := [NTAG215Size]byte{}
 
-	copy(tag[8:], data[0:8])
-	copy(tag[128:], data[8:40])
-	copy(tag[16:], data[40:76])
-	copy(tag[160:], data[76:436])
-	copy(tag[52:], data[436:468])
-	copy(tag[0:], data[468:476])
-	copy(tag[84:], data[476:520])
+	copy(d[:8], amiibo.FullUID()[:8])
+	d[8] = amiibo.BCC1()
+	d[9] = amiibo.Int()
+	copy(d[10:12], amiibo.StaticLockBytes())
+	copy(d[12:16], amiibo.CapabilityContainer())
+	d[16] = amiibo.Unknown()
+	copy(d[17:19], amiibo.WriteCounter())
+	copy(d[19:52], amiibo.DataHMACData1())
+	copy(d[52:84], amiibo.TagHMAC())
+	copy(d[84:96], amiibo.ModelInfoRaw())
+	copy(d[96:128], amiibo.Salt())
+	copy(d[128:160], amiibo.DataHMAC())
+	copy(d[160:520], amiibo.CryptoSection())
+	copy(d[520:], amiibo.Raw()[520:]) // Leftover NTAG215 data.
 
-	return tag, nil
+	return &Amiibo{NTAG215{data: d}}
 }
