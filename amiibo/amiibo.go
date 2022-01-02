@@ -91,13 +91,6 @@ func (a *Amiibo) Salt() []byte {
 	return x
 }
 
-// PlainData returns unencrypted Amiibo data.
-func (a *Amiibo) PlainData() []byte {
-	plain := make([]byte, 44)
-	copy(plain[:], a.data[84:128])
-	return plain
-}
-
 // CryptoSection1 returns the first block of crypto data. En/decryption must be done by
 // concatenating CryptoSection2 and en/decrypting the entire block in one go.
 func (a *Amiibo) CryptoSection1() []byte {
