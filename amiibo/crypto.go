@@ -198,8 +198,8 @@ func Crypt(key *DerivedKey, amiibo *Amiibo) *Amiibo {
 	copy(out, amiibo.Raw())
 
 	var dataIn []byte
-	dataIn = append(dataIn, amiibo.CryptoSection1()...)
-	dataIn = append(dataIn, amiibo.CryptoSection2()...)
+	dataIn = append(dataIn, amiibo.DataHMACData1()[1:]...)
+	dataIn = append(dataIn, amiibo.CryptoSection()...)
 	dataOut := make([]byte, len(dataIn))
 
 	stream := cipher.NewCTR(block, key.AesIV[:])
@@ -234,7 +234,7 @@ func NewDataHmac(dataKey *DerivedKey, amiibo *Amiibo, tagHmac []byte) []byte {
 	cntHmac := amiibo.WriteCounter()
 	cntHmac = append(cntHmac, amiibo.DataHMACData1()...)
 	h.Write(cntHmac)
-	h.Write(amiibo.DataHMACData2())
+	h.Write(amiibo.CryptoSection())
 	h.Write(tagHmac)
 	fullUid := amiibo.FullUID()
 	h.Write(fullUid[:8])
