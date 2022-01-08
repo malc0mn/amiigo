@@ -34,7 +34,8 @@ func (a *Amiibo) Type() DumpType {
 	return TypeAmiibo
 }
 
-// Unknown1 is obviously unknown but always seems to be set to 0xa5.
+// Unknown is obviously unknown but always seems to be set to 0xa5 which is done when writing to
+// the amiibo.
 func (a *Amiibo) Unknown() byte {
 	return a.data[16]
 }
