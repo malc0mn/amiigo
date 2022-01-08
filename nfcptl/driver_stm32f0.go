@@ -140,7 +140,18 @@ const (
 	STM32F0_LedOn = 0xff
 )
 
-// stm32f0 implements the Driver interface for the following USB device:
+// stm32f0 implements the Driver interface for STM32F0 based devices.
+type stm32f0 struct {
+	tokenMu     sync.Mutex
+	tokenPlaced bool  // Keeps track of token state.
+	tokenErrors uint8 // Used in polling to detect if a token has been removed.
+
+	totalErrors uint8 // Total consecutive errors before a token is to be considered removed.
+
+	optimised bool // Defines the driver behavior. Setting to false mimics the original software as closely as possible.
+}
+
+// Supports implements these USB devices:
 //   ID 1c1a:03d9 Datel Electronics Ltd. NFC-Portal
 //   Device Descriptor:
 //     bLength                18
@@ -207,16 +218,8 @@ const (
 //             Usage Type               Data
 //           wMaxPacketSize     0x0040  1x 64 bytes
 //           bInterval               1
-type stm32f0 struct {
-	tokenMu     sync.Mutex
-	tokenPlaced bool  // Keeps track of token state.
-	tokenErrors uint8 // Used in polling to detect if a token has been removed.
-
-	totalErrors uint8 // Total consecutive errors before a token is to be considered removed.
-
-	optimised bool // Defines the driver behavior. Setting to false mimics the original software as closely as possible.
-}
-
+//
+//   ID 5c60:dead MaxLander Portal
 func (p *stm32f0) Supports() []Vendor {
 	return []Vendor{
 		{
