@@ -1,8 +1,11 @@
 package amiibo
 
 import (
+	"bytes"
+	"encoding/binary"
 	"errors"
 	"fmt"
+	"unicode/utf16"
 )
 
 // Amiitool contains binary amiibo data as structured by the amiitool command (c) 2015-2017 Marcos
@@ -111,6 +114,17 @@ func (a *Amiitool) DataHMACData1() []byte {
 	b := make([]byte, 33)
 	copy(b[:], a.data[43:76])
 	return b
+}
+
+// NickName returns the nickname as configured for the amiibo. When an empty nickname is returned
+// this could mean the nickname could not be read!
+// Note: this info is encrypted, decrypt the amiibo first!
+func (a *Amiitool) Nickname() string {
+	n := make([]uint16, 10)
+	if err := binary.Read(bytes.NewReader(a.data[56:76]), binary.BigEndian, n); err != nil {
+		return ""
+	}
+	return string(utf16.Decode(n))
 }
 
 func (a *Amiitool) SetEncrypt1(enc []byte) {

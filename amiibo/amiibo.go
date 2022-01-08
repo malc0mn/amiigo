@@ -1,8 +1,11 @@
 package amiibo
 
 import (
+	"bytes"
+	"encoding/binary"
 	"errors"
 	"fmt"
+	"unicode/utf16"
 )
 
 // Amiibo embeds NTAG215 which in turn contains binary amiibo data. Amiibo allows easy amiibo
@@ -54,6 +57,17 @@ func (a *Amiibo) DataHMACData1() []byte {
 	d := make([]byte, 33)
 	copy(d[:], a.data[19:52])
 	return d
+}
+
+// NickName returns the nickname as configured for the amiibo. When an empty nickname is returned
+// this could mean the nickname could not be read!
+// Note: this info is encrypted, decrypt the amiibo first!
+func (a *Amiibo) Nickname() string {
+	n := make([]uint16, 10)
+	if err := binary.Read(bytes.NewReader(a.data[32:52]), binary.BigEndian, n); err != nil {
+		return ""
+	}
+	return string(utf16.Decode(n))
 }
 
 func (a *Amiibo) SetEncrypt1(enc []byte) {

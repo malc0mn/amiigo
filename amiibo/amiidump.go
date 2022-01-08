@@ -22,6 +22,7 @@ type Amiidump interface {
 	FullUID() []byte
 	Int() byte
 	ModelInfoRaw() []byte
+	Nickname() string
 	Raw() []byte
 	Salt() []byte
 	SetDataHMAC(dHmac []byte)
