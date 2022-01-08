@@ -203,14 +203,8 @@ func Crypt(key *DerivedKey, amiibo Amiidump) Amiidump {
 	stream.XORKeyStream(dataOut, dataIn)
 
 	c, _ := NewAmiidump(amiibo.Raw(), amiibo.Type())
-
-	enc1 := [32]byte{}
-	copy(enc1[:], dataOut[:32])
-	c.SetEncrypt1(enc1)
-
-	enc2 := [360]byte{}
-	copy(enc2[:], dataOut[32:])
-	c.SetEncrypt2(enc2)
+	c.SetEncrypt1(dataOut[:32])
+	c.SetEncrypt2(dataOut[32:])
 
 	return c
 }

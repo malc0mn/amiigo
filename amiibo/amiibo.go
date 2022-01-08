@@ -55,8 +55,8 @@ func (a *Amiibo) DataHMACData1() []byte {
 	return d
 }
 
-func (a *Amiibo) SetEncrypt1(enc [32]byte) {
-	copy(a.data[20:], enc[:])
+func (a *Amiibo) SetEncrypt1(enc []byte) {
+	copy(a.data[20:54], enc[:])
 }
 
 // TagHMAC returns the HMAC to be verified using a 'tag' DerivedKey (master key locked-secret.bin).
@@ -106,8 +106,8 @@ func (a *Amiibo) CryptoSection() []byte {
 	return cfg
 }
 
-func (a *Amiibo) SetEncrypt2(enc [360]byte) {
-	copy(a.data[160:], enc[:])
+func (a *Amiibo) SetEncrypt2(enc []byte) {
+	copy(a.data[160:520], enc[:])
 }
 
 // GeneratePassword generates the password based on the tag UID where uid byte 0 is skipped as it's

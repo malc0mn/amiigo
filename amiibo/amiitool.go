@@ -113,8 +113,8 @@ func (a *Amiitool) DataHMACData1() []byte {
 	return b
 }
 
-func (a *Amiitool) SetEncrypt1(enc [32]byte) {
-	copy(a.data[44:], enc[:])
+func (a *Amiitool) SetEncrypt1(enc []byte) {
+	copy(a.data[44:76], enc[:])
 }
 
 // CryptoSection returns the second block of crypto data. En/decryption must be done by
@@ -125,8 +125,8 @@ func (a *Amiitool) CryptoSection() []byte {
 	return cfg
 }
 
-func (a *Amiitool) SetEncrypt2(enc [360]byte) {
-	copy(a.data[76:], enc[:])
+func (a *Amiitool) SetEncrypt2(enc []byte) {
+	copy(a.data[76:463], enc[:])
 }
 
 // TagHMAC returns the HMAC to be verified using a 'tag' DerivedKey (master key locked-secret.bin).

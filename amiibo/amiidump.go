@@ -25,8 +25,8 @@ type Amiidump interface {
 	Raw() []byte
 	Salt() []byte
 	SetDataHMAC(dHmac []byte)
-	SetEncrypt1(enc [32]byte)
-	SetEncrypt2(enc [360]byte)
+	SetEncrypt1(enc []byte)
+	SetEncrypt2(enc []byte)
 	SetTagHMAC(tHmac []byte)
 	StaticLockBytes() []byte
 	TagHMAC() []byte
