@@ -14,7 +14,7 @@ import (
 	"testing"
 )
 
-const TestDataDir = "testdata/"
+const testDataDir = "testdata/"
 
 func TestNewRetailKey(t *testing.T) {
 	wrong := []string{
@@ -24,13 +24,13 @@ func TestNewRetailKey(t *testing.T) {
 	}
 
 	for _, f := range wrong {
-		key, err := NewRetailKey(TestDataDir + f)
+		key, err := NewRetailKey(testDataDir + f)
 		if key != nil || err == nil {
 			t.Fatalf("NewRetailKey should have failed, got %v, %s", key, err)
 		}
 	}
 
-	file := TestDataDir + "key_retail.bin"
+	file := testDataDir + "key_retail.bin"
 	key, err := NewRetailKey(file)
 	if err != nil {
 		t.Fatalf("NewRetailKey returned error %s. Make sure you have the correct %s file!", err, file)
@@ -50,19 +50,19 @@ func TestNewRetailKey(t *testing.T) {
 }
 
 func TestEncryptAmiibo(t *testing.T) {
-	file := TestDataDir + "key_retail.bin"
+	file := testDataDir + "key_retail.bin"
 	key, err := NewRetailKey(file)
 	if err != nil {
 		t.Fatalf("NewRetailKey returned error %s. Make sure you have the correct %s file!", err, file)
 	}
 
-	file = TestDataDir + "real_amiibo.bin"
+	file = testDataDir + "real_amiibo.bin"
 	want, err := os.ReadFile(file)
 	if err != nil {
 		t.Fatalf("EncryptAmiibo failed to load file %s, provide a real amiibo dump for testing", file)
 	}
 
-	file = TestDataDir + "plain_amiibo.bin"
+	file = testDataDir + "plain_amiibo.bin"
 	data, err := os.ReadFile(file)
 	if err != nil {
 		t.Fatalf("EncryptAmiibo failed to load file %s, provide a decrypted amiibo dump for testing", file)
@@ -80,19 +80,19 @@ func TestEncryptAmiibo(t *testing.T) {
 }
 
 func TestEncryptAmiitool(t *testing.T) {
-	file := TestDataDir + "key_retail.bin"
+	file := testDataDir + "key_retail.bin"
 	key, err := NewRetailKey(file)
 	if err != nil {
 		t.Fatalf("NewRetailKey returned error %s. Make sure you have the correct %s file!", err, file)
 	}
 
-	file = TestDataDir + "real_amiibo.bin"
+	file = testDataDir + "real_amiibo.bin"
 	want, err := os.ReadFile(file)
 	if err != nil {
 		t.Fatalf("EncryptAmiitool failed to load file %s, provide a real amiibo dump for testing", file)
 	}
 
-	file = TestDataDir + "plain_amiibo_amiitool.bin"
+	file = testDataDir + "plain_amiibo_amiitool.bin"
 	data, err := os.ReadFile(file)
 	if err != nil {
 		t.Fatalf("EncryptAmiitool failed to load file %s, provide a decrypted amiibo dump for testing", file)
@@ -111,19 +111,19 @@ func TestEncryptAmiitool(t *testing.T) {
 }
 
 func TestDecrypt(t *testing.T) {
-	file := TestDataDir + "key_retail.bin"
+	file := testDataDir + "key_retail.bin"
 	key, err := NewRetailKey(file)
 	if err != nil {
 		t.Fatalf("NewRetailKey returned error %s. Make sure you have the correct %s file!", err, file)
 	}
 
-	file = TestDataDir + "plain_amiibo.bin"
+	file = testDataDir + "plain_amiibo.bin"
 	want, err := os.ReadFile(file)
 	if err != nil {
 		t.Fatalf("Encrypt failed to load file %s, provide a decrypted amiibo dump for testing", file)
 	}
 
-	file = TestDataDir + "real_amiibo.bin"
+	file = testDataDir + "real_amiibo.bin"
 	data, err := os.ReadFile(file)
 	if err != nil {
 		t.Fatalf("Encrypt failed to load file %s, provide a real amiibo dump for testing", file)
