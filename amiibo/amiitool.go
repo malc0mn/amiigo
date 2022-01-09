@@ -1,11 +1,8 @@
 package amiibo
 
 import (
-	"bytes"
-	"encoding/binary"
 	"errors"
 	"fmt"
-	"unicode/utf16"
 )
 
 // Amiitool contains binary amiibo data as structured by the amiitool command (c) 2015-2017 Marcos
@@ -37,7 +34,6 @@ func (a *Amiitool) Type() DumpType {
 	return TypeAmiitool
 }
 
-// Raw returns the raw tag data.
 func (a *Amiitool) Raw() []byte {
 	return a.data[:]
 }
@@ -83,74 +79,68 @@ func (a *Amiitool) CapabilityContainer() []byte {
 	return cc
 }
 
-// DataHMAC returns the HMAC to be verified using a 'data' DerivedKey (master key unfixed-info.bin).
 func (a *Amiitool) DataHMAC() []byte {
 	d := make([]byte, 32)
 	copy(d[:], a.data[8:40])
 	return d
 }
 
-// SetDataHMAC sets the HMAC to sign the 'data' data.
 func (a *Amiitool) SetDataHMAC(dHmac []byte) {
 	copy(a.data[8:40], dHmac[:])
 }
 
-// Unknown1 is obviously unknown but always seems to be set to 0xa5.
-func (a *Amiitool) Unknown() byte {
+func (a *Amiitool) Unknown1() byte {
 	return a.data[40]
 }
 
-// WriteCounter returns the amiibo write counter. This counter is also used as magic bytes to
-// create the crypto Seed.
 func (a *Amiitool) WriteCounter() []byte {
 	t := make([]byte, 2)
 	copy(t[:], a.data[41:43])
 	return t
 }
 
-// DataHMACData1 returns the first part of the data needed to generate the 'data' HMAC using the
-// DerivedKey generated from the 'data' master key (usually in a file named unfixed-info.bin).
-func (a *Amiitool) DataHMACData1() []byte {
-	b := make([]byte, 33)
-	copy(b[:], a.data[43:76])
+func (a *Amiitool) Unknown2() byte {
+	return a.data[43]
+}
+
+func (a *Amiitool) RegisterInfoRaw() []byte {
+	b := make([]byte, 32)
+	copy(b[:], a.data[44:76])
 	return b
 }
 
-// NickName returns the nickname as configured for the amiibo. When an empty nickname is returned
-// this could mean the nickname could not be read!
-// Note: this info is encrypted, decrypt the amiibo first!
-func (a *Amiitool) Nickname() string {
-	n := make([]uint16, 10)
-	if err := binary.Read(bytes.NewReader(a.data[56:76]), binary.BigEndian, n); err != nil {
-		return ""
-	}
-	return string(utf16.Decode(n))
+func (a *Amiitool) RegisterInfo() *RegisterInfo {
+	data := [32]byte{}
+	copy(data[:], a.RegisterInfoRaw())
+	return &RegisterInfo{data: data}
 }
 
-func (a *Amiitool) SetEncrypt1(enc []byte) {
+func (a *Amiitool) SetRegisterInfo(enc []byte) {
 	copy(a.data[44:76], enc[:])
 }
 
-// CryptoSection returns the second block of crypto data. En/decryption must be done by
-// prepending CryptoSection1 and en/decrypting the entire block in one go.
-func (a *Amiitool) CryptoSection() []byte {
+func (a *Amiitool) Settings() *Settings {
+	data := [360]byte{}
+	copy(data[:], a.SettingsRaw())
+	return &Settings{data: data}
+}
+
+func (a *Amiitool) SettingsRaw() []byte {
 	cfg := make([]byte, 360)
 	copy(cfg[:], a.data[76:436])
 	return cfg
 }
 
-func (a *Amiitool) SetEncrypt2(enc []byte) {
+func (a *Amiitool) SetSettings(enc []byte) {
 	copy(a.data[76:463], enc[:])
 }
 
-// TagHMAC returns the HMAC to be verified using a 'tag' DerivedKey (master key locked-secret.bin).
 func (a *Amiitool) TagHMAC() []byte {
 	t := make([]byte, 32)
 	copy(t[:], a.data[436:468])
 	return t
 }
 
-// SetTagHMAC sets the HMAC to sign the 'tag' data.
 func (a *Amiitool) SetTagHMAC(tHmac []byte) {
 	copy(a.data[436:468], tHmac[:])
 }
@@ -206,15 +196,18 @@ func (a *Amiitool) FullUID() []byte {
 	return []byte{a.UID0(), a.UID1(), a.UID2(), a.BCC0(), a.UID3(), a.UID4(), a.UID5(), a.UID6(), a.BCC1()}
 }
 
-// ModelInfoRaw returns the amiibo model info.
-// The model info is also used in the calculation of the 'tag' HMAC concatenated with the Salt.
+func (a *Amiitool) ModelInfo() *ModelInfo {
+	data := [12]byte{}
+	copy(data[:], a.ModelInfoRaw())
+	return &ModelInfo{data: data}
+}
+
 func (a *Amiitool) ModelInfoRaw() []byte {
 	mi := make([]byte, 12)
 	copy(mi[:], a.data[476:488])
 	return mi
 }
 
-// Salt returns the 32 bytes used as salt in the Seed.
 func (a *Amiitool) Salt() []byte {
 	x := make([]byte, 32)
 	copy(x, a.data[488:520])

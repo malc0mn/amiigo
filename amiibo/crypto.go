@@ -195,16 +195,16 @@ func Crypt(key *DerivedKey, amiibo Amiidump) Amiidump {
 	}
 
 	var dataIn []byte
-	dataIn = append(dataIn, amiibo.DataHMACData1()[1:]...)
-	dataIn = append(dataIn, amiibo.CryptoSection()...)
+	dataIn = append(dataIn, amiibo.RegisterInfoRaw()...)
+	dataIn = append(dataIn, amiibo.SettingsRaw()...)
 	dataOut := make([]byte, len(dataIn))
 
 	stream := cipher.NewCTR(block, key.AesIV[:])
 	stream.XORKeyStream(dataOut, dataIn)
 
 	c, _ := NewAmiidump(amiibo.Raw(), amiibo.Type())
-	c.SetEncrypt1(dataOut[:32])
-	c.SetEncrypt2(dataOut[32:])
+	c.SetRegisterInfo(dataOut[:32])
+	c.SetSettings(dataOut[32:])
 
 	return c
 }
@@ -228,9 +228,10 @@ func NewDataHmac(dataKey *DerivedKey, amiibo Amiidump, tagHmac []byte) []byte {
 	// Generate and tag HMAC.
 	h := hmac.New(sha256.New, dataKey.HmacKey[:])
 	cntHmac := amiibo.WriteCounter()
-	cntHmac = append(cntHmac, amiibo.DataHMACData1()...)
+	cntHmac = append(cntHmac, amiibo.Unknown2())
+	cntHmac = append(cntHmac, amiibo.RegisterInfoRaw()...)
 	h.Write(cntHmac)
-	h.Write(amiibo.CryptoSection())
+	h.Write(amiibo.SettingsRaw())
 	h.Write(tagHmac)
 	fullUid := amiibo.FullUID()
 	h.Write(fullUid[:8])
