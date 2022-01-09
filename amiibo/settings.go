@@ -1,23 +1,50 @@
 package amiibo
 
 import (
-	"bytes"
 	"encoding/binary"
-	"unicode/utf16"
 )
 
 type Settings struct {
 	data [360]byte
 }
 
-// OwnerName returns the owner name as configured for the amiibo. When an empty owner name is
-// returned this could mean the nickname could not be read!
-// Note: this info is encrypted, decrypt the amiibo first!
-func (as *Settings) OwnerName() string {
-	n := make([]uint16, 10)
-	// Owner name is indeed little endian!
-	if err := binary.Read(bytes.NewReader(as.data[26:46]), binary.LittleEndian, n); err != nil {
-		return ""
-	}
-	return string(utf16.Decode(n))
+// Mii returns the Mii struct allowing you to explore the Mii data stored in the amiibo.
+func (s *Settings) Mii() *Mii {
+	data := [96]byte{}
+	copy(data[:], s.data[:96])
+	return &Mii{data: data}
+}
+
+func (s *Settings) TitleID() []byte {
+	ai := make([]byte, 8)
+	copy(ai[:], s.data[96:104])
+	return ai
+}
+
+func (s *Settings) WriteCounter() uint16 {
+	return binary.BigEndian.Uint16(s.data[104:106])
+}
+
+func (s *Settings) ApplicationID() []byte {
+	ai := make([]byte, 4)
+	copy(ai[:], s.data[106:110])
+	return ai
+}
+
+func (s *Settings) Unknown1() []byte {
+	d := make([]byte, 2)
+	copy(d[:], s.data[110:112])
+	return d
+}
+
+func (s *Settings) Unknown2() []byte {
+	d := make([]byte, 32)
+	copy(d[:], s.data[112:144])
+	return d
+}
+
+func (s *Settings) ApplicationData() []byte {
+	d := make([]byte, 216)
+	copy(d[:], s.data[144:360])
+	return d
 }
