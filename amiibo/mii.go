@@ -49,16 +49,16 @@ const (
 	FavColWhite      FavouriteColour = 10
 	FavColBlack      FavouriteColour = 11
 
-	SkinLightApricot   SkinTone = 0
-	SkinChardonnay     SkinTone = 1
-	SkinApricot        SkinTone = 2
-	SkinSienna         SkinTone = 3
-	SkinEspresso       SkinTone = 4
-	SkinLightPink      SkinTone = 5
-	SkinMediumPink     SkinTone = 6
-	SkinRawSienna      SkinTone = 7
-	SkinBurntUmber     SkinTone = 8
-	SkinBistre         SkinTone = 9
+	SkinLightApricot SkinTone = 0
+	SkinChardonnay   SkinTone = 1
+	SkinApricot      SkinTone = 2
+	SkinSienna       SkinTone = 3
+	SkinEspresso     SkinTone = 4
+	SkinLightPink    SkinTone = 5
+	SkinMediumPink   SkinTone = 6
+	SkinRawSienna    SkinTone = 7
+	SkinBurntUmber   SkinTone = 8
+	SkinBistre       SkinTone = 9
 )
 
 // Mii represents the mii data structure in the amiibo dump. Note that not all settings are
