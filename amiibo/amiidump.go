@@ -6,7 +6,7 @@ type DumpType byte
 
 const (
 	TypeAmiibo   DumpType = 1
-	TypeAmiitool          = 2
+	TypeAmiitool DumpType = 2
 
 	// AmiiboSize defines the minimum amount of bytes for an (incomplete) amiibo dump;
 	AmiiboSize = 520
