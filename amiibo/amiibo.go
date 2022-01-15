@@ -13,7 +13,7 @@ type Amiibo struct{ NTAG215 }
 // from a given Amiitool struct.
 func NewAmiibo(data []byte, amiibo *Amiitool) (Amiidump, error) {
 	if (data == nil && amiibo == nil) || (data != nil && amiibo != nil) {
-		return nil, errors.New("amiibo: provide either amiitool structured data or an Amiibo struct")
+		return nil, errors.New("amiibo: provide either amiibo structured data or an Amiitool struct")
 	}
 
 	if data != nil {
