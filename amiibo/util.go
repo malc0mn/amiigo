@@ -7,9 +7,9 @@ import (
 	"unicode/utf16"
 )
 
-// extractBits extracts 'amount' bits from the given 'number' starting on 'position'.
-func extractBits(number, amount, position int) int {
-	return ((((1 << amount) - 1) << position) & number) >> position
+// extractBits extracts 'amount' bits from the given 'number' starting on 'startPos'.
+func extractBits(number, amount, startPos int) int {
+	return ((((1 << amount) - 1) << startPos) & number) >> startPos
 }
 
 // utf16ToPlainString converts a byte array containing UTF16 data to a string with all null chars
