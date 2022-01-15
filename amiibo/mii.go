@@ -3,17 +3,22 @@ package amiibo
 import (
 	"bytes"
 	"encoding/binary"
+	"strings"
 	"time"
 	"unicode/utf16"
 )
 
+type Charset int
+
 type DeviceType int
+
+type FavouriteColour int
 
 type MiiSex int
 
 type Region int
 
-type Charset int
+type SkinTone int
 
 const (
 	DeviceWii        DeviceType = 0x10
@@ -33,6 +38,30 @@ const (
 	CharsetChina          Charset = 1
 	CharsetKorea          Charset = 2
 	CharsetTaiwan         Charset = 3
+
+	FavColRed        FavouriteColour = 0
+	FavColOrange     FavouriteColour = 1
+	FavColYellow     FavouriteColour = 2
+	FavColLightGreen FavouriteColour = 3
+	FavColDarkGreen  FavouriteColour = 4
+	FavColDarkBlue   FavouriteColour = 5
+	FavColLightBlue  FavouriteColour = 6
+	FavColPink       FavouriteColour = 7
+	FavColPurple     FavouriteColour = 8
+	FavColBrown      FavouriteColour = 9
+	FavColWhite      FavouriteColour = 10
+	FavColBlack      FavouriteColour = 11
+
+	SkinLightApricot   SkinTone = 0
+	SkinChardonnay     SkinTone = 1
+	SkinApricot        SkinTone = 2
+	SkinSienna         SkinTone = 3
+	SkinEspresso       SkinTone = 4
+	SkinLightPink      SkinTone = 5
+	SkinMediumPink     SkinTone = 6
+	SkinRawSienna      SkinTone = 7
+	SkinBurntUmber     SkinTone = 8
+	SkinBistre         SkinTone = 9
 )
 
 // Mii represents the mii data structure in the amiibo dump. Note that not all settings are
@@ -108,7 +137,9 @@ func (m *Mii) BirthdayMonth() int { return extractBits(int(m.Personal()), 4, 1) 
 
 func (m *Mii) BirthdayDay() int { return extractBits(int(m.Personal()), 5, 5) }
 
-func (m *Mii) FavouriteColour() int { return extractBits(int(m.Personal()), 4, 10) }
+func (m *Mii) FavouriteColour() FavouriteColour {
+	return FavouriteColour(extractBits(int(m.Personal()), 4, 10))
+}
 
 func (m *Mii) IsFavourite() bool { return extractBits(int(m.Personal()), 1, 14) == 1 }
 
@@ -117,7 +148,9 @@ func (m *Mii) Name() string {
 	if err := binary.Read(bytes.NewReader(m.data[26:46]), binary.LittleEndian, n); err != nil {
 		return ""
 	}
-	return string(utf16.Decode(n))
+	// Note: using bytes.Trim first will cause problems as the resulting byte slice could end up
+	// with too little bytes.
+	return strings.Replace(string(utf16.Decode(n)), "\x00", "", -1)
 }
 
 func (m *Mii) Width() int { return int(m.data[46]) }
@@ -130,20 +163,20 @@ func (m *Mii) Height() int { return int(m.data[47]) }
 //  bit 5-7: skin colour
 func (m *Mii) Head() int { return int(m.data[48]) }
 
-func (m *Mii) MayShare() int { return extractBits(m.Head(), 1, 0) }
+func (m *Mii) MayShare() bool { return extractBits(m.Head(), 1, 0) == 1 }
 
 func (m *Mii) HeadShape() int { return extractBits(m.Head(), 4, 1) }
 
-func (m *Mii) HeadColour() int { return extractBits(m.Head(), 3, 5) }
+func (m *Mii) SkinTone() SkinTone { return SkinTone(extractBits(m.Head(), 3, 5)) }
 
 // Face data holds:
 //  bit 0-3: wrinkles
 //  bit 4-7: makeup
 func (m *Mii) Face() int { return int(m.data[49]) }
 
-func (m *Mii) FaceWrinkles() int { return extractBits(m.Face(), 4, 0) }
+func (m *Mii) Wrinkles() int { return extractBits(m.Face(), 4, 0) }
 
-func (m *Mii) FaceMakeup() int { return extractBits(m.Face(), 4, 4) }
+func (m *Mii) Makeup() int { return extractBits(m.Face(), 4, 4) }
 
 func (m *Mii) HairStyle() int { return int(m.data[50]) }
 
@@ -159,7 +192,7 @@ func (m *Mii) HairColour() int { return int(m.data[51]) }
 //  bit 25-29: eye y position
 func (m *Mii) Eyes() uint32 { return binary.LittleEndian.Uint32(m.data[52:56]) }
 
-func (m *Mii) EyeStyle() int { return extractBits(int(m.Eyes()), 5, 0) }
+func (m *Mii) EyeStyle() int { return extractBits(int(m.Eyes()), 6, 0) }
 
 func (m *Mii) EyeColour() int { return extractBits(int(m.Eyes()), 3, 6) }
 
@@ -283,7 +316,9 @@ func (m *Mii) Author() string {
 	if err := binary.Read(bytes.NewReader(m.data[72:92]), binary.LittleEndian, n); err != nil {
 		return ""
 	}
-	return string(utf16.Decode(n))
+	// Note: using bytes.Trim first will cause problems as the resulting byte slice could end up
+	// with too little bytes.
+	return strings.Replace(string(utf16.Decode(n)), "\x00", "", -1)
 }
 
 func (m *Mii) Padding2() []byte {
