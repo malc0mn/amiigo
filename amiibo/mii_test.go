@@ -47,6 +47,16 @@ func TestMii_Version(t *testing.T) {
 	}
 }
 
+func TestMii_Region(t *testing.T) {
+	mii := loadMii(t)
+	got := mii.Region()
+	want := 0
+
+	if got != want {
+		t.Errorf("Region: got %d, want %d", got, want)
+	}
+}
+
 func TestMii_CanCopy(t *testing.T) {
 	mii := loadMii(t)
 	got := mii.CanCopy()
