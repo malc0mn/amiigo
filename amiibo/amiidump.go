@@ -14,12 +14,12 @@ const (
 
 // Amiidump defines the interface necessary to encrypt and convert Amiibo and Amiitool structs.
 type Amiidump interface {
-	BCC1() byte
-	CapabilityContainer() []byte
-	// DataHMAC returns the HMAC to be verified using a 'data' DerivedKey (master key unfixed-info.bin).
+	// DataHMAC returns the HMAC to be verified using a 'data' DerivedKey (using master key
+	// unfixed-info.bin).
 	DataHMAC() []byte
+	// FullUID returns the full UUID including check bytes. All bytes except the last check byte
+	// are used in the seed and HMAC calculations.
 	FullUID() []byte
-	Int() byte
 	// ModelInfo returns a ModelInfo struct which can be used to extract detailed amiibo info. Since
 	// this data is not encrypted, it can be accessed at any time.
 	ModelInfo() *ModelInfo
@@ -38,22 +38,22 @@ type Amiidump interface {
 	Salt() []byte
 	// SetDataHMAC sets the HMAC to sign the 'data' data.
 	SetDataHMAC(dHmac []byte)
+	// SetRegisterInfo overwrites the register info with the given data.
 	SetRegisterInfo(enc []byte)
+	// SetSettings overwrites the settings data with the given data.
 	SetSettings(enc []byte)
 	// SetTagHMAC sets the HMAC to sign the 'tag' data.
 	SetTagHMAC(tHmac []byte)
+	// Settings returns the application specific settings and Mii when stored on the amiibo.
 	Settings() *Settings
 	// SettingsRaw returns the second block of crypto data. En/decryption must be done by
 	// prepending RegisterInfoRaw and en/decrypting the entire block in one go.
+	// This data is encrypted, so decrypt the amiibo first!
 	SettingsRaw() []byte
-	StaticLockBytes() []byte
 	// TagHMAC returns the HMAC to be verified using a 'tag' DerivedKey (master key locked-secret.bin).
 	TagHMAC() []byte
 	// Type returns the dump type: TypeAmiibo or TypeAmiitool.
 	Type() DumpType
-	// Unknown1 is obviously unknown but always seems to be set to 0xa5 which is done when writing to
-	// the amiibo.
-	Unknown1() byte
 	// Unknown2 is obviously unknown but is used to generate the data HMAC.
 	Unknown2() byte
 	// WriteCounter returns the amiibo write counter. This counter is also used as magic bytes to

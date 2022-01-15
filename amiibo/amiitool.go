@@ -89,6 +89,8 @@ func (a *Amiitool) SetDataHMAC(dHmac []byte) {
 	copy(a.data[8:40], dHmac[:])
 }
 
+// Unknown1 is obviously unknown but always seems to be set to 0xa5 which is done when writing to
+// the amiibo.
 func (a *Amiitool) Unknown1() byte {
 	return a.data[40]
 }
