@@ -1,10 +1,8 @@
 package amiibo
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
-	"unicode/utf16"
 )
 
 type RegisterInfo struct {
@@ -56,9 +54,5 @@ func (ri *RegisterInfo) CRC() []byte {
 // this could mean the nickname could not be read!
 // Note: this info is encrypted, decrypt the amiibo first!
 func (ri *RegisterInfo) Nickname() string {
-	n := make([]uint16, 10)
-	if err := binary.Read(bytes.NewReader(ri.data[12:32]), binary.BigEndian, n); err != nil {
-		return ""
-	}
-	return string(utf16.Decode(n))
+	return utf16ToPlainString(ri.data[12:32], binary.BigEndian)
 }

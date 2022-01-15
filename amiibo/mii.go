@@ -1,11 +1,8 @@
 package amiibo
 
 import (
-	"bytes"
 	"encoding/binary"
-	"strings"
 	"time"
-	"unicode/utf16"
 )
 
 type Charset int
@@ -143,15 +140,7 @@ func (m *Mii) FavouriteColour() FavouriteColour {
 
 func (m *Mii) IsFavourite() bool { return extractBits(int(m.Personal()), 1, 14) == 1 }
 
-func (m *Mii) Name() string {
-	n := make([]uint16, 10)
-	if err := binary.Read(bytes.NewReader(m.data[26:46]), binary.LittleEndian, n); err != nil {
-		return ""
-	}
-	// Note: using bytes.Trim first will cause problems as the resulting byte slice could end up
-	// with too little bytes.
-	return strings.Replace(string(utf16.Decode(n)), "\x00", "", -1)
-}
+func (m *Mii) Name() string { return utf16ToPlainString(m.data[26:46], binary.LittleEndian) }
 
 func (m *Mii) Width() int { return int(m.data[46]) }
 
@@ -311,15 +300,7 @@ func (m *Mii) MoleXPosition() int { return extractBits(int(m.Mole()), 5, 5) }
 
 func (m *Mii) MoleYPosition() int { return extractBits(int(m.Mole()), 5, 10) }
 
-func (m *Mii) Author() string {
-	n := make([]uint16, 10)
-	if err := binary.Read(bytes.NewReader(m.data[72:92]), binary.LittleEndian, n); err != nil {
-		return ""
-	}
-	// Note: using bytes.Trim first will cause problems as the resulting byte slice could end up
-	// with too little bytes.
-	return strings.Replace(string(utf16.Decode(n)), "\x00", "", -1)
-}
+func (m *Mii) Author() string { return utf16ToPlainString(m.data[72:92], binary.LittleEndian) }
 
 func (m *Mii) Padding2() []byte {
 	id := make([]byte, 2)
