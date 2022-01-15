@@ -2,7 +2,6 @@ package amiibo
 
 import (
 	"errors"
-	"fmt"
 )
 
 // Amiitool contains binary amiibo data as structured by the amiitool command (c) 2015-2017 Marcos
@@ -18,7 +17,7 @@ func NewAmiitool(data []byte, amiibo *Amiibo) (*Amiitool, error) {
 
 	if data != nil {
 		if len(data) > NTAG215Size || len(data) < AmiiboSize {
-			return nil, fmt.Errorf("amiibo: data must be >= %d and <= %d", AmiiboSize, NTAG215Size)
+			return nil, ErrInvalidSize
 		}
 
 		d := [NTAG215Size]byte{}

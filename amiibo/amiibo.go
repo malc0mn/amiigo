@@ -5,6 +5,9 @@ import (
 	"fmt"
 )
 
+// ErrInvalidSize is the error returned when the data provided is too long or too short.
+var ErrInvalidSize = fmt.Errorf("amiibo: data must be >= %d and <= %d", AmiiboSize, NTAG215Size)
+
 // Amiibo embeds NTAG215 which in turn contains binary amiibo data. Amiibo allows easy amiibo
 // manipulation.
 type Amiibo struct{ NTAG215 }
@@ -18,7 +21,7 @@ func NewAmiibo(data []byte, amiibo *Amiitool) (Amiidump, error) {
 
 	if data != nil {
 		if len(data) > NTAG215Size || len(data) < AmiiboSize {
-			return nil, fmt.Errorf("amiibo: data must be >= %d and <= %d", AmiiboSize, NTAG215Size)
+			return nil, ErrInvalidSize
 		}
 
 		d := [NTAG215Size]byte{}
