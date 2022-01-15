@@ -18,7 +18,7 @@ func NewAmiitool(data []byte, amiibo *Amiibo) (*Amiitool, error) {
 
 	if data != nil {
 		if len(data) > NTAG215Size || len(data) < AmiiboSize {
-			return nil, fmt.Errorf("amiibo: data must be > %d and < %d", AmiiboSize, NTAG215Size)
+			return nil, fmt.Errorf("amiibo: data must be >= %d and <= %d", AmiiboSize, NTAG215Size)
 		}
 
 		d := [NTAG215Size]byte{}
