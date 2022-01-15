@@ -23,8 +23,13 @@ func NewAmiitool(data []byte, amiibo *Amiibo) (*Amiitool, error) {
 
 		d := [NTAG215Size]byte{}
 		copy(d[:], data)
+		a := &Amiitool{data: d}
 
-		return &Amiitool{data: d}, nil
+		if len(data) < NTAG215Size {
+			a.ResetSecurity()
+		}
+
+		return a, nil
 	}
 
 	return AmiiboToAmiitool(amiibo), nil
@@ -238,4 +243,10 @@ func (a *Amiitool) GeneratePassword() {
 
 	a.SetPassword(pwd)
 	a.SetPasswordAcknowledge([2]byte{0x80, 0x80})
+}
+
+// ResetSecurity writes the default amiibo security to the tag. Existing data will be lost beyond
+// recovery.
+func (a *Amiitool) ResetSecurity() {
+	copy(a.data[520:540], defaultSecurity())
 }

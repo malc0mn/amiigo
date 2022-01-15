@@ -23,3 +23,11 @@ func utf16ToPlainString(d []byte, bo binary.ByteOrder) string {
 	// with too little bytes.
 	return strings.Replace(string(utf16.Decode(n)), "\x00", "", -1)
 }
+
+// defaultSecurity returns the default amiibo NTAG215 security settings.
+func defaultSecurity() []byte {
+	return []byte{
+		0x01, 0x00, 0x0f, 0xbd, 0x00, 0x00, 0x00, 0x04, 0x5f, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	}
+}

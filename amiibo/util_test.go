@@ -1,7 +1,9 @@
 package amiibo
 
 import (
+	"bytes"
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 	"testing"
 )
@@ -38,5 +40,17 @@ func TestToPlainStringBigEndian(t *testing.T) {
 
 	if got != want {
 		t.Errorf("utf16ToPlainString: got %s, want %s", got, want)
+	}
+}
+
+func TestDefaultSecurity(t *testing.T) {
+	got := defaultSecurity()
+	want := []byte{
+		0x01, 0x00, 0x0f, 0xbd, 0x00, 0x00, 0x00, 0x04, 0x5f, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	}
+
+	if !bytes.Equal(got, want) {
+		t.Errorf("defaultSecurity: got:\n%s want:\n%s", hex.Dump(got), hex.Dump(want))
 	}
 }

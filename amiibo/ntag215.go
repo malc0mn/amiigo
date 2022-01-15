@@ -257,3 +257,9 @@ func (n *NTAG215) RFUI() []byte {
 	copy(rfui[:], n.data[538:540])
 	return rfui
 }
+
+// ResetSecurity writes the default amiibo security to the tag. Existing data will be lost beyond
+// recovery.
+func (n *NTAG215) ResetSecurity() {
+	copy(n.data[520:540], defaultSecurity())
+}

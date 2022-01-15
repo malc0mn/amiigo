@@ -23,8 +23,13 @@ func NewAmiibo(data []byte, amiibo *Amiitool) (Amiidump, error) {
 
 		d := [NTAG215Size]byte{}
 		copy(d[:], data)
+		a := &Amiibo{NTAG215{data: d}}
 
-		return &Amiibo{NTAG215{data: d}}, nil
+		if len(data) < NTAG215Size {
+			a.ResetSecurity()
+		}
+
+		return a, nil
 	}
 
 	return AmiitoolToAmiibo(amiibo), nil
