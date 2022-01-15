@@ -54,3 +54,21 @@ func TestDefaultSecurity(t *testing.T) {
 		t.Errorf("defaultSecurity: got:\n%s want:\n%s", hex.Dump(got), hex.Dump(want))
 	}
 }
+
+func TestGeneratePassword(t *testing.T) {
+	got := generatePassword([]byte{0xf8, 0xa9, 0x56, 0xb1, 0xf3, 0x60, 0xaa})
+	want := [4]byte{0xb2, 0xf0, 0x7b, 0x0c}
+
+	if got != want {
+		t.Errorf("generatePassword: got: %#x want: #%#x", got, want)
+	}
+}
+
+func TestPasswordAcknowledge(t *testing.T) {
+	got := passwordAcknowledge()
+	want := [2]byte{0x80, 0x80}
+
+	if got != want {
+		t.Errorf("passwordAcknowledge: got: %#x want: #%#x", got, want)
+	}
+}

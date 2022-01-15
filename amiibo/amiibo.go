@@ -128,13 +128,6 @@ func (a *Amiibo) SetSettings(enc []byte) {
 // GeneratePassword generates the password based on the tag UID where uid byte 0 is skipped as it's
 // always set to 0x04 on an amiibo tag.
 func (a *Amiibo) GeneratePassword() {
-	uid := a.UID()
-	xor := []byte{0xaa, 0x55, 0xaa, 0x55}
-	pwd := [4]byte{}
-	for i := 0; i < 4; i++ {
-		pwd[i] = uid[i+1] ^ uid[i+3] ^ xor[i]
-	}
-
-	a.SetPassword(pwd)
-	a.SetPasswordAcknowledge([2]byte{0x80, 0x80})
+	a.SetPassword(generatePassword(a.UID()))
+	a.SetPasswordAcknowledge(passwordAcknowledge())
 }

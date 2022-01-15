@@ -31,3 +31,18 @@ func defaultSecurity() []byte {
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	}
 }
+
+// generatePassword generates an amiibo password based on the uid.
+func generatePassword(uid []byte) [4]byte {
+	xor := []byte{0xaa, 0x55, 0xaa, 0x55}
+	pwd := [4]byte{}
+	for i := 0; i < 4; i++ {
+		pwd[i] = uid[i+1] ^ uid[i+3] ^ xor[i]
+	}
+	return pwd
+}
+
+// passwordAcknowledge returns the standard amiibo password acknowlege bytes.
+func passwordAcknowledge() [2]byte {
+	return [2]byte{0x80, 0x80}
+}
