@@ -7,14 +7,14 @@ import (
 	"testing"
 )
 
-func TestAmiitoolToNTAG215(t *testing.T) {
-	file := testDataDir + "convert_ntag215.bin"
+func TestAmiitoolToAmiibo(t *testing.T) {
+	file := testDataDir + "dummy_ntag215.bin"
 	want, err := os.ReadFile(file)
 	if err != nil {
 		t.Fatalf("AmiitoolToAmiibo failed to load file %s", file)
 	}
 
-	file = testDataDir + "convert_amiitool.bin"
+	file = testDataDir + "dummy_amiitool.bin"
 	data, err := os.ReadFile(file)
 	if err != nil {
 		t.Fatalf("AmiitoolToAmiibo failed to load file %s", file)
@@ -28,14 +28,14 @@ func TestAmiitoolToNTAG215(t *testing.T) {
 	}
 }
 
-func TestNTAG215ToAmiitool(t *testing.T) {
-	file := testDataDir + "convert_amiitool.bin"
+func TestAmiiboToAmiitool(t *testing.T) {
+	file := testDataDir + "dummy_amiitool.bin"
 	want, err := os.ReadFile(file)
 	if err != nil {
 		t.Fatalf("AmiiboToAmiitool failed to load file %s", file)
 	}
 
-	file = testDataDir + "convert_ntag215.bin"
+	file = testDataDir + "dummy_ntag215.bin"
 	data, err := os.ReadFile(file)
 	if err != nil {
 		t.Fatalf("AmiiboToAmiitool failed to load file %s", file)
