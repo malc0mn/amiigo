@@ -21,10 +21,14 @@ func (ri *RegisterInfo) CRCCounter() uint16 {
 	return binary.BigEndian.Uint16(ri.data[2:4])
 }
 
+// bits 0-4 = day
+// bits 5-8 = month
+// bits 9-15 = year relative to 2K
 func (ri *RegisterInfo) dateToString(d uint16) string {
-	day := int((d << 11) >> 11)  // bits 0-4 = day
-	month := int((d << 6) >> 11) // bits 5-8 = month
-	year := 2000 + int(d>>9)     // bits 9-15 = year relative to 2K
+	day := extractBits(int(d), 5, 0)
+	month := extractBits(int(d), 4, 5)
+	year := 2000 + extractBits(int(d), 6, 9)
+
 	return fmt.Sprintf("%d-%d-%d", year, month, day)
 }
 
