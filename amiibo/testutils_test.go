@@ -8,8 +8,8 @@ import (
 const (
 	testDataDir = "testdata/"
 
-	dummyNtag    = "dummy_ntag215.bin"
-	dummyAmitool = "dummy_amiitool.bin"
+	testDummyNtag    = "dummy_ntag215.bin"
+	testDummyAmitool = "dummy_amiitool.bin"
 )
 
 func readFile(t *testing.T, fileName string) []byte {
