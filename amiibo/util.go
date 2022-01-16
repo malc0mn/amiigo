@@ -31,7 +31,7 @@ func utf16ToPlainString(d []byte, bo binary.ByteOrder) string {
 	}
 	// Note: using bytes.Trim first will cause problems as the resulting byte slice could end up
 	// with too little bytes.
-	return strings.Replace(string(utf16.Decode(n)), "\x00", "", -1)
+	return strings.Replace(string(utf16.Decode(n)), "\000", "", -1)
 }
 
 // defaultSecurity returns the default amiibo NTAG215 security settings.
