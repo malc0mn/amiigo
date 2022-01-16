@@ -13,7 +13,7 @@ func TestExtractBits(t *testing.T) {
 	want := "00000000000000000000000000100111"
 
 	if got != want {
-		t.Errorf("extractBits: got %s, want %s", got, want)
+		t.Errorf("got %s, want %s", got, want)
 	}
 }
 
@@ -26,7 +26,7 @@ func TestToPlainStringLittleEndian(t *testing.T) {
 	want := "tester testing"
 
 	if got != want {
-		t.Errorf("utf16ToPlainString: got %s, want %s", got, want)
+		t.Errorf("got %s, want %s", got, want)
 	}
 }
 
@@ -39,7 +39,7 @@ func TestToPlainStringBigEndian(t *testing.T) {
 	want := "tester testing"
 
 	if got != want {
-		t.Errorf("utf16ToPlainString: got %s, want %s", got, want)
+		t.Errorf("got %s, want %s", got, want)
 	}
 }
 
@@ -51,7 +51,7 @@ func TestDefaultSecurity(t *testing.T) {
 	}
 
 	if !bytes.Equal(got, want) {
-		t.Errorf("defaultSecurity: got:\n%s want:\n%s", hex.Dump(got), hex.Dump(want))
+		t.Errorf("got:\n%s want:\n%s", hex.Dump(got), hex.Dump(want))
 	}
 }
 
@@ -60,7 +60,7 @@ func TestGeneratePassword(t *testing.T) {
 	want := [4]byte{0xb2, 0xf0, 0x7b, 0x0c}
 
 	if got != want {
-		t.Errorf("generatePassword: got: %#x want: #%#x", got, want)
+		t.Errorf("got %#x, want #%#x", got, want)
 	}
 }
 
@@ -69,6 +69,6 @@ func TestPasswordAcknowledge(t *testing.T) {
 	want := [2]byte{0x80, 0x80}
 
 	if got != want {
-		t.Errorf("passwordAcknowledge: got: %#x want: #%#x", got, want)
+		t.Errorf("got %#x, want #%#x", got, want)
 	}
 }
