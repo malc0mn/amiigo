@@ -158,12 +158,10 @@ func TestStm32f0_getDriverCommandForClientCommand(t *testing.T) {
 func TestStm32f0_getNextPollCommand_NoToken(t *testing.T) {
 	p := &stm32f0{}
 
-	type test struct {
+	tests := []struct {
 		dc   DriverCommand
 		next int
-	}
-
-	tests := []test{
+	}{
 		{
 			dc:   STM32F0_FieldOff,
 			next: 1,
@@ -200,12 +198,10 @@ func TestStm32f0_getNextPollCommand_NoToken(t *testing.T) {
 func TestStm32f0_getNextPollCommand_TokenPlaced(t *testing.T) {
 	p := &stm32f0{tokenPlaced: true}
 
-	type test struct {
+	tests := []struct {
 		dc   DriverCommand
 		next int
-	}
-
-	tests := []test{
+	}{
 		{
 			dc:   STM32F0_GetTokenUid,
 			next: 0,
@@ -242,13 +238,11 @@ func TestStm32f0_getNextPollCommand_TokenPlaced(t *testing.T) {
 func TestStm32f0_getEventForDriverCommand(t *testing.T) {
 	p := &stm32f0{}
 
-	type test struct {
+	tests := []struct {
 		dc   DriverCommand
 		args []byte
 		want EventType
-	}
-
-	tests := []test{
+	}{
 		{
 			dc:   STM32F0_SetLedState,
 			args: []byte{STM32F0_LedOff},
