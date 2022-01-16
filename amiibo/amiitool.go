@@ -220,9 +220,23 @@ func (a *Amiitool) Salt() []byte {
 	return x
 }
 
+// Password returns the 32bit password used for memory access protection.
+func (a *Amiitool) Password() []byte {
+	pwd := make([]byte, 4)
+	copy(pwd[:], a.data[532:536])
+	return pwd
+}
+
 // SetPassword writes the given password to the NFC tag.
 func (a *Amiitool) SetPassword(pwd [4]byte) {
 	copy(a.data[532:], pwd[:])
+}
+
+// PasswordAcknowledge returns the 16bit password acknowledge used during password verification.
+func (a *Amiitool) PasswordAcknowledge() []byte {
+	pack := make([]byte, 2)
+	copy(pack[:], a.data[536:538])
+	return pack
 }
 
 // SetPasswordAcknowledge writes the given password acknowledge to the NFC tag.

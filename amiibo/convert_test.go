@@ -8,7 +8,7 @@ import (
 
 func TestAmiitoolToAmiibo(t *testing.T) {
 	want := readFile(t, testDummyNtag)
-	data := readFile(t, testDummyAmitool)
+	data := readFile(t, testDummyAmiitool)
 
 	amiitool := [NTAG215Size]byte{}
 	copy(amiitool[:], data)
@@ -19,7 +19,7 @@ func TestAmiitoolToAmiibo(t *testing.T) {
 }
 
 func TestAmiiboToAmiitool(t *testing.T) {
-	want := readFile(t, testDummyAmitool)
+	want := readFile(t, testDummyAmiitool)
 	data := readFile(t, testDummyNtag)
 
 	amiibo := [NTAG215Size]byte{}

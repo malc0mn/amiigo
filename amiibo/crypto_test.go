@@ -28,7 +28,7 @@ func loadRetailKey(t *testing.T) *RetailKey {
 	return key
 }
 
-func loadAmiibo(t *testing.T, file string) *Amiibo {
+func loadRealAmiibo(t *testing.T, file string) *Amiibo {
 	typ := "decrypted"
 	if file == testRealAmiibo {
 		typ = "real"
@@ -37,13 +37,14 @@ func loadAmiibo(t *testing.T, file string) *Amiibo {
 	data := readFileWithError(t, file, "failed to load file %s, provide a "+typ+" amiibo dump for testing")
 	amiibo, err := NewAmiibo(data, nil)
 	if err != nil {
-		t.Fatalf("NewAmiibo failed, got %s, want nil", err)
+		t.Fatalf("NewAmiibo failed: got %s, want nil", err)
 	}
 	return amiibo
 }
 
 func TestNewRetailKey(t *testing.T) {
 	wrong := []string{
+		"non-existant.bin",
 		"crypto_short_key_retail.bin",
 		"crypto_long_key_retail.bin",
 		"crypto_wrong_key_retail.bin",
@@ -74,7 +75,7 @@ func TestNewRetailKey(t *testing.T) {
 func TestEncryptAmiibo(t *testing.T) {
 	want := readFileWithError(t, testRealAmiibo, "failed to load file %s, provide a real amiibo dump for testing")
 
-	got := Encrypt(loadRetailKey(t), loadAmiibo(t, testPlainAmiibo))
+	got := Encrypt(loadRetailKey(t), loadRealAmiibo(t, testPlainAmiibo))
 	if !bytes.Equal(got.Raw(), want) {
 		t.Errorf("Encrypt got:\n%s want:\n%s", hex.Dump(got.Raw()), hex.Dump(want))
 	}
@@ -102,11 +103,18 @@ func TestEncryptAmiitool(t *testing.T) {
 func TestDecrypt(t *testing.T) {
 	want := readFileWithError(t, testPlainAmiibo, "Encrypt failed to load file %s, provide a decrypted amiibo dump for testing")
 
-	got, err := Decrypt(loadRetailKey(t), loadAmiibo(t, testRealAmiibo))
+	got, err := Decrypt(loadRetailKey(t), loadRealAmiibo(t, testRealAmiibo))
 	if !bytes.Equal(got.Raw(), want) {
 		t.Errorf("Decrypt got:\n%s want:\n%s", hex.Dump(got.Raw()), hex.Dump(want))
 	}
 	if err != nil {
 		t.Errorf("Decrypt got %s, want nil", err)
+	}
+}
+
+func TestDecryptFail(t *testing.T) {
+	_, err := Decrypt(loadRetailKey(t), loadRealAmiibo(t, testDummyNtag))
+	if err == nil {
+		t.Error("Decrypt got nil, want error")
 	}
 }

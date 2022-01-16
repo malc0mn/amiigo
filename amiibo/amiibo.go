@@ -58,16 +58,16 @@ func (a *Amiibo) Unknown2() byte {
 	return a.data[19]
 }
 
-func (a *Amiibo) RegisterInfoRaw() []byte {
-	d := make([]byte, 32)
-	copy(d[:], a.data[20:52])
-	return d
-}
-
 func (a *Amiibo) RegisterInfo() *RegisterInfo {
 	data := [32]byte{}
 	copy(data[:], a.RegisterInfoRaw())
 	return &RegisterInfo{data: data}
+}
+
+func (a *Amiibo) RegisterInfoRaw() []byte {
+	d := make([]byte, 32)
+	copy(d[:], a.data[20:52])
+	return d
 }
 
 func (a *Amiibo) SetRegisterInfo(enc []byte) {
@@ -133,4 +133,10 @@ func (a *Amiibo) SetSettings(enc []byte) {
 func (a *Amiibo) GeneratePassword() {
 	a.SetPassword(generatePassword(a.UID()))
 	a.SetPasswordAcknowledge(passwordAcknowledge())
+}
+
+// ResetSecurity writes the default amiibo security to the tag. Existing data will be lost beyond
+// recovery.
+func (n *NTAG215) ResetSecurity() {
+	copy(n.data[520:540], defaultSecurity())
 }

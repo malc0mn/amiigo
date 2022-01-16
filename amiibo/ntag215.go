@@ -1,9 +1,6 @@
 package amiibo
 
-import (
-	"errors"
-	"math/rand"
-)
+import "errors"
 
 // No attempt was made to add NTAG213 or NTAG216 support as this is out of the scope for Amiibo
 // compatibility.
@@ -125,10 +122,7 @@ func (n *NTAG215) ValidateUID() bool {
 // uid0 can be passed in to set byte 0 of the uid. All amiibo seem to have 0x04 set as byte 0 of
 // the UID.
 func (n *NTAG215) RandomiseUid(uid0 byte) error {
-	uid := make([]byte, 7)
-	if _, err := rand.Read(uid); err != nil {
-		panic("amiibo: unable to generate random bytes")
-	}
+	uid := randomBytes(7)
 
 	if uid0 != 0x00 {
 		uid[0] = uid0
@@ -256,10 +250,4 @@ func (n *NTAG215) RFUI() []byte {
 	rfui := make([]byte, 2)
 	copy(rfui[:], n.data[538:540])
 	return rfui
-}
-
-// ResetSecurity writes the default amiibo security to the tag. Existing data will be lost beyond
-// recovery.
-func (n *NTAG215) ResetSecurity() {
-	copy(n.data[520:540], defaultSecurity())
 }

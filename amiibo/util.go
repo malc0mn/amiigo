@@ -3,9 +3,19 @@ package amiibo
 import (
 	"bytes"
 	"encoding/binary"
+	"math/rand"
 	"strings"
 	"unicode/utf16"
 )
+
+func randomBytes(size int) []byte {
+	b := make([]byte, size)
+	if _, err := rand.Read(b); err != nil {
+		panic("amiibo: unable to generate random bytes")
+	}
+
+	return b
+}
 
 // extractBits extracts 'amount' bits from the given 'number' starting on 'startPos'.
 func extractBits(number, amount, startPos int) int {
