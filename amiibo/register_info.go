@@ -56,7 +56,6 @@ func (ri *RegisterInfo) CRC() []byte {
 
 // Nickname returns the nickname as configured for the amiibo. When an empty nickname is returned
 // this could mean the nickname could not be read!
-// Note: this info is encrypted, decrypt the amiibo first!
 func (ri *RegisterInfo) Nickname() string {
 	return utf16ToPlainString(ri.data[12:32], binary.BigEndian)
 }
