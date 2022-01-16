@@ -39,7 +39,7 @@ func loadAmiibo(t *testing.T, file string) *Amiibo {
 	if err != nil {
 		t.Fatalf("NewAmiibo failed, got %s, want nil", err)
 	}
-	return amiibo.(*Amiibo)
+	return amiibo
 }
 
 func TestNewRetailKey(t *testing.T) {

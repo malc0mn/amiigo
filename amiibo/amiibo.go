@@ -14,7 +14,7 @@ type Amiibo struct{ NTAG215 }
 
 // NewAmiibo builds a new Amiibo structure based on the given raw NTAG215 data or by converting it
 // from a given Amiitool struct.
-func NewAmiibo(data []byte, amiibo *Amiitool) (Amiidump, error) {
+func NewAmiibo(data []byte, amiibo *Amiitool) (*Amiibo, error) {
 	if (data == nil && amiibo == nil) || (data != nil && amiibo != nil) {
 		return nil, errors.New("amiibo: provide either amiibo structured data or an Amiitool struct")
 	}
