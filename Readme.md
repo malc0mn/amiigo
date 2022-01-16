@@ -1,4 +1,17 @@
-# Go library to communicate with NFC portals
+# Amiigo is the _uber geek amiibo inspector_
+
+## Packages
+
+## amiibo
+The `amiibo` package can be used independently to work with amiibodumps being a
+classic NTAG215 raw dump or a decrypted amiitool bin file.
+It can decrypt and encrypt both formats and inspect or modify the amiibo data.
+
+## nfcptl
+The `nfcptl` package handles communications with NFC portal devices over USB. it
+depends on the `gousb` package and provides a Client struct that handles the
+device connection and communications.
+This package can be used fully independently.
 
 ### Supported devices
 - Datel's *PowerSaves for Amiibo*
@@ -20,3 +33,7 @@ untested.
 Ideally hardware access to these devices is needed. Alternatively a full
 wireshark dump of **all** operations would also be helpful.
 **Or just create a pull request yourself!**
+
+## Credits
+- https://github.com/socram8888/amiitool
+- https://www.3dbrew.org
