@@ -289,8 +289,7 @@ func (p *stm32f0) Drive(c *Client) {
 		log.Println("stm32f0: driving")
 	}
 
-	// TODO: double check if the original software does a setIdle call.
-	// c.SetIdle(0,0)
+	c.SetIdle(0, 0)
 
 	// TODO: how to set optimised to true? Another interface function SetOptimised?
 	if p.optimised {
