@@ -21,9 +21,14 @@ This package can be used fully independently.
 - MaxLander
 
 From all the information found online, these two devices are **identical** to
-Datel's *PowerSaves for Amiibo* device but due to the lack of access to the
-hardware and the fact that they're no longer commercially available they remain
-untested.
+Datel's *PowerSaves for Amiibo* device (the NaMiio device is 100% compatible
+with the original Datel software which NaMiio even documented on their site)
+but due to the lack of access to the hardware and the fact that they're no
+longer commercially available they remain untested.
+
+Granted: MaxLander uses 1K MFC tags but AFAIK they should be able to handle
+NTAG215 as well from the data gathered. 1K MFC tag support is not present yet.
+
 **Anyone out there care to have a go and post a report?**
 
 ### Would be cool to also support
