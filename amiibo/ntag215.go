@@ -6,7 +6,7 @@ import "errors"
 // compatibility.
 
 const (
-	// CT stands for Cascade Tag and has a fixed value of 88h as defined in ISO/IEC 14443-3 Type A.
+	// CT stands for Cascade Tag and has a fixed value of 0x88 as defined in ISO/IEC 14443-3 Type A.
 	CT = 0x88
 
 	// NTAG215Size defines the maximum amount of bytes for an NTAG215 dump.
@@ -135,7 +135,7 @@ func (n *NTAG215) RandomiseUid(uid0 byte) error {
 	return n.SetUID([9]byte{uid[0], uid[1], uid[2], bcc[0], uid[3], uid[4], uid[5], uid[6], bcc[1]})
 }
 
-// Int returns the second byte of page 02h and is reserved for internal data.
+// Int returns the second byte of page 0x02 and is reserved for internal data.
 func (n *NTAG215) Int() byte {
 	return n.data[9]
 }

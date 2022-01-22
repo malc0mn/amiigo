@@ -48,7 +48,7 @@ func (a *Amiitool) BCC1() byte {
 	return a.data[0]
 }
 
-// Int returns the second byte of page 02h and is reserved for internal data.
+// Int returns the second byte of page 0x02 and is reserved for internal data.
 func (a *Amiitool) Int() byte {
 	return a.data[1]
 }
