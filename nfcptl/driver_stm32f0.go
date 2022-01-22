@@ -28,49 +28,56 @@ const (
 	// STM32F0_Reset resets the STM32F0 MCU.
 	STM32F0_Reset DriverCommand = 0x08
 
-	// STM32F0_FieldOn is the second command sent when polling for a token. It turns on the NFC
-	// detection field and obviously must precede STM32F0_GetTokenUid for STM32F0_GetTokenUid to be
-	// able to return a token UID.
-	STM32F0_FieldOn DriverCommand = 0x10
-	// STM32F0_FieldOff is the first command sent when polling for a token. It turns off the NFC
+	// STM32F0_RFFieldOn is the second command sent when polling for a token. It turns on the NFC
+	// detection field and obviously must precede STM32F0_GetTokenUid for STM32F0_GetTokenUid to
+	// be able to return a token NUID.
+	STM32F0_RFFieldOn DriverCommand = 0x10
+	// STM32F0_RFFieldOff is the first command sent when polling for a token. It turns off the NFC
 	// detection field. To detect a token, the field must obviously be turned on.
 	// Omitting this command from the polling sequence makes no difference in the token detection
 	// effectiveness.
-	STM32F0_FieldOff DriverCommand = 0x11
-	// STM32F0_GetTokenUid is the third command sent when polling for a token. It MUST be preceded
-	// by STM32F0_FieldOn or the command will never return a token UID.
+	STM32F0_RFFieldOff DriverCommand = 0x11
+	// STM32F0_GetTokenUid is the third command sent when polling for a token. The NFC field must
+	// obviously been enabled by issuing STM32F0_RFFieldOn first in order to detect a token.
 	STM32F0_GetTokenUid DriverCommand = 0x12
 
 	// STM32F0_Unknown5 what this does, seems to take one parameter.
 	STM32F0_Unknown5 DriverCommand = 0x13
 
-	// STM32F0_ReadPageAlt1 is an alternative for STM32F0_ReadPage.
-	STM32F0_ReadPageAlt1 DriverCommand = 0x14
-	// STM32F0_WritePageAlt1 is an alternative for STM32F0_WritePage.
-	STM32F0_WritePageAlt1 DriverCommand = 0x15
+	// STM32F0_ReadAlt1 is an alternative for STM32F0_Read.
+	STM32F0_ReadAlt1 DriverCommand = 0x14
+	// STM32F0_WriteAlt1 is an alternative for STM32F0_Write.
+	STM32F0_WriteAlt1 DriverCommand = 0x15
 
 	// STM32F0_Unknown6 what this does. When this command is sent while a token is present on the
 	// device, all read commands return empty data (0x00).
 	STM32F0_Unknown6 DriverCommand = 0x16
 
-	// STM32F0_ReadPageAlt2 is another alternative for STM32F0_ReadPage.
-	STM32F0_ReadPageAlt2 DriverCommand = 0x17
-	// STM32F0_WritePageAlt2 is another alternative for STM32F0_WritePage.
-	STM32F0_WritePageAlt2 DriverCommand = 0x18
+	// STM32F0_ReadAlt2 is another alternative for STM32F0_Read.
+	STM32F0_ReadAlt2 DriverCommand = 0x17
+	// STM32F0_WriteAlt2 is another alternative for STM32F0_Write.
+	STM32F0_WriteAlt2 DriverCommand = 0x18
 
 	// STM32F0_Status seems to return the last registered error code.
 	STM32F0_Status DriverCommand = 0x19
 
-	// STM32F0_ReadPage reads the specified page from the token. Takes one argument being the page
-	// to read.
-	STM32F0_ReadPage DriverCommand = 0x1c
+	// STM32F0_Unlock unlocks the tag for writing. This returns 0x80 0x80 which is the default
+	// password acknowledge for amiibo.
+	STM32F0_Unlock = 0x1b
 
-	// STM32F0_WritePage writes to the specified page of the token.
-	STM32F0_WritePage DriverCommand = 0x1d
+	// STM32F0_Read is equivalent to the NTAG21x READ command allowing you to read four pages in
+	// one go from the token. It only takes one argument being the page to start reading from
+	// returning 16 bytes of data.
+	STM32F0_Read DriverCommand = 0x1c
+
+	// STM32F0_Write is equivalent to the NTAG21x WRITE command and writes 4 bytes to the specified
+	// page of the token. The first argument is the page number, the second parameter is the four
+	// byte payload to write.
+	STM32F0_Write DriverCommand = 0x1d
 
 	// STM32F0_Unknown4 is used after a token has been detected on the portal after command 0x30.
 	// It takes data from STM32F0_MakeKey as arguments:
-	//   0x00 + the answer from STM32F0_MakeKey
+	//   0x00 (page index? MFC sector?) + the answer from STM32F0_MakeKey
 	STM32F0_Unknown4 DriverCommand = 0x1e
 
 	// STM32F0_Unknown1 with a token on the portal always returns:
@@ -96,12 +103,12 @@ const (
 	//   00000010  b9 c8 ca 3c 4b cd 13 14  27 11 ff 57 1c f0 1e 66  |...<K...'..W...f|
 	//   00000020  bd 6f 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |.o..............|
 	//   00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-	// It is used after a token has been detected after calling 0x1f
+	// It is used after a token has been detected after calling STM32F0_Unknown1.
 	STM32F0_Unknown2 DriverCommand = 0x21
 
 	// STM32F0_MakeKey is called after a token has been detected on the portal, after page 16 has
 	// been read. It takes data from two previous commands as arguments:
-	//   the answer to STM32F0_GetTokenUid being the token UID + the answer to STM32F0_ReadPage
+	//   the answer to STM32F0_GetTokenUid being the token UID + the answer to STM32F0_Read
 	//   called with argument 0x10 (page 16)
 	STM32F0_MakeKey DriverCommand = 0x30
 
@@ -293,9 +300,9 @@ func (p *stm32f0) Drive(c *Client) {
 	p.commandListener(c)
 }
 
-// wasTokenPlaced will update the tokenPlaced state if the return of the STM32F0_GetTokenUid message
-// was not an error. Its purpose is to notify us when a token has been placed on the NFC portal. If
-// it detects a token being placed, it will return true.
+// wasTokenPlaced will update the tokenPlaced state if the return of the STM32F0_GetTokenUid
+// message was not an error. Its purpose is to notify us when a token has been placed on the NFC
+// portal. If it detects a token being placed, it will return true.
 // wasTokenPlaced is thread safe.
 func (p *stm32f0) wasTokenPlaced() bool {
 	p.tokenMu.Lock()
@@ -319,10 +326,10 @@ func (p *stm32f0) wasTokenRemoved() bool {
 	p.tokenMu.Lock()
 	defer p.tokenMu.Unlock()
 
-	// Once a token is placed on the portal, we will be polling only with message STM32F0_GetTokenUid
-	// which will alternate between an error and a token present in that order.
-	// As soon as we know a token is present on the portal we need to check for two consecutive
-	// errors to know the token has been removed again!
+	// Once a token is placed on the portal, we will be polling only with message
+	// STM32F0_GetTokenUid which will alternate between an error and a token present in that order.
+	// As soon as we know a token is present on the portal we need to check for at least
+	// consecutive errors to know the token has been removed again!
 	// The original software turns the front LED off after 10 consecutive errors.
 	if p.tokenPlaced {
 		if p.tokenErrors++; p.tokenErrors >= p.totalErrors {
@@ -349,8 +356,8 @@ func (p *stm32f0) getDriverCommandForClientCommand(cc ClientCommand) (DriverComm
 		GetDeviceName:   STM32F0_GetDeviceName,
 		GetHardwareInfo: STM32F0_GetHardwareInfo,
 		GetApiPassword:  STM32F0_GenerateApiPassword,
-		FetchTokenData:  STM32F0_ReadPage,
-		WriteTokenData:  STM32F0_WritePage,
+		FetchTokenData:  STM32F0_Read,
+		WriteTokenData:  STM32F0_Write,
 		SetLedState:     STM32F0_SetLedState,
 	}[cc]
 	if !ok {
@@ -369,7 +376,7 @@ func (p *stm32f0) commandListener(c *Client) {
 	defer ticker.Stop()
 
 	if p.optimised {
-		p.sendCommand(c, STM32F0_FieldOn, []byte{})
+		p.sendCommand(c, STM32F0_RFFieldOn, []byte{})
 	}
 
 	for {
@@ -388,7 +395,7 @@ func (p *stm32f0) commandListener(c *Client) {
 		case <-c.Terminate():
 			// TODO: actually make this work properly, seems we're not cleanly shutting down!
 			// Ensure the NFC field is off before termination.
-			p.sendCommand(c, STM32F0_FieldOff, []byte{})
+			p.sendCommand(c, STM32F0_RFFieldOff, []byte{})
 			// Ensure front LED is off before termination.
 			p.sendCommand(c, STM32F0_SetLedState, []byte{STM32F0_LedOff})
 			return
@@ -439,7 +446,7 @@ func (p *stm32f0) handleGetTokenUidReturn(c *Client, res []byte, isErr bool) {
 // getNextPollCommand returns the correct DriverCommand given the current poll sequence position.
 func (p *stm32f0) getNextPollCommand(pos int) (int, DriverCommand) {
 	// This polling sequence is what the original software does.
-	sequence := []DriverCommand{STM32F0_FieldOff, STM32F0_FieldOn, STM32F0_GetTokenUid}
+	sequence := []DriverCommand{STM32F0_RFFieldOff, STM32F0_RFFieldOn, STM32F0_GetTokenUid}
 
 	// Basic poll when a token is present on the portal.
 	if p.isTokenPlaced() {
@@ -485,7 +492,7 @@ func (p *stm32f0) handleToken(c *Client, buff []byte) {
 	//  the return data from this call is never the same, even with the same arguments, so it's some form of
 	//  encryption or seeded hashing.
 	//MsgSixAfterTokenDetect = []byte{1e 00 0c 10 fe 86 87 33 f7 16 08 b5 01 78 d4 f3 b8 b9}
-	//  the arguments for 0x1e are 0x00 + the answer from 0x30
+	//  the arguments for 0x1e are 0x00 + the answer from 0x30 the first argument might be an MFC sector?
 	//  When the arguments to 0x30 are incorrect, the return is 01 02: an error.
 	//MsgSevenAfterTokenDetect byte = 0x1f
 	//   => the answer is 0x01 0xfe when the above calls have been made correctly, otherwise it returns:
@@ -501,7 +508,7 @@ func (p *stm32f0) handleToken(c *Client, buff []byte) {
 	cmds := []map[DriverCommand][]byte{
 		{STM32F0_Unknown1: {}},
 		{STM32F0_Unknown2: {}},
-		{STM32F0_ReadPage: {0x10}},
+		{STM32F0_Read: {0x10}},
 		{STM32F0_MakeKey: {}},
 		{STM32F0_Unknown4: {}},
 		{STM32F0_Unknown1: {}},
@@ -523,7 +530,7 @@ func (p *stm32f0) handleToken(c *Client, buff []byte) {
 			r, _ := p.sendCommand(c, cmd, args)
 
 			switch cmd {
-			case STM32F0_ReadPage:
+			case STM32F0_Read:
 				copy(page16, r[2:])
 			case STM32F0_MakeKey:
 				copy(key, r[2:])
@@ -561,7 +568,7 @@ func (p *stm32f0) readToken(c *Client) ([]byte, error) {
 	for i = 0; i < 0x88; i += 4 {
 		pageErrors := 0
 	read:
-		res, isErr := p.sendCommand(c, STM32F0_ReadPage, []byte{i})
+		res, isErr := p.sendCommand(c, STM32F0_Read, []byte{i})
 		if isErr {
 			if pageErrors++; pageErrors > 2 {
 				return token, fmt.Errorf("stm32f0: failed to read page %#02x", i)

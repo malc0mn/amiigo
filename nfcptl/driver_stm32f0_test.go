@@ -129,8 +129,8 @@ func TestStm32f0_getDriverCommandForClientCommand(t *testing.T) {
 		GetDeviceName:   STM32F0_GetDeviceName,
 		GetHardwareInfo: STM32F0_GetHardwareInfo,
 		GetApiPassword:  STM32F0_GenerateApiPassword,
-		FetchTokenData:  STM32F0_ReadPage,
-		WriteTokenData:  STM32F0_WritePage,
+		FetchTokenData:  STM32F0_Read,
+		WriteTokenData:  STM32F0_Write,
 		SetLedState:     STM32F0_SetLedState,
 	}
 
@@ -163,11 +163,11 @@ func TestStm32f0_getNextPollCommand_NoToken(t *testing.T) {
 		next int
 	}{
 		{
-			dc:   STM32F0_FieldOff,
+			dc:   STM32F0_RFFieldOff,
 			next: 1,
 		},
 		{
-			dc:   STM32F0_FieldOn,
+			dc:   STM32F0_RFFieldOn,
 			next: 2,
 		},
 		{
@@ -175,11 +175,11 @@ func TestStm32f0_getNextPollCommand_NoToken(t *testing.T) {
 			next: 3,
 		},
 		{
-			dc:   STM32F0_FieldOff,
+			dc:   STM32F0_RFFieldOff,
 			next: 1,
 		},
 		{
-			dc:   STM32F0_FieldOff,
+			dc:   STM32F0_RFFieldOff,
 			next: 1,
 		},
 	}
