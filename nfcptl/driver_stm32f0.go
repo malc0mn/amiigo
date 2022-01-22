@@ -464,9 +464,9 @@ func (p *stm32f0) getNextPollCommand(pos int) (int, DriverCommand) {
 
 // handleToken processes the token placed on the NFC portal.
 func (p *stm32f0) handleToken(c *Client, buff []byte) {
-	// It SEEMS that byte 5 in the sequence is the UID length, so we start after that.
-	// TODO: use byte 5 to read x number of bytes...?
-	uid := buff[5:12]
+	l := int(buff[4])    // Byte 4 in the sequence is the NUID length which can be 4 or 7 bytes long.
+	s := 5               // The NUID starts at byte 5.
+	uid := buff[s : s+l] // Read the full NUID starting on byte 5 with length l.
 
 	log.Printf("stm32f0: token detected with id %#07x", uid)
 
