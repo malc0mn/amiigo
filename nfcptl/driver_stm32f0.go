@@ -585,6 +585,42 @@ func (stm *stm32f0) readToken(c *Client) ([]byte, error) {
 	return token, nil
 }
 
+// Write sequence:
+//    0x11 -> turn off nfc field
+//    0x10 -> turn on nfc field
+//      the token has now been 'power cycled'
+//    0x12 -> get token NUID
+//    0x1b -> unlock? returns: 0x80 0x80 which is the default password ack on an amiibo
+//    0x1d 0x04 0x?? 0x?? 0x?? 0x?? -> writePage 0x04 with 4 bytes payload => page 0x04 is where the NTAG215 user data
+//      starts! It continues writing until page 0x81 which is the end of the NTAG215 user data.
+//      So it never 'resets' the default NTAG pages.
+//    0x1c 0x00 => read page 0 ... it keeps reading until page 0x84, possibly for validation?
+//    0x1c 0x00 => and it starts reading from the start all over again (not very efficient is it)
+//    now it starts the 'token on portal' polling sequence
+func (stm *stm32f0) writeToken(c *Client) error {
+	return nil
+}
+
+// Write sequence:
+//    0x11 -> turn off nfc field
+//    0x10 -> turn on nfc field
+//      the token has now been 'power cycled'
+//    0x12 -> get token NUID
+//    0x1c 0x10 -> read page 16
+//    0x30 + token NUID + 16 bytes starting from page 16
+//    0x1e 0x00 + response from 0x30
+//      => some API call here?
+//    0x1b -> unlock? returns: 0x80 0x80 which is the default password ack on an amiibo
+//    0x1d ... -> it will now write data to specific pages. which pages will no doubt be returned by the api
+//      the cheat tested started at 0x86 (zero 4 bytes), followed by writing page 0x01 (NOT page 0x00!) all the way up
+//      to page 0x85 (but not page 0x86??) and it finishes by finally writing to page 0x00
+//    0x1c 0x00 => read page 0 ... it keeps reading until page 0x84, possibly for validation?
+//    0x1c 0x00 => and it starts reading from the start again
+//    now it starts the 'token on portal' polling sequence
+func (stm *stm32f0) applyCheat(c *Client) error {
+	return nil
+}
+
 // getEventForDriverCommand returns the corresponding EventType for the given DriverCommand.
 // If there is no event for the given DriverCommand, NoEvent will be returned.
 func (stm *stm32f0) getEventForDriverCommand(dc DriverCommand, args []byte) EventType {
