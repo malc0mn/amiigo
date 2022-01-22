@@ -227,7 +227,7 @@ type stm32f0 struct {
 //           bInterval               1
 //
 //   ID 5c60:dead MaxLander Portal
-func (p *stm32f0) Supports() []Vendor {
+func (stm *stm32f0) Supports() []Vendor {
 	return []Vendor{
 		{
 			ID:    VIDDatelElectronicsLtd,
@@ -252,8 +252,8 @@ func (p *stm32f0) Supports() []Vendor {
 	}
 }
 
-func (p *stm32f0) VendorId(alias string) (uint16, error) {
-	for _, v := range p.Supports() {
+func (stm *stm32f0) VendorId(alias string) (uint16, error) {
+	for _, v := range stm.Supports() {
 		if v.Alias == alias {
 			return v.ID, nil
 		}
@@ -262,8 +262,8 @@ func (p *stm32f0) VendorId(alias string) (uint16, error) {
 	return 0, fmt.Errorf("stm32f0: unknown vendor %s", alias)
 }
 
-func (p *stm32f0) ProductId(alias string) (uint16, error) {
-	for _, v := range p.Supports() {
+func (stm *stm32f0) ProductId(alias string) (uint16, error) {
+	for _, v := range stm.Supports() {
 		for _, pr := range v.Products {
 			if pr.Alias == alias {
 				return pr.ID, nil
@@ -274,7 +274,7 @@ func (p *stm32f0) ProductId(alias string) (uint16, error) {
 	return 0, fmt.Errorf("stm32f0: unknown product %s", alias)
 }
 
-func (p *stm32f0) Setup() DeviceSetup {
+func (stm *stm32f0) Setup() DeviceSetup {
 	return DeviceSetup{
 		Config:           1,
 		Interface:        0,
@@ -284,7 +284,7 @@ func (p *stm32f0) Setup() DeviceSetup {
 	}
 }
 
-func (p *stm32f0) Drive(c *Client) {
+func (stm *stm32f0) Drive(c *Client) {
 	if c.Debug() {
 		log.Println("stm32f0: driving")
 	}
@@ -292,24 +292,24 @@ func (p *stm32f0) Drive(c *Client) {
 	c.SetIdle(0, 0)
 
 	// TODO: how to set optimised to true? Another interface function SetOptimised?
-	if p.optimised {
-		p.totalErrors = 2
+	if stm.optimised {
+		stm.totalErrors = 2
 	}
 
-	p.commandListener(c)
+	stm.commandListener(c)
 }
 
 // wasTokenPlaced will update the tokenPlaced state if the return of the STM32F0_GetTokenUid
 // message was not an error. Its purpose is to notify us when a token has been placed on the NFC
 // portal. If it detects a token being placed, it will return true.
 // wasTokenPlaced is thread safe.
-func (p *stm32f0) wasTokenPlaced() bool {
-	p.tokenMu.Lock()
-	defer p.tokenMu.Unlock()
+func (stm *stm32f0) wasTokenPlaced() bool {
+	stm.tokenMu.Lock()
+	defer stm.tokenMu.Unlock()
 
-	p.tokenErrors = 0
-	if !p.tokenPlaced {
-		p.tokenPlaced = true
+	stm.tokenErrors = 0
+	if !stm.tokenPlaced {
+		stm.tokenPlaced = true
 		return true
 	}
 
@@ -321,19 +321,19 @@ func (p *stm32f0) wasTokenPlaced() bool {
 // token is placed on the portal. Its purpose is to notify us when a token has been removed from
 // the NFC portal. If it detects a token removal, it will return true.
 // wasTokenRemoved is thread safe.
-func (p *stm32f0) wasTokenRemoved() bool {
-	p.tokenMu.Lock()
-	defer p.tokenMu.Unlock()
+func (stm *stm32f0) wasTokenRemoved() bool {
+	stm.tokenMu.Lock()
+	defer stm.tokenMu.Unlock()
 
 	// Once a token is placed on the portal, we will be polling only with message
 	// STM32F0_GetTokenUid which will alternate between an error and a token present in that order.
 	// As soon as we know a token is present on the portal we need to check for at least
 	// consecutive errors to know the token has been removed again!
 	// The original software turns the front LED off after 10 consecutive errors.
-	if p.tokenPlaced {
-		if p.tokenErrors++; p.tokenErrors >= p.totalErrors {
-			p.tokenPlaced = false
-			p.tokenErrors = 0
+	if stm.tokenPlaced {
+		if stm.tokenErrors++; stm.tokenErrors >= stm.totalErrors {
+			stm.tokenPlaced = false
+			stm.tokenErrors = 0
 			return true
 		}
 	}
@@ -343,14 +343,14 @@ func (p *stm32f0) wasTokenRemoved() bool {
 }
 
 // isTokenPlaced returns the value of tokenPlaced in a thread safe way.
-func (p *stm32f0) isTokenPlaced() bool {
-	p.tokenMu.Lock()
-	defer p.tokenMu.Unlock()
-	return p.tokenPlaced
+func (stm *stm32f0) isTokenPlaced() bool {
+	stm.tokenMu.Lock()
+	defer stm.tokenMu.Unlock()
+	return stm.tokenPlaced
 }
 
 // getDriverCommandForClientCommand returns the corresponding DriverCommand for the given ClientCommand.
-func (p *stm32f0) getDriverCommandForClientCommand(cc ClientCommand) (DriverCommand, error) {
+func (stm *stm32f0) getDriverCommandForClientCommand(cc ClientCommand) (DriverCommand, error) {
 	dc, ok := map[ClientCommand]DriverCommand{
 		GetDeviceName:   STM32F0_GetDeviceName,
 		GetHardwareInfo: STM32F0_GetHardwareInfo,
@@ -370,12 +370,12 @@ func (p *stm32f0) getDriverCommandForClientCommand(cc ClientCommand) (DriverComm
 // execute a single three-step poll sequence to check if a token is placed on the device.
 // commandListener uses a ticker to ensure command intervals adhere to the poll interval as defined
 // by the device.
-func (p *stm32f0) commandListener(c *Client) {
+func (stm *stm32f0) commandListener(c *Client) {
 	ticker := time.NewTicker(c.PollInterval())
 	defer ticker.Stop()
 
-	if p.optimised {
-		p.sendCommand(c, STM32F0_RFFieldOn, []byte{})
+	if stm.optimised {
+		stm.sendCommand(c, STM32F0_RFFieldOn, []byte{})
 	}
 
 	for {
@@ -383,20 +383,20 @@ func (p *stm32f0) commandListener(c *Client) {
 		case <-ticker.C:
 			select {
 			case cmd := <-c.Commands():
-				if dc, err := p.getDriverCommandForClientCommand(cmd.Command); err != nil {
+				if dc, err := stm.getDriverCommandForClientCommand(cmd.Command); err != nil {
 					c.PublishEvent(NewEvent(UnknownCommand, []byte{}))
 				} else {
-					p.sendCommand(c, dc, cmd.Arguments)
+					stm.sendCommand(c, dc, cmd.Arguments)
 				}
 			default:
-				p.pollForToken(c, ticker)
+				stm.pollForToken(c, ticker)
 			}
 		case <-c.Terminate():
 			// TODO: actually make this work properly, seems we're not cleanly shutting down!
 			// Ensure the NFC field is off before termination.
-			p.sendCommand(c, STM32F0_RFFieldOff, []byte{})
+			stm.sendCommand(c, STM32F0_RFFieldOff, []byte{})
 			// Ensure front LED is off before termination.
-			p.sendCommand(c, STM32F0_SetLedState, []byte{STM32F0_LedOff})
+			stm.sendCommand(c, STM32F0_SetLedState, []byte{STM32F0_LedOff})
 			return
 		}
 	}
@@ -407,10 +407,10 @@ func (p *stm32f0) commandListener(c *Client) {
 // experimenting, this can be optimised to a single message on each poll.
 // When a token is detected, it will read the token contents  and send a TokenDetected event to the
 // client.
-func (p *stm32f0) pollForToken(c *Client, ticker *time.Ticker) {
-	if p.optimised {
-		res, isErr := p.sendCommand(c, STM32F0_GetTokenUid, []byte{})
-		p.handleGetTokenUidReturn(c, res, isErr)
+func (stm *stm32f0) pollForToken(c *Client, ticker *time.Ticker) {
+	if stm.optimised {
+		res, isErr := stm.sendCommand(c, STM32F0_GetTokenUid, []byte{})
+		stm.handleGetTokenUidReturn(c, res, isErr)
 		return
 	}
 
@@ -420,10 +420,10 @@ func (p *stm32f0) pollForToken(c *Client, ticker *time.Ticker) {
 	for i := 0; i < 3; i++ {
 		select {
 		case <-ticker.C:
-			next, cmd = p.getNextPollCommand(next)
-			res, isErr := p.sendCommand(c, cmd, []byte{})
+			next, cmd = stm.getNextPollCommand(next)
+			res, isErr := stm.sendCommand(c, cmd, []byte{})
 			if cmd == STM32F0_GetTokenUid {
-				p.handleGetTokenUidReturn(c, res, isErr)
+				stm.handleGetTokenUidReturn(c, res, isErr)
 			}
 		case <-c.Terminate():
 			return
@@ -432,23 +432,23 @@ func (p *stm32f0) pollForToken(c *Client, ticker *time.Ticker) {
 }
 
 // handleGetTokenUidReturn will handle the result returned by the STM32F0_GetTokenUid command.
-func (p *stm32f0) handleGetTokenUidReturn(c *Client, res []byte, isErr bool) {
+func (stm *stm32f0) handleGetTokenUidReturn(c *Client, res []byte, isErr bool) {
 	if isErr {
-		if p.wasTokenRemoved() {
-			p.sendCommand(c, STM32F0_SetLedState, []byte{STM32F0_LedOff})
+		if stm.wasTokenRemoved() {
+			stm.sendCommand(c, STM32F0_SetLedState, []byte{STM32F0_LedOff})
 		}
-	} else if p.wasTokenPlaced() {
-		p.handleToken(c, res)
+	} else if stm.wasTokenPlaced() {
+		stm.handleToken(c, res)
 	}
 }
 
 // getNextPollCommand returns the correct DriverCommand given the current poll sequence position.
-func (p *stm32f0) getNextPollCommand(pos int) (int, DriverCommand) {
+func (stm *stm32f0) getNextPollCommand(pos int) (int, DriverCommand) {
 	// This polling sequence is what the original software does.
 	sequence := []DriverCommand{STM32F0_RFFieldOff, STM32F0_RFFieldOn, STM32F0_GetTokenUid}
 
 	// Basic poll when a token is present on the portal.
-	if p.isTokenPlaced() {
+	if stm.isTokenPlaced() {
 		return 0, sequence[2]
 	}
 
@@ -463,7 +463,7 @@ func (p *stm32f0) getNextPollCommand(pos int) (int, DriverCommand) {
 }
 
 // handleToken processes the token placed on the NFC portal.
-func (p *stm32f0) handleToken(c *Client, buff []byte) {
+func (stm *stm32f0) handleToken(c *Client, buff []byte) {
 	l := int(buff[4])    // Byte 4 in the sequence is the NUID length which can be 4 or 7 bytes long.
 	s := 5               // The NUID starts at byte 5.
 	uid := buff[s : s+l] // Read the full NUID starting on byte 5 with length l.
@@ -473,7 +473,7 @@ func (p *stm32f0) handleToken(c *Client, buff []byte) {
 	if c.Debug() {
 		log.Println("stm32f0: enabling front led")
 	}
-	p.sendCommand(c, STM32F0_SetLedState, []byte{STM32F0_LedOn})
+	stm.sendCommand(c, STM32F0_SetLedState, []byte{STM32F0_LedOn})
 
 	//MsgOneAfterTokenDetect = []byte{0x20, 0xff}
 	//  set led to full brightness
@@ -526,7 +526,7 @@ func (p *stm32f0) handleToken(c *Client, buff []byte) {
 				args = append([]byte{0x00}, key...)
 			}
 
-			r, _ := p.sendCommand(c, cmd, args)
+			r, _ := stm.sendCommand(c, cmd, args)
 
 			switch cmd {
 			case STM32F0_Read:
@@ -538,15 +538,15 @@ func (p *stm32f0) handleToken(c *Client, buff []byte) {
 	}
 
 	// Actual read.
-	token, err := p.readToken(c)
+	token, err := stm.readToken(c)
 	if err != nil {
 		if c.Debug() {
 			log.Printf("%s", err)
 		}
 		c.PublishEvent(NewEvent(TokenTagDataError, token))
-	} else if !p.optimised {
+	} else if !stm.optimised {
 		// The original software reads the token twice, probably for validation purposes.
-		verify, _ := p.readToken(c)
+		verify, _ := stm.readToken(c)
 		if !bytes.Equal(token, verify) {
 			c.PublishEvent(NewEvent(TokenTagDataError, token))
 			return
@@ -560,14 +560,14 @@ func (p *stm32f0) handleToken(c *Client, buff []byte) {
 }
 
 // readToken actually reads the token data and returns it as a byte slice.
-func (p *stm32f0) readToken(c *Client) ([]byte, error) {
+func (stm *stm32f0) readToken(c *Client) ([]byte, error) {
 	var i byte
 	token := make([]byte, 540)
 	n := 0
 	for i = 0; i < 0x88; i += 4 {
 		pageErrors := 0
 	read:
-		res, isErr := p.sendCommand(c, STM32F0_Read, []byte{i})
+		res, isErr := stm.sendCommand(c, STM32F0_Read, []byte{i})
 		if isErr {
 			if pageErrors++; pageErrors > 2 {
 				return token, fmt.Errorf("stm32f0: failed to read page %#02x", i)
@@ -587,7 +587,7 @@ func (p *stm32f0) readToken(c *Client) ([]byte, error) {
 
 // getEventForDriverCommand returns the corresponding EventType for the given DriverCommand.
 // If there is no event for the given DriverCommand, NoEvent will be returned.
-func (p *stm32f0) getEventForDriverCommand(dc DriverCommand, args []byte) EventType {
+func (stm *stm32f0) getEventForDriverCommand(dc DriverCommand, args []byte) EventType {
 	if dc == STM32F0_SetLedState {
 		if args[0] == STM32F0_LedOff {
 			return FrontLedOff
@@ -605,13 +605,13 @@ func (p *stm32f0) getEventForDriverCommand(dc DriverCommand, args []byte) EventT
 // sendCommand sends a command to the device and reads the response. It will return the response
 // together with a boolean value indicating if the response contains an error (first two bytes 0x01
 // 0x02) or not.
-func (p *stm32f0) sendCommand(c *Client, cmd DriverCommand, args []byte) ([]byte, bool) {
+func (stm *stm32f0) sendCommand(c *Client, cmd DriverCommand, args []byte) ([]byte, bool) {
 	maxSize := c.MaxPacketSize()
 
 	// Send command.
 	usbCmd := NewUsbCommand(
 		cmd,
-		p.createArguments(maxSize-1, args),
+		stm.createArguments(maxSize-1, args),
 	)
 	if c.Debug() {
 		log.Println("stm32f0: sending command:")
@@ -632,7 +632,7 @@ func (p *stm32f0) sendCommand(c *Client, cmd DriverCommand, args []byte) ([]byte
 			fmt.Fprintln(os.Stderr, hex.Dump(b))
 		}
 	}
-	if event := p.getEventForDriverCommand(cmd, args); event != NoEvent {
+	if event := stm.getEventForDriverCommand(cmd, args); event != NoEvent {
 		c.PublishEvent(NewEvent(event, b))
 	}
 
@@ -640,7 +640,7 @@ func (p *stm32f0) sendCommand(c *Client, cmd DriverCommand, args []byte) ([]byte
 }
 
 // createArguments builds the arguments for a command and pads the remaining bytes with 0xcd.
-func (p *stm32f0) createArguments(size int, args []byte) []byte {
+func (stm *stm32f0) createArguments(size int, args []byte) []byte {
 	packet := make([]byte, size)
 	// Fill out packet with 0xcd. This is not needed at all. Using 0x00 works just as well but
 	// let's stick to how the original software does it. One never knows what might change in the
