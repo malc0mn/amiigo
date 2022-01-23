@@ -19,7 +19,7 @@ func TestModelInfo_ID(t *testing.T) {
 	want := []byte{0x05, 0xc0, 0x00, 0x00, 0x00, 0x06, 0x00, 0x02}
 
 	if !bytes.Equal(got, want) {
-		t.Errorf("got %#x, want %#x", got, want)
+		t.Errorf("got %#08x, want %#08x", got, want)
 	}
 }
 

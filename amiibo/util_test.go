@@ -71,7 +71,7 @@ func TestGeneratePassword(t *testing.T) {
 	want := [4]byte{0xb2, 0xf0, 0x7b, 0x0c}
 
 	if got != want {
-		t.Errorf("got %#x, want #%#x", got, want)
+		t.Errorf("got %#04x, want #%#04x", got, want)
 	}
 }
 
@@ -80,6 +80,6 @@ func TestPasswordAcknowledge(t *testing.T) {
 	want := [2]byte{0x80, 0x80}
 
 	if got != want {
-		t.Errorf("got %#x, want #%#x", got, want)
+		t.Errorf("got %#02x, want #%#02x", got, want)
 	}
 }

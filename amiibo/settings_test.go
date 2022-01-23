@@ -39,7 +39,7 @@ func TestSettings_TitleID(t *testing.T) {
 	want := []byte{0x82, 0xbe, 0xca, 0x41, 0x95, 0xbc, 0x5f, 0xe0}
 
 	if !bytes.Equal(got, want) {
-		t.Errorf("got %#x want %#x", got, want)
+		t.Errorf("got %#08x want %#08x", got, want)
 	}
 }
 
@@ -61,7 +61,7 @@ func TestSettings_ApplicationID(t *testing.T) {
 	want := []byte{0xbd, 0x03, 0x36, 0xf8}
 
 	if !bytes.Equal(got, want) {
-		t.Errorf("got %#x want %#x", got, want)
+		t.Errorf("got %#04x want %#04x", got, want)
 	}
 }
 
@@ -72,7 +72,7 @@ func TestSettings_Unknown1(t *testing.T) {
 	want := []byte{0x3a, 0x24}
 
 	if !bytes.Equal(got, want) {
-		t.Errorf("got %#x want %#x", got, want)
+		t.Errorf("got %#02x want %#02x", got, want)
 	}
 }
 func TestSettings_Unknown2(t *testing.T) {
@@ -85,7 +85,7 @@ func TestSettings_Unknown2(t *testing.T) {
 	}
 
 	if !bytes.Equal(got, want) {
-		t.Errorf("got %#x want %#x", got, want)
+		t.Errorf("got %#032x want %#032x", got, want)
 	}
 }
 
