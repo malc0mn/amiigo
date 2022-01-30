@@ -1,0 +1,973 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CheatList>
+    <Games>
+        <Game><Name>Super Smash Bros. (WiiU)</Name><idx>0</idx></Game>
+        <Game><Name>Mario Party 10</Name><idx>1</idx></Game>
+        <Game><Name>Super Smash Bros. (3DS)</Name><idx>2</idx></Game>
+        <Game><Name>Mario Tennis Ultra Smash</Name><idx>3</idx></Game>
+
+        <Game><Name>Shovel Knight (WiiU)</Name><idx>7</idx></Game>
+        <Game><Name>Shovel Knight (3DS)</Name><idx>8</idx></Game>
+
+        <Game><Name>Zelda: Breath of the Wild</Name><idx>9</idx></Game>
+
+        <Game><Name>Random Serial Number</Name><idx>98</idx></Game>
+        <Game><Name>Reset Game Data</Name><idx>99</idx></Game>
+    </Games>
+
+    <GameIds>
+        <Ids>0,1,2,3,4,5,6,7,8,9,98,99</Ids>
+    </GameIds>
+
+    <Characters>
+        <Toy><Name>Mario</Name><idx>0x0000000002380602</idx></Toy>
+        <Toy><Name>Bowser</Name><idx>0x0005FF00023A0702</idx></Toy>
+        <Toy><Name>Donkey Kong</Name><idx>0x0008FF00023B0702</idx></Toy>
+        <Toy><Name>Chibi Robo</Name><idx>0x22C00000003A0202</idx></Toy>
+        <Toy><Name>Yoshi</Name><idx>0x0003010200410302</idx></Toy>
+        <Toy><Name>Poochy</Name><idx>0x00800102035D0302</idx></Toy>
+        <Toy><Name>Shovel Knight</Name><idx>0x35C0000002500A02</idx></Toy>
+        <Toy><Name>Mewtwo</Name><idx>0x1D000001025C0D02</idx></Toy>
+        <Toy><Name>Megaman</Name><idx>0x3480000002580002</idx></Toy>
+        <Toy><Name>Kirby</Name><idx>0x1F00000002540C02</idx></Toy>
+        <Toy><Name>Meta Knight</Name><idx>0x1F01000002550C02</idx></Toy>
+        <Toy><Name>King Dedede</Name><idx>0x1F02000002560C02</idx></Toy>
+        <Toy><Name>Waddle Dee</Name><idx>0x1F03000002570C02</idx></Toy>
+        <Toy><Name>Male Hunter</Name><idx>0x3500010002E10F02</idx></Toy>
+        <Toy><Name>Female Hunter</Name><idx>0x3500020002E20F02</idx></Toy>
+        <Toy><Name>Nabiru</Name><idx>0x3501000002E30F02</idx></Toy>
+        <Toy><Name>Qurupeco/Dan</Name><idx>0x3504010002E60F02</idx></Toy>
+        <Toy><Name>Barioth/Ayuria</Name><idx>0x3503010002E50F02</idx></Toy>
+        <Toy><Name>Rathian/Cheval</Name><idx>0x3502010002E40F02</idx></Toy>
+        <Toy><Name>FE - Alm</Name><idx>0x2106000003601202</idx></Toy>
+        <Toy><Name>FE - Celica</Name><idx>0x2107000003611202</idx></Toy>
+        <Toy><Name>FE - Chrom</Name><idx>0x21080000036F1202</idx></Toy>
+        <Toy><Name>FE - Corrin</Name><idx>0x21050000025A0002</idx></Toy>
+        <Toy><Name>FE - Corrin (P2)</Name><idx>0x2105010003630002</idx></Toy>
+        <Toy><Name>FE - Ike</Name><idx>0x2101000000180002</idx></Toy>
+        <Toy><Name>FE - Lucina</Name><idx>0x2102000000290002</idx></Toy>
+        <Toy><Name>FE - Marth</Name><idx>0x21000000000B0002</idx></Toy>
+        <Toy><Name>FE - Robin</Name><idx>0x21030000002A0002</idx></Toy>
+        <Toy><Name>FE - Roy</Name><idx>0x2104000002520002</idx></Toy>
+        <Toy><Name>FE - Tiki</Name><idx>0x2109000003701202</idx></Toy>
+        <Toy><Name>Qbby</Name><idx>0x1F400000035E1002</idx></Toy>
+        <Toy><Name>Pikmin</Name><idx>0x06420000035F1102</idx></Toy>
+        <Toy><Name>Odyssey - Mario Suit</Name><idx>0x0000000003710102</idx></Toy>
+        <Toy><Name>Odyssey - Peach Wedding</Name><idx>0x0002000003720102</idx></Toy>
+        <Toy><Name>Odyssey - Bowser Suit</Name><idx>0x0005000003730102</idx></Toy>
+        <Toy><Name>Odyssey - Gold Mario</Name><idx>0x00000000003C0102</idx></Toy>
+        <Toy><Name>SSB - Donkey Kong</Name><idx>0x0008000000030002</idx></Toy>
+        <Toy><Name>SSB - Fox</Name><idx>0x0580000000050002</idx></Toy>
+        <Toy><Name>SSB - Kirby</Name><idx>0x1F000000000A0002</idx></Toy>
+        <Toy><Name>SSB - Link</Name><idx>0x0100000000040002</idx></Toy>
+        <Toy><Name>SSB - Mario</Name><idx>0x0000000000000002</idx></Toy>
+        <Toy><Name>SSB - Marth</Name><idx>0x21000000000B0002</idx></Toy>
+        <Toy><Name>SSB - Peach</Name><idx>0x0002000000010002</idx></Toy>
+        <Toy><Name>SSB - Pikachu</Name><idx>0x1919000000090002</idx></Toy>
+        <Toy><Name>SSB - Samus</Name><idx>0x05C0000000060002</idx></Toy>
+        <Toy><Name>SSB - Villager</Name><idx>0x0180000000080002</idx></Toy>
+        <Toy><Name>SSB - Wii Fit Trainer</Name><idx>0x0700000000070002</idx></Toy>
+        <Toy><Name>SSB - Yoshi</Name><idx>0x0003000000020002</idx></Toy>
+        <Toy><Name>SSB - Captain Falcon</Name><idx>0x0600000000120002</idx></Toy>
+        <Toy><Name>SSB - Diddy Kong</Name><idx>0x00090000000D0002</idx></Toy>
+        <Toy><Name>SSB - Little Mac</Name><idx>0x06C00000000F0002</idx></Toy>
+        <Toy><Name>SSB - Luigi</Name><idx>0x00010000000C0002</idx></Toy>
+        <Toy><Name>SSB - Pit</Name><idx>0x0740000000100002</idx></Toy>
+        <Toy><Name>SSB - Zelda</Name><idx>0x01010000000E0002</idx></Toy>
+        <Toy><Name>SSB - Bowser</Name><idx>0x0005000000140002</idx></Toy>
+        <Toy><Name>SSB - Ike</Name><idx>0x2101000000180002</idx></Toy>
+        <Toy><Name>SSB - Lucario</Name><idx>0x1AC0000000110002</idx></Toy>
+        <Toy><Name>SSB - King Dedede</Name><idx>0x1F02000000280002</idx></Toy>
+        <Toy><Name>SSB - Megaman</Name><idx>0x3480000000310002</idx></Toy>
+        <Toy><Name>SSB - Meta Knight</Name><idx>0x1F01000000270002</idx></Toy>
+        <Toy><Name>SSB - Rosalina and Luma</Name><idx>0x0004010000130002</idx></Toy>
+        <Toy><Name>SSB - Shiek</Name><idx>0x0101010000170002</idx></Toy>
+        <Toy><Name>SSB - Shulk</Name><idx>0x22400000002B0002</idx></Toy>
+        <Toy><Name>SSB - Sonic</Name><idx>0x3200000000300002</idx></Toy>
+        <Toy><Name>SSB - Toon Link</Name><idx>0x0100010000160002</idx></Toy>
+        <Toy><Name>SSB - Charizard</Name><idx>0x1906000000240002</idx></Toy>
+        <Toy><Name>SSB - Greninja</Name><idx>0x1B92000000250002</idx></Toy>
+        <Toy><Name>SSB - Jigglypuff</Name><idx>0x1927000000260002</idx></Toy>
+        <Toy><Name>SSB - Ness</Name><idx>0x22800000002C0002</idx></Toy>
+        <Toy><Name>SSB - Lucina</Name><idx>0x2102000000290002</idx></Toy>
+        <Toy><Name>SSB - Pac-man</Name><idx>0x3340000000320002</idx></Toy>
+        <Toy><Name>SSB - Robin</Name><idx>0x21030000002A0002</idx></Toy>
+        <Toy><Name>SSB - Wario</Name><idx>0x00070000001A0002</idx></Toy>
+        <Toy><Name>SSB - Bowser Jr.</Name><idx>0x0006000000150002</idx></Toy>
+        <Toy><Name>SSB - Dark Pit</Name><idx>0x0741000000200002</idx></Toy>
+        <Toy><Name>SSB - Dr. Mario</Name><idx>0x0000010000190002</idx></Toy>
+        <Toy><Name>SSB - Ganondorf</Name><idx>0x01020100001B0002</idx></Toy>
+        <Toy><Name>SSB - Olimar</Name><idx>0x06400100001E0002</idx></Toy>
+        <Toy><Name>SSB - Palutena</Name><idx>0x07420000001F0002</idx></Toy>
+        <Toy><Name>SSB - Zero Suit Samus</Name><idx>0x05C00100001D0002</idx></Toy>
+        <Toy><Name>SSB - Duck Hunt</Name><idx>0x07820000002F0002</idx></Toy>
+        <Toy><Name>SSB - Mr. G&amp;W</Name><idx>0x07800000002D0002</idx></Toy>
+        <Toy><Name>SSB - R.O.B., Famicom</Name><idx>0x07810000002E0002</idx></Toy>
+        <Toy><Name>SSB - R.O.B., NES</Name><idx>0x0781000000330002</idx></Toy>
+        <Toy><Name>SSB - Mii Brawler</Name><idx>0x07C0000000210002</idx></Toy>
+        <Toy><Name>SSB - Mii Gunner</Name><idx>0x07C0020000230002</idx></Toy>
+        <Toy><Name>SSB - Mii Swordfighter</Name><idx>0x07C0010000220002</idx></Toy>
+        <Toy><Name>SSB - Falco</Name><idx>0x05810000001C0002</idx></Toy>
+        <Toy><Name>SSB - Mewtwo</Name><idx>0x19960000023D0002</idx></Toy>
+        <Toy><Name>SSB - Lucas</Name><idx>0x2281000002510002</idx></Toy>
+        <Toy><Name>SSB - Roy</Name><idx>0x2104000002520002</idx></Toy>
+        <Toy><Name>SSB - Ryu</Name><idx>0x34C0000002530002</idx></Toy>
+        <Toy><Name>SSB - Cloud Strife</Name><idx>0x3600010003620002</idx></Toy>
+        <Toy><Name>SSB - Corrin</Name><idx>0x21050000025A0002</idx></Toy>
+        <Toy><Name>SSB - Bayonetta</Name><idx>0x32400000025B0002</idx></Toy>
+        <Toy><Name>SMB - Bowser</Name><idx>0x0005000000390102</idx></Toy>
+        <Toy><Name>SMB - Luigi</Name><idx>0x0001000000350102</idx></Toy>
+        <Toy><Name>SMB - Mario</Name><idx>0x0000000000340102</idx></Toy>
+        <Toy><Name>SMB - Peach</Name><idx>0x0002000000360102</idx></Toy>
+        <Toy><Name>SMB - Toad</Name><idx>0x000A000000380102</idx></Toy>
+        <Toy><Name>SMB - Yoshi</Name><idx>0x0003000000370102</idx></Toy>
+        <Toy><Name>SMB - Boo</Name><idx>0x0017000002680102</idx></Toy>
+        <Toy><Name>SMB - Daisy</Name><idx>0x0013000002660102</idx></Toy>
+        <Toy><Name>SMB - Diddy Kong</Name><idx>0x0009000002650102</idx></Toy>
+        <Toy><Name>SMB - Donkey Kong</Name><idx>0x0008000002640102</idx></Toy>
+        <Toy><Name>SMB - Rosalina</Name><idx>0x0004000002620102</idx></Toy>
+        <Toy><Name>SMB - Waluigi</Name><idx>0x0014000002670102</idx></Toy>
+        <Toy><Name>SMB - Wario</Name><idx>0x0007000002630102</idx></Toy>
+        <Toy><Name>MSSS - Mario (Soccer)</Name><idx>0x09C0010102690E02</idx></Toy>
+        <Toy><Name>MSSS - Mario (Baseball)</Name><idx>0x09C00201026A0E02</idx></Toy>
+        <Toy><Name>MSSS - Mario (Tennis)</Name><idx>0x09C00301026B0E02</idx></Toy>
+        <Toy><Name>MSSS - Mario (Golf)</Name><idx>0x09C00401026C0E02</idx></Toy>
+        <Toy><Name>MSSS - Mario (Horse Racing)</Name><idx>0x09C00501026D0E02</idx></Toy>
+        <Toy><Name>MSSS - Luigi (Soccer)</Name><idx>0x09C10101026E0E02</idx></Toy>
+        <Toy><Name>MSSS - Luigi (Baseball)</Name><idx>0x09C10201026F0E02</idx></Toy>
+        <Toy><Name>MSSS - Luigi (Tennis)</Name><idx>0x09C1030102700E02</idx></Toy>
+        <Toy><Name>MSSS - Luigi (Golf)</Name><idx>0x09C1040102710E02</idx></Toy>
+        <Toy><Name>MSSS - Luigi (Horse Racing)</Name><idx>0x09C1050102720E02</idx></Toy>
+        <Toy><Name>MSSS - Peach (Soccer)</Name><idx>0x09C2010102730E02</idx></Toy>
+        <Toy><Name>MSSS - Peach (Baseball)</Name><idx>0x09C2020102740E02</idx></Toy>
+        <Toy><Name>MSSS - Peach (Tennis)</Name><idx>0x09C2030102750E02</idx></Toy>
+        <Toy><Name>MSSS - Peach (Golf)</Name><idx>0x09C2040102760E02</idx></Toy>
+        <Toy><Name>MSSS - Peach (Horse Racing)</Name><idx>0x09C2050102770E02</idx></Toy>
+        <Toy><Name>MSSS - Daisy (Soccer)</Name><idx>0x09C3010102780E02</idx></Toy>
+        <Toy><Name>MSSS - Daisy (Baseball)</Name><idx>0x09C3020102790E02</idx></Toy>
+        <Toy><Name>MSSS - Daisy (Tennis)</Name><idx>0x09C30301027A0E02</idx></Toy>
+        <Toy><Name>MSSS - Daisy (Golf)</Name><idx>0x09C30401027B0E02</idx></Toy>
+        <Toy><Name>MSSS - Daisy (Horse Racing)</Name><idx>0x09C30501027C0E02</idx></Toy>
+        <Toy><Name>MSSS - Yoshi (Soccer)</Name><idx>0x09C40101027D0E02</idx></Toy>
+        <Toy><Name>MSSS - Yoshi (Baseball)</Name><idx>0x09C40201027E0E02</idx></Toy>
+        <Toy><Name>MSSS - Yoshi (Tennis)</Name><idx>0x09C40301027F0E02</idx></Toy>
+        <Toy><Name>MSSS - Yoshi (Golf)</Name><idx>0x09C4040102800E02</idx></Toy>
+        <Toy><Name>MSSS - Yoshi (Horse Racing)</Name><idx>0x09C4050102810E02</idx></Toy>
+        <Toy><Name>MSSS - Wario (Soccer)</Name><idx>0x09C5010102820E02</idx></Toy>
+        <Toy><Name>MSSS - Wario (Baseball)</Name><idx>0x09C5020102830E02</idx></Toy>
+        <Toy><Name>MSSS - Wario (Tennis)</Name><idx>0x09C5030102840E02</idx></Toy>
+        <Toy><Name>MSSS - Wario (Golf)</Name><idx>0x09C5040102850E02</idx></Toy>
+        <Toy><Name>MSSS - Wario (Horse Racing)</Name><idx>0x09C5050102860E02</idx></Toy>
+        <Toy><Name>MSSS - Waluigi (Soccer)</Name><idx>0x09C6010102870E02</idx></Toy>
+        <Toy><Name>MSSS - Waluigi (Baseball)</Name><idx>0x09C6020102880E02</idx></Toy>
+        <Toy><Name>MSSS - Waluigi (Tennis)</Name><idx>0x09C6030102890E02</idx></Toy>
+        <Toy><Name>MSSS - Waluigi (Golf)</Name><idx>0x09C60401028A0E02</idx></Toy>
+        <Toy><Name>MSSS - Waluigi (Horse Racing)</Name><idx>0x09C60501028B0E02</idx></Toy>
+        <Toy><Name>MSSS - Donkey Kong (Soccer)</Name><idx>0x09C70101028C0E02</idx></Toy>
+        <Toy><Name>MSSS - Donkey Kong (Baseball)</Name><idx>0x09C70201028D0E02</idx></Toy>
+        <Toy><Name>MSSS - Donkey Kong (Tennis)</Name><idx>0x09C70301028E0E02</idx></Toy>
+        <Toy><Name>MSSS - Donkey Kong (Golf)</Name><idx>0x09C70401028F0E02</idx></Toy>
+        <Toy><Name>MSSS - Donkey Kong (Horse Racing)</Name><idx>0x09C7050102900E02</idx></Toy>
+        <Toy><Name>MSSS - Diddy Kong (Soccer)</Name><idx>0x09C8010102910E02</idx></Toy>
+        <Toy><Name>MSSS - Diddy Kong (Baseball)</Name><idx>0x09C8020102920E02</idx></Toy>
+        <Toy><Name>MSSS - Diddy Kong (Tennis)</Name><idx>0x09C8030102930E02</idx></Toy>
+        <Toy><Name>MSSS - Diddy Kong (Golf)</Name><idx>0x09C8040102940E02</idx></Toy>
+        <Toy><Name>MSSS - Diddy Kong (Horse Racing)</Name><idx>0x09C8050102950E02</idx></Toy>
+        <Toy><Name>MSSS - Bowser (Soccer)</Name><idx>0x09C9010102960E02</idx></Toy>
+        <Toy><Name>MSSS - Bowser (Baseball)</Name><idx>0x09C9020102970E02</idx></Toy>
+        <Toy><Name>MSSS - Bowser (Tennis)</Name><idx>0x09C9030102980E02</idx></Toy>
+        <Toy><Name>MSSS - Bowser (Golf)</Name><idx>0x09C9040102990E02</idx></Toy>
+        <Toy><Name>MSSS - Bowser (Horse Racing)</Name><idx>0x09C90501029A0E02</idx></Toy>
+        <Toy><Name>MSSS - Bowser Jr. (Soccer)</Name><idx>0x09CA0101029B0E02</idx></Toy>
+        <Toy><Name>MSSS - Bowser Jr. (Baseball)</Name><idx>0x09CA0201029C0E02</idx></Toy>
+        <Toy><Name>MSSS - Bowser Jr. (Tennis)</Name><idx>0x09CA0301029D0E02</idx></Toy>
+        <Toy><Name>MSSS - Bowser Jr. (Golf)</Name><idx>0x09CA0401029E0E02</idx></Toy>
+        <Toy><Name>MSSS - Bowser Jr. (Horse Racing)</Name><idx>0x09CA0501029F0E02</idx></Toy>
+        <Toy><Name>MSSS - Boo (Soccer)</Name><idx>0x09CB010102A00E02</idx></Toy>
+        <Toy><Name>MSSS - Boo (Baseball)</Name><idx>0x09CB020102A10E02</idx></Toy>
+        <Toy><Name>MSSS - Boo (Tennis)</Name><idx>0x09CB030102A20E02</idx></Toy>
+        <Toy><Name>MSSS - Boo (Golf)</Name><idx>0x09CB040102A30E02</idx></Toy>
+        <Toy><Name>MSSS - Boo (Horse Racing)</Name><idx>0x09CB050102A40E02</idx></Toy>
+        <Toy><Name>MSSS - Baby Mario (Soccer)</Name><idx>0x09CC010102A50E02</idx></Toy>
+        <Toy><Name>MSSS - Baby Mario (Baseball)</Name><idx>0x09CC020102A60E02</idx></Toy>
+        <Toy><Name>MSSS - Baby Mario (Tennis)</Name><idx>0x09CC030102A70E02</idx></Toy>
+        <Toy><Name>MSSS - Baby Mario (Golf)</Name><idx>0x09CC040102A80E02</idx></Toy>
+        <Toy><Name>MSSS - Baby Mario (Horse Racing)</Name><idx>0x09CC050102A90E02</idx></Toy>
+        <Toy><Name>MSSS - Baby Luigi (Soccer)</Name><idx>0x09CD010102AA0E02</idx></Toy>
+        <Toy><Name>MSSS - Baby Luigi (Baseball)</Name><idx>0x09CD020102AB0E02</idx></Toy>
+        <Toy><Name>MSSS - Baby Luigi (Tennis)</Name><idx>0x09CD030102AC0E02</idx></Toy>
+        <Toy><Name>MSSS - Baby Luigi (Golf)</Name><idx>0x09CD040102AD0E02</idx></Toy>
+        <Toy><Name>MSSS - Baby Luigi (Horse Racing)</Name><idx>0x09CD050102AE0E02</idx></Toy>
+        <Toy><Name>MSSS - Birdo (Soccer)</Name><idx>0x09CE010102AF0E02</idx></Toy>
+        <Toy><Name>MSSS - Birdo (Baseball)</Name><idx>0x09CE020102B00E02</idx></Toy>
+        <Toy><Name>MSSS - Birdo (Tennis)</Name><idx>0x09CE030102B10E02</idx></Toy>
+        <Toy><Name>MSSS - Birdo (Golf)</Name><idx>0x09CE040102B20E02</idx></Toy>
+        <Toy><Name>MSSS - Birdo (Horse Racing)</Name><idx>0x09CE050102B30E02</idx></Toy>
+        <Toy><Name>MSSS - Rosalina (Soccer)</Name><idx>0x09CF010102B40E02</idx></Toy>
+        <Toy><Name>MSSS - Rosalina (Baseball)</Name><idx>0x09CF020102B50E02</idx></Toy>
+        <Toy><Name>MSSS - Rosalina (Tennis)</Name><idx>0x09CF030102B60E02</idx></Toy>
+        <Toy><Name>MSSS - Rosalina (Golf)</Name><idx>0x09CF040102B70E02</idx></Toy>
+        <Toy><Name>MSSS - Rosalina (Horse Racing)</Name><idx>0x09CF050102B80E02</idx></Toy>
+        <Toy><Name>MSSS - Metal Mario (Soccer)</Name><idx>0x09D0010102B90E02</idx></Toy>
+        <Toy><Name>MSSS - Metal Mario (Baseball)</Name><idx>0x09D0020102BA0E02</idx></Toy>
+        <Toy><Name>MSSS - Metal Mario (Tennis)</Name><idx>0x09D0030102BB0E02</idx></Toy>
+        <Toy><Name>MSSS - Metal Mario (Golf)</Name><idx>0x09D0040102BC0E02</idx></Toy>
+        <Toy><Name>MSSS - Metal Mario (Horse Racing)</Name><idx>0x09D0050102BD0E02</idx></Toy>
+        <Toy><Name>MSSS - Peach Pink Gold (Soccer)</Name><idx>0x09D1010102BE0E02</idx></Toy>
+        <Toy><Name>MSSS - Peach Pink Gold (Baseball)</Name><idx>0x09D1020102BF0E02</idx></Toy>
+        <Toy><Name>MSSS - Peach Pink Gold (Tennis)</Name><idx>0x09D1030102C00E02</idx></Toy>
+        <Toy><Name>MSSS - Peach Pink Gold (Golf)</Name><idx>0x09D1040102C10E02</idx></Toy>
+        <Toy><Name>MSSS - Peach Pink Gold (Horse Racing)</Name><idx>0x09D1050102C20E02</idx></Toy>
+        <Toy><Name>LOZ - Midna &amp; Wolf Link</Name><idx>0x01030000024F0902</idx></Toy>
+        <Toy><Name>LOZ - Link, OoT</Name><idx>0x01000000034B0902</idx></Toy>
+        <Toy><Name>LOZ - Link, 8-Bit</Name><idx>0x01000000034F0902</idx></Toy>
+        <Toy><Name>LOZ - Toon Link</Name><idx>0x0100010003500902</idx></Toy>
+        <Toy><Name>LOZ - Toon Zelda</Name><idx>0x0101000003520902</idx></Toy>
+        <Toy><Name>LOZ - BotW, Link - Archer</Name><idx>0x0100000003530902</idx></Toy>
+        <Toy><Name>LOZ - BotW, Link - Rider</Name><idx>0x0100000003540902</idx></Toy>
+        <Toy><Name>LOZ - BotW, Guardian</Name><idx>0x0140000003550902</idx></Toy>
+        <Toy><Name>LOZ - BotW, Zelda</Name><idx>0x0101000003560902</idx></Toy>
+        <Toy><Name>LOZ - Champ, Daruk</Name><idx>0x0105000003580902</idx></Toy>
+        <Toy><Name>LOZ - Champ, Urbosa</Name><idx>0x0106000003590902</idx></Toy>
+        <Toy><Name>LOZ - Champ, Mipha</Name><idx>0x01070000035A0902</idx></Toy>
+        <Toy><Name>LOZ - Champ, Revali</Name><idx>0x01080000035B0902</idx></Toy>
+        <Toy><Name>LOZ - BotW, Bokoblin</Name><idx>0x01410000035C0902</idx></Toy>
+        <Toy><Name>SPL - Splatoon Boy</Name><idx>0x08000200003F0402</idx></Toy>
+        <Toy><Name>SPL - Splatoon Girl</Name><idx>0x08000100003E0402</idx></Toy>
+        <Toy><Name>SPL - Splatoon Squid</Name><idx>0x0800030000400402</idx></Toy>
+        <Toy><Name>SPL - Callie</Name><idx>0x08010000025D0402</idx></Toy>
+        <Toy><Name>SPL - Marie</Name><idx>0x08020000025E0402</idx></Toy>
+        <Toy><Name>SPL - Pearl</Name><idx>0x0803000003760402</idx></Toy>
+        <Toy><Name>SPL - Marina</Name><idx>0x0804000003770402</idx></Toy>
+        <Toy><Name>SPL - Octoling Girl</Name><idx>0x08050100038e0402</idx></Toy>
+        <Toy><Name>SPL - Octoling Boy</Name><idx>0x08050200038f0402</idx></Toy>
+        <Toy><Name>SPL - Octopus</Name><idx>0x0805030003900402</idx></Toy>
+        <Toy><Name>001 - Isabelle</Name><idx>0x0181000100440502</idx></Toy>
+        <Toy><Name>002 - Tom Nook</Name><idx>0x0183000100450502</idx></Toy>
+        <Toy><Name>003 - DJ KK</Name><idx>0x0182010100460502</idx></Toy>
+        <Toy><Name>004 - Sable</Name><idx>0x0187000100470502</idx></Toy>
+        <Toy><Name>005 - Kapp'n</Name><idx>0x0196000100480502</idx></Toy>
+        <Toy><Name>006 - Resetti</Name><idx>0x018E000100490502</idx></Toy>
+        <Toy><Name>007 - Joan</Name><idx>0x01A30001004A0502</idx></Toy>
+        <Toy><Name>008 - Timmy</Name><idx>0x01850001004B0502</idx></Toy>
+        <Toy><Name>009 - Digby</Name><idx>0x018C0001004C0502</idx></Toy>
+        <Toy><Name>010 - Pascal</Name><idx>0x01A40001004D0502</idx></Toy>
+        <Toy><Name>011 - Harriet</Name><idx>0x01910001004E0502</idx></Toy>
+        <Toy><Name>012 - Redd</Name><idx>0x01A80001004F0502</idx></Toy>
+        <Toy><Name>013 - Sahara</Name><idx>0x01A6000100500502</idx></Toy>
+        <Toy><Name>014 - Luna</Name><idx>0x01B5000100510502</idx></Toy>
+        <Toy><Name>015 - Tortimer</Name><idx>0x01B0000100520502</idx></Toy>
+        <Toy><Name>016 - Lyle</Name><idx>0x01AA000100530502</idx></Toy>
+        <Toy><Name>017 - Lottie</Name><idx>0x01C1000100540502</idx></Toy>
+        <Toy><Name>018 - Bob</Name><idx>0x025D000100550502</idx></Toy>
+        <Toy><Name>019 - Fauna</Name><idx>0x02D6000100560502</idx></Toy>
+        <Toy><Name>020 - Curt</Name><idx>0x0216000100570502</idx></Toy>
+        <Toy><Name>021 - Portia</Name><idx>0x02EF000100580502</idx></Toy>
+        <Toy><Name>022 - Leonardo</Name><idx>0x04FE000100590502</idx></Toy>
+        <Toy><Name>023 - Cheri</Name><idx>0x02870001005A0502</idx></Toy>
+        <Toy><Name>024 - Kyle</Name><idx>0x05150001005B0502</idx></Toy>
+        <Toy><Name>025 - Al</Name><idx>0x03710001005C0502</idx></Toy>
+        <Toy><Name>026 - Ren..e</Name><idx>0x04BA0001005D0502</idx></Toy>
+        <Toy><Name>027 - Lopez</Name><idx>0x02DB0001005E0502</idx></Toy>
+        <Toy><Name>028 - Jambette</Name><idx>0x03450001005F0502</idx></Toy>
+        <Toy><Name>029 - Rasher</Name><idx>0x047A000100600502</idx></Toy>
+        <Toy><Name>030 - Tiffany</Name><idx>0x049B000100610502</idx></Toy>
+        <Toy><Name>031 - Sheldon</Name><idx>0x04ED000100620502</idx></Toy>
+        <Toy><Name>032 - Bluebear</Name><idx>0x027D000100630502</idx></Toy>
+        <Toy><Name>033 - Bill</Name><idx>0x0307000100640502</idx></Toy>
+        <Toy><Name>034 - Kiki</Name><idx>0x0261000100650502</idx></Toy>
+        <Toy><Name>035 - Deli</Name><idx>0x0401000100660502</idx></Toy>
+        <Toy><Name>036 - Alli</Name><idx>0x02C4000100670502</idx></Toy>
+        <Toy><Name>037 - Kabuki</Name><idx>0x0266000100680502</idx></Toy>
+        <Toy><Name>038 - Patty</Name><idx>0x02B1000100690502</idx></Toy>
+        <Toy><Name>039 - Jitters</Name><idx>0x02310001006A0502</idx></Toy>
+        <Toy><Name>040 - Gigi</Name><idx>0x03480001006B0502</idx></Toy>
+        <Toy><Name>041 - Quillson</Name><idx>0x03180001006C0502</idx></Toy>
+        <Toy><Name>042 - Marcie</Name><idx>0x03DB0001006D0502</idx></Toy>
+        <Toy><Name>043 - Puck</Name><idx>0x04650001006E0502</idx></Toy>
+        <Toy><Name>044 - Shari</Name><idx>0x04000001006F0502</idx></Toy>
+        <Toy><Name>045 - Octavian</Name><idx>0x0429000100700502</idx></Toy>
+        <Toy><Name>046 - Winnie</Name><idx>0x03A9000100710502</idx></Toy>
+        <Toy><Name>047 - Knox</Name><idx>0x02A4000100720502</idx></Toy>
+        <Toy><Name>048 - Sterling</Name><idx>0x0452000100730502</idx></Toy>
+        <Toy><Name>049 - Bonbon</Name><idx>0x04A5000100740502</idx></Toy>
+        <Toy><Name>050 - Punchy</Name><idx>0x0263000100750502</idx></Toy>
+        <Toy><Name>051 - Opal</Name><idx>0x0323000100760502</idx></Toy>
+        <Toy><Name>052 - Poppy</Name><idx>0x04EC000100770502</idx></Toy>
+        <Toy><Name>053 - Limberg</Name><idx>0x040D000100780502</idx></Toy>
+        <Toy><Name>054 - Deena</Name><idx>0x030B000100790502</idx></Toy>
+        <Toy><Name>055 - Snake</Name><idx>0x04970001007A0502</idx></Toy>
+        <Toy><Name>056 - Bangle</Name><idx>0x04FD0001007B0502</idx></Toy>
+        <Toy><Name>057 - Phil</Name><idx>0x043D0001007C0502</idx></Toy>
+        <Toy><Name>058 - Monique</Name><idx>0x02680001007D0502</idx></Toy>
+        <Toy><Name>059 - Nate</Name><idx>0x02190001007E0502</idx></Toy>
+        <Toy><Name>060 - Samson</Name><idx>0x04100001007F0502</idx></Toy>
+        <Toy><Name>061 - Tutu</Name><idx>0x021B000100800502</idx></Toy>
+        <Toy><Name>062 - T-Bone</Name><idx>0x024F000100810502</idx></Toy>
+        <Toy><Name>063 - Mint</Name><idx>0x04E6000100820502</idx></Toy>
+        <Toy><Name>064 - Pudge</Name><idx>0x0280000100830502</idx></Toy>
+        <Toy><Name>065 - Midge</Name><idx>0x0235000100840502</idx></Toy>
+        <Toy><Name>066 - Gruff</Name><idx>0x035A000100850502</idx></Toy>
+        <Toy><Name>067 - Flurry</Name><idx>0x0384000100860502</idx></Toy>
+        <Toy><Name>068 - Clyde</Name><idx>0x03AE000100870502</idx></Toy>
+        <Toy><Name>069 - Bella</Name><idx>0x040E000100880502</idx></Toy>
+        <Toy><Name>070 - Biff</Name><idx>0x0394000100890502</idx></Toy>
+        <Toy><Name>071 - Yuka</Name><idx>0x03BC0001008A0502</idx></Toy>
+        <Toy><Name>072 - Lionel</Name><idx>0x03EE0001008B0502</idx></Toy>
+        <Toy><Name>073 - Flo</Name><idx>0x046C0001008C0502</idx></Toy>
+        <Toy><Name>074 - Cobb</Name><idx>0x04800001008D0502</idx></Toy>
+        <Toy><Name>075 - Amelia</Name><idx>0x044C0001008E0502</idx></Toy>
+        <Toy><Name>076 - Jeremiah</Name><idx>0x033F0001008F0502</idx></Toy>
+        <Toy><Name>077 - Cherry</Name><idx>0x02FB000100900502</idx></Toy>
+        <Toy><Name>078 - Rosco</Name><idx>0x03A8000100910502</idx></Toy>
+        <Toy><Name>079 - Truffles</Name><idx>0x0479000100920502</idx></Toy>
+        <Toy><Name>080 - Eugene</Name><idx>0x03C6000100930502</idx></Toy>
+        <Toy><Name>081 - Eunice</Name><idx>0x04C7000100940502</idx></Toy>
+        <Toy><Name>082 - Goose</Name><idx>0x0299000100950502</idx></Toy>
+        <Toy><Name>083 - Annalisa</Name><idx>0x0208000100960502</idx></Toy>
+        <Toy><Name>084 - Benjamin</Name><idx>0x02FA000100970502</idx></Toy>
+        <Toy><Name>085 - Pancetti</Name><idx>0x0488000100980502</idx></Toy>
+        <Toy><Name>086 - Chief</Name><idx>0x050B000100990502</idx></Toy>
+        <Toy><Name>087 - Bunnie</Name><idx>0x04940001009A0502</idx></Toy>
+        <Toy><Name>088 - Clay</Name><idx>0x03830001009B0502</idx></Toy>
+        <Toy><Name>089 - Diana</Name><idx>0x02DE0001009C0502</idx></Toy>
+        <Toy><Name>090 - Axel</Name><idx>0x03290001009D0502</idx></Toy>
+        <Toy><Name>091 - Muffy</Name><idx>0x04D10001009E0502</idx></Toy>
+        <Toy><Name>092 - Henry</Name><idx>0x034B0001009F0502</idx></Toy>
+        <Toy><Name>093 - Bertha</Name><idx>0x0393000100A00502</idx></Toy>
+        <Toy><Name>094 - Cyrano</Name><idx>0x0200000100A10502</idx></Toy>
+        <Toy><Name>095 - Peanut</Name><idx>0x04DD000100A20502</idx></Toy>
+        <Toy><Name>096 - Cole</Name><idx>0x04A6000100A30502</idx></Toy>
+        <Toy><Name>097 - Willow</Name><idx>0x04CC000100A40502</idx></Toy>
+        <Toy><Name>098 - Roald</Name><idx>0x0460000100A50502</idx></Toy>
+        <Toy><Name>099 - Molly</Name><idx>0x0317000100A60502</idx></Toy>
+        <Toy><Name>100 - Walker</Name><idx>0x02F0000100A70502</idx></Toy>
+        <Toy><Name>101 - K.K. Slider</Name><idx>0x0182000100A80502</idx></Toy>
+        <Toy><Name>102 - Reese</Name><idx>0x018A000100A90502</idx></Toy>
+        <Toy><Name>103 - Kicks</Name><idx>0x0194000100AA0502</idx></Toy>
+        <Toy><Name>104 - Labelle</Name><idx>0x0189000100AB0502</idx></Toy>
+        <Toy><Name>105 - Copper</Name><idx>0x019D000100AC0502</idx></Toy>
+        <Toy><Name>106 - Booker</Name><idx>0x019E000100AD0502</idx></Toy>
+        <Toy><Name>107 - Katie</Name><idx>0x01B6000100AE0502</idx></Toy>
+        <Toy><Name>108 - Tommy</Name><idx>0x0186010100AF0502</idx></Toy>
+        <Toy><Name>109 - Porter</Name><idx>0x0195000100B00502</idx></Toy>
+        <Toy><Name>110 - Lelia</Name><idx>0x0198000100B10502</idx></Toy>
+        <Toy><Name>111 - Dr. Shrunk</Name><idx>0x01B1000100B20502</idx></Toy>
+        <Toy><Name>112 - Don Resetti</Name><idx>0x018F000100B30502</idx></Toy>
+        <Toy><Name>113 - Isabelle (Aut)</Name><idx>0x0181010100B40502</idx></Toy>
+        <Toy><Name>114 - Blanca</Name><idx>0x01B3000100B50502</idx></Toy>
+        <Toy><Name>115 - Nat</Name><idx>0x019B000100B60502</idx></Toy>
+        <Toy><Name>116 - Chip</Name><idx>0x019A000100B70502</idx></Toy>
+        <Toy><Name>117 - Jack</Name><idx>0x01AD000100B80502</idx></Toy>
+        <Toy><Name>118 - Poncho</Name><idx>0x027F000100B90502</idx></Toy>
+        <Toy><Name>119 - Felicity</Name><idx>0x026E000100BA0502</idx></Toy>
+        <Toy><Name>120 - Ozzie</Name><idx>0x03C1000100BB0502</idx></Toy>
+        <Toy><Name>121 - Tia</Name><idx>0x032D000100BC0502</idx></Toy>
+        <Toy><Name>122 - Lucha</Name><idx>0x023C000100BD0502</idx></Toy>
+        <Toy><Name>123 - Fuchsia</Name><idx>0x02DC000100BE0502</idx></Toy>
+        <Toy><Name>124 - Harry</Name><idx>0x0398000100BF0502</idx></Toy>
+        <Toy><Name>125 - Gwen</Name><idx>0x0464000100C00502</idx></Toy>
+        <Toy><Name>126 - Coach</Name><idx>0x0251000100C10502</idx></Toy>
+        <Toy><Name>127 - Kitt</Name><idx>0x03D1000100C20502</idx></Toy>
+        <Toy><Name>128 - Tom</Name><idx>0x026C000100C30502</idx></Toy>
+        <Toy><Name>129 - Tipper</Name><idx>0x02B2000100C40502</idx></Toy>
+        <Toy><Name>130 - Prince</Name><idx>0x0344000100C50502</idx></Toy>
+        <Toy><Name>131 - Pate</Name><idx>0x0309000100C60502</idx></Toy>
+        <Toy><Name>132 - Vladimir</Name><idx>0x0283000100C70502</idx></Toy>
+        <Toy><Name>133 - Savannah</Name><idx>0x03A6000100C80502</idx></Toy>
+        <Toy><Name>134 - Kidd</Name><idx>0x035D000100C90502</idx></Toy>
+        <Toy><Name>135 - Phoebe</Name><idx>0x0440000100CA0502</idx></Toy>
+        <Toy><Name>136 - Egbert</Name><idx>0x029B000100CB0502</idx></Toy>
+        <Toy><Name>137 - Cookie</Name><idx>0x02F2000100CC0502</idx></Toy>
+        <Toy><Name>138 - Sly</Name><idx>0x02C9000100CD0502</idx></Toy>
+        <Toy><Name>139 - Blaire</Name><idx>0x04DE000100CE0502</idx></Toy>
+        <Toy><Name>140 - Avery</Name><idx>0x0450000100CF0502</idx></Toy>
+        <Toy><Name>141 - Nana</Name><idx>0x03FA000100D00502</idx></Toy>
+        <Toy><Name>142 - Peck</Name><idx>0x023E000100D10502</idx></Toy>
+        <Toy><Name>143 - Olivia</Name><idx>0x0260000100D20502</idx></Toy>
+        <Toy><Name>144 - Cesar</Name><idx>0x0369000100D30502</idx></Toy>
+        <Toy><Name>145 - Carmen</Name><idx>0x04A4000100D40502</idx></Toy>
+        <Toy><Name>146 - Rodney</Name><idx>0x0381000100D50502</idx></Toy>
+        <Toy><Name>147 - Scoot</Name><idx>0x0311000100D60502</idx></Toy>
+        <Toy><Name>148 - Whitney</Name><idx>0x050E000100D70502</idx></Toy>
+        <Toy><Name>149 - Broccolo</Name><idx>0x0418000100D80502</idx></Toy>
+        <Toy><Name>150 - Coco</Name><idx>0x0496000100D90502</idx></Toy>
+        <Toy><Name>151 - Groucho</Name><idx>0x021A000100DA0502</idx></Toy>
+        <Toy><Name>152 - Wendy</Name><idx>0x04CE000100DB0502</idx></Toy>
+        <Toy><Name>153 - Alfonso</Name><idx>0x02C3000100DC0502</idx></Toy>
+        <Toy><Name>154 - Rhonda</Name><idx>0x04B3000100DD0502</idx></Toy>
+        <Toy><Name>155 - Butch</Name><idx>0x02EB000100DE0502</idx></Toy>
+        <Toy><Name>156 - Gabi</Name><idx>0x0499000100DF0502</idx></Toy>
+        <Toy><Name>157 - Moose</Name><idx>0x041A000100E00502</idx></Toy>
+        <Toy><Name>158 - Timbra</Name><idx>0x04CF000100E10502</idx></Toy>
+        <Toy><Name>159 - Zell</Name><idx>0x02D8000100E20502</idx></Toy>
+        <Toy><Name>160 - Pekoe</Name><idx>0x028B000100E30502</idx></Toy>
+        <Toy><Name>161 - Teddy</Name><idx>0x0214000100E40502</idx></Toy>
+        <Toy><Name>162 - Mathilda</Name><idx>0x03D2000100E50502</idx></Toy>
+        <Toy><Name>163 - Ed</Name><idx>0x03AA000100E60502</idx></Toy>
+        <Toy><Name>164 - Bianca</Name><idx>0x0500000100E70502</idx></Toy>
+        <Toy><Name>165 - Filbert</Name><idx>0x04DF000100E80502</idx></Toy>
+        <Toy><Name>166 - Kitty</Name><idx>0x026B000100E90502</idx></Toy>
+        <Toy><Name>167 - Beau</Name><idx>0x02DD000100EA0502</idx></Toy>
+        <Toy><Name>168 - Nan</Name><idx>0x0357000100EB0502</idx></Toy>
+        <Toy><Name>169 - Bud</Name><idx>0x03E6000100EC0502</idx></Toy>
+        <Toy><Name>170 - Ruby</Name><idx>0x049D000100ED0502</idx></Toy>
+        <Toy><Name>171 - Benedict</Name><idx>0x029A000100EE0502</idx></Toy>
+        <Toy><Name>172 - Agnes</Name><idx>0x0489000100EF0502</idx></Toy>
+        <Toy><Name>173 - Julian</Name><idx>0x03B1000100F00502</idx></Toy>
+        <Toy><Name>174 - Bettina</Name><idx>0x041B000100F10502</idx></Toy>
+        <Toy><Name>175 - Jay</Name><idx>0x022D000100F20502</idx></Toy>
+        <Toy><Name>176 - Sprinkle</Name><idx>0x046D000100F30502</idx></Toy>
+        <Toy><Name>177 - Flip</Name><idx>0x03FF000100F40502</idx></Toy>
+        <Toy><Name>178 - Hugh</Name><idx>0x047B000100F50502</idx></Toy>
+        <Toy><Name>179 - Hopper</Name><idx>0x0462000100F60502</idx></Toy>
+        <Toy><Name>180 - Pecan</Name><idx>0x04E0000100F70502</idx></Toy>
+        <Toy><Name>181 - Drake</Name><idx>0x0310000100F80502</idx></Toy>
+        <Toy><Name>182 - Alice</Name><idx>0x03BD000100F90502</idx></Toy>
+        <Toy><Name>183 - Camofrog</Name><idx>0x033B000100FA0502</idx></Toy>
+        <Toy><Name>184 - Anicotti</Name><idx>0x0416000100FB0502</idx></Toy>
+        <Toy><Name>185 - Chops</Name><idx>0x0486000100FC0502</idx></Toy>
+        <Toy><Name>186 - Charlise</Name><idx>0x0220000100FD0502</idx></Toy>
+        <Toy><Name>187 - Vic</Name><idx>0x0252000100FE0502</idx></Toy>
+        <Toy><Name>188 - Ankha</Name><idx>0x0270000100FF0502</idx></Toy>
+        <Toy><Name>189 - Drift</Name><idx>0x033C000101000502</idx></Toy>
+        <Toy><Name>190 - Vesta</Name><idx>0x04C5000101010502</idx></Toy>
+        <Toy><Name>191 - Marcel</Name><idx>0x02F9000101020502</idx></Toy>
+        <Toy><Name>192 - Pango</Name><idx>0x0202000101030502</idx></Toy>
+        <Toy><Name>193 - Keaton</Name><idx>0x0453000101040502</idx></Toy>
+        <Toy><Name>194 - Gladys</Name><idx>0x0437000101050502</idx></Toy>
+        <Toy><Name>195 - Hamphrey</Name><idx>0x0385000101060502</idx></Toy>
+        <Toy><Name>196 - Freya</Name><idx>0x0510000101070502</idx></Toy>
+        <Toy><Name>197 - Kid Cat</Name><idx>0x0267000101080502</idx></Toy>
+        <Toy><Name>198 - Agent S</Name><idx>0x04E2000101090502</idx></Toy>
+        <Toy><Name>199 - Big Top</Name><idx>0x03250001010A0502</idx></Toy>
+        <Toy><Name>200 - Rocket</Name><idx>0x03720001010B0502</idx></Toy>
+        <Toy><Name>201 - Rover</Name><idx>0x018D0001010C0502</idx></Toy>
+        <Toy><Name>202 - Blathers</Name><idx>0x01920001010D0502</idx></Toy>
+        <Toy><Name>203 - Tom Nook</Name><idx>0x01830101010E0502</idx></Toy>
+        <Toy><Name>204 - Pelly</Name><idx>0x01A00001010F0502</idx></Toy>
+        <Toy><Name>205 - Phyllis</Name><idx>0x01A1000101100502</idx></Toy>
+        <Toy><Name>206 - Pete</Name><idx>0x019F000101110502</idx></Toy>
+        <Toy><Name>207 - Mabel</Name><idx>0x0188000101120502</idx></Toy>
+        <Toy><Name>208 - Leif</Name><idx>0x01B4000101130502</idx></Toy>
+        <Toy><Name>209 - Wendell</Name><idx>0x01A7000101140502</idx></Toy>
+        <Toy><Name>210 - Cyrus</Name><idx>0x018B000101150502</idx></Toy>
+        <Toy><Name>211 - Grams</Name><idx>0x0199000101160502</idx></Toy>
+        <Toy><Name>212 - Timmy</Name><idx>0x0185020101170502</idx></Toy>
+        <Toy><Name>213 - Digby</Name><idx>0x018C010101180502</idx></Toy>
+        <Toy><Name>214 - Don Resetti</Name><idx>0x018F010101190502</idx></Toy>
+        <Toy><Name>215 - Isabelle</Name><idx>0x01810201011A0502</idx></Toy>
+        <Toy><Name>216 - Franklin</Name><idx>0x01AE0001011B0502</idx></Toy>
+        <Toy><Name>217 - Jingle</Name><idx>0x01AF0001011C0502</idx></Toy>
+        <Toy><Name>218 - Lily</Name><idx>0x03380001011D0502</idx></Toy>
+        <Toy><Name>219 - Anchovy</Name><idx>0x022F0001011E0502</idx></Toy>
+        <Toy><Name>220 - Tabby</Name><idx>0x02690001011F0502</idx></Toy>
+        <Toy><Name>221 - Kody</Name><idx>0x0281000101200502</idx></Toy>
+        <Toy><Name>222 - Miranda</Name><idx>0x0313000101210502</idx></Toy>
+        <Toy><Name>223 - Del</Name><idx>0x02C7000101220502</idx></Toy>
+        <Toy><Name>224 - Paula</Name><idx>0x021E000101230502</idx></Toy>
+        <Toy><Name>225 - Ken</Name><idx>0x02A6000101240502</idx></Toy>
+        <Toy><Name>226 - Mitzi</Name><idx>0x025E000101250502</idx></Toy>
+        <Toy><Name>227 - Rodeo</Name><idx>0x024B000101260502</idx></Toy>
+        <Toy><Name>228 - Bubbles</Name><idx>0x0392000101270502</idx></Toy>
+        <Toy><Name>229 - Cousteau</Name><idx>0x0342000101280502</idx></Toy>
+        <Toy><Name>230 - Velma</Name><idx>0x035C000101290502</idx></Toy>
+        <Toy><Name>231 - Elvis</Name><idx>0x03E70001012A0502</idx></Toy>
+        <Toy><Name>232 - Canberra</Name><idx>0x03C40001012B0502</idx></Toy>
+        <Toy><Name>233 - Colton</Name><idx>0x03AF0001012C0502</idx></Toy>
+        <Toy><Name>234 - Marina</Name><idx>0x042A0001012D0502</idx></Toy>
+        <Toy><Name>235 - Spork/Crackle</Name><idx>0x047D0001012E0502</idx></Toy>
+        <Toy><Name>236 - Freckles</Name><idx>0x030E0001012F0502</idx></Toy>
+        <Toy><Name>237 - Bam</Name><idx>0x02D7000101300502</idx></Toy>
+        <Toy><Name>238 - Friga</Name><idx>0x0463000101310502</idx></Toy>
+        <Toy><Name>239 - Ricky</Name><idx>0x04E7000101320502</idx></Toy>
+        <Toy><Name>240 - Deirdre</Name><idx>0x02DA000101330502</idx></Toy>
+        <Toy><Name>241 - Hans</Name><idx>0x0373000101340502</idx></Toy>
+        <Toy><Name>242 - Chevre</Name><idx>0x0356000101350502</idx></Toy>
+        <Toy><Name>243 - Drago</Name><idx>0x02CB000101360502</idx></Toy>
+        <Toy><Name>244 - Tangy</Name><idx>0x0262000101370502</idx></Toy>
+        <Toy><Name>245 - Mac</Name><idx>0x02F8000101380502</idx></Toy>
+        <Toy><Name>246 - Eloise</Name><idx>0x0326000101390502</idx></Toy>
+        <Toy><Name>247 - Wart Jr.</Name><idx>0x033D0001013A0502</idx></Toy>
+        <Toy><Name>248 - Hazel</Name><idx>0x04EF0001013B0502</idx></Toy>
+        <Toy><Name>249 - Beardo</Name><idx>0x02210001013C0502</idx></Toy>
+        <Toy><Name>250 - Ava</Name><idx>0x029E0001013D0502</idx></Toy>
+        <Toy><Name>251 - Chester</Name><idx>0x028C0001013E0502</idx></Toy>
+        <Toy><Name>252 - Merry</Name><idx>0x026D0001013F0502</idx></Toy>
+        <Toy><Name>253 - Genji</Name><idx>0x049C000101400502</idx></Toy>
+        <Toy><Name>254 - Greta</Name><idx>0x041C000101410502</idx></Toy>
+        <Toy><Name>255 - Wolfgang</Name><idx>0x050D000101420502</idx></Toy>
+        <Toy><Name>256 - Diva</Name><idx>0x034A000101430502</idx></Toy>
+        <Toy><Name>257 - Klaus</Name><idx>0x0222000101440502</idx></Toy>
+        <Toy><Name>258 - Daisy</Name><idx>0x02F1000101450502</idx></Toy>
+        <Toy><Name>259 - Stinky</Name><idx>0x026A000101460502</idx></Toy>
+        <Toy><Name>260 - Tammi</Name><idx>0x03FC000101470502</idx></Toy>
+        <Toy><Name>261 - Tucker</Name><idx>0x032C000101480502</idx></Toy>
+        <Toy><Name>262 - Blanche</Name><idx>0x043E000101490502</idx></Toy>
+        <Toy><Name>263 - Gaston</Name><idx>0x04980001014A0502</idx></Toy>
+        <Toy><Name>264 - Marshal</Name><idx>0x04EE0001014B0502</idx></Toy>
+        <Toy><Name>265 - Gala</Name><idx>0x04850001014C0502</idx></Toy>
+        <Toy><Name>266 - Joey</Name><idx>0x03080001014D0502</idx></Toy>
+        <Toy><Name>267 - Pippy</Name><idx>0x049A0001014E0502</idx></Toy>
+        <Toy><Name>268 - Buck</Name><idx>0x03A40001014F0502</idx></Toy>
+        <Toy><Name>269 - Bree</Name><idx>0x040F000101500502</idx></Toy>
+        <Toy><Name>270 - Rooney</Name><idx>0x03DA000101510502</idx></Toy>
+        <Toy><Name>271 - Curlos</Name><idx>0x04CD000101520502</idx></Toy>
+        <Toy><Name>272 - Skye</Name><idx>0x0514000101530502</idx></Toy>
+        <Toy><Name>273 - Moe</Name><idx>0x0265000101540502</idx></Toy>
+        <Toy><Name>274 - Flora</Name><idx>0x043F000101550502</idx></Toy>
+        <Toy><Name>275 - Hamlet</Name><idx>0x037E000101560502</idx></Toy>
+        <Toy><Name>276 - Astrid</Name><idx>0x03D6000101570502</idx></Toy>
+        <Toy><Name>277 - Monty</Name><idx>0x03FD000101580502</idx></Toy>
+        <Toy><Name>278 - Dora</Name><idx>0x040C000101590502</idx></Toy>
+        <Toy><Name>279 - Biskit</Name><idx>0x02ED0001015A0502</idx></Toy>
+        <Toy><Name>280 - Victoria</Name><idx>0x03A50001015B0502</idx></Toy>
+        <Toy><Name>281 - Lyman</Name><idx>0x03C50001015C0502</idx></Toy>
+        <Toy><Name>282 - Violet</Name><idx>0x03700001015D0502</idx></Toy>
+        <Toy><Name>283 - Frank</Name><idx>0x04510001015E0502</idx></Toy>
+        <Toy><Name>284 - Chadder</Name><idx>0x041E0001015F0502</idx></Toy>
+        <Toy><Name>285 - Merengue</Name><idx>0x04B9000101600502</idx></Toy>
+        <Toy><Name>286 - Cube</Name><idx>0x0461000101610502</idx></Toy>
+        <Toy><Name>287 - Claudia</Name><idx>0x04FF000101620502</idx></Toy>
+        <Toy><Name>288 - Curly</Name><idx>0x0478000101630502</idx></Toy>
+        <Toy><Name>289 - Boomer</Name><idx>0x0469000101640502</idx></Toy>
+        <Toy><Name>290 - Caroline</Name><idx>0x04E3000101650502</idx></Toy>
+        <Toy><Name>291 - Sparro</Name><idx>0x023F000101660502</idx></Toy>
+        <Toy><Name>292 - Baabara</Name><idx>0x04C6000101670502</idx></Toy>
+        <Toy><Name>293 - Rolf</Name><idx>0x04FA000101680502</idx></Toy>
+        <Toy><Name>294 - Maple</Name><idx>0x027E000101690502</idx></Toy>
+        <Toy><Name>295 - Antonio</Name><idx>0x02010001016A0502</idx></Toy>
+        <Toy><Name>296 - Soleil</Name><idx>0x03820001016B0502</idx></Toy>
+        <Toy><Name>297 - Apollo</Name><idx>0x044B0001016C0502</idx></Toy>
+        <Toy><Name>298 - Derwin</Name><idx>0x030F0001016D0502</idx></Toy>
+        <Toy><Name>299 - Francine</Name><idx>0x04A00001016E0502</idx></Toy>
+        <Toy><Name>300 - Chrissy</Name><idx>0x04A10001016F0502</idx></Toy>
+        <Toy><Name>301 - Isabelle</Name><idx>0x0181030101700502</idx></Toy>
+        <Toy><Name>302 - Brewster</Name><idx>0x0190000101710502</idx></Toy>
+        <Toy><Name>303 - Katrina</Name><idx>0x01A5000101720502</idx></Toy>
+        <Toy><Name>304 - Phineas</Name><idx>0x019C000101730502</idx></Toy>
+        <Toy><Name>305 - Celeste</Name><idx>0x0193000101740502</idx></Toy>
+        <Toy><Name>306 - Tommy</Name><idx>0x0186030101750502</idx></Toy>
+        <Toy><Name>307 - Gracie</Name><idx>0x01A9000101760502</idx></Toy>
+        <Toy><Name>308 - Leilani</Name><idx>0x0197000101770502</idx></Toy>
+        <Toy><Name>309 - Resetti</Name><idx>0x018E010101780502</idx></Toy>
+        <Toy><Name>310 - Timmy</Name><idx>0x0185040101790502</idx></Toy>
+        <Toy><Name>311 - Lottie</Name><idx>0x01C10101017A0502</idx></Toy>
+        <Toy><Name>312 - Shrunk</Name><idx>0x01B10101017B0502</idx></Toy>
+        <Toy><Name>313 - Pave</Name><idx>0x01AB0001017C0502</idx></Toy>
+        <Toy><Name>314 - Gulliver</Name><idx>0x01A20001017D0502</idx></Toy>
+        <Toy><Name>315 - Redd</Name><idx>0x01A80101017E0502</idx></Toy>
+        <Toy><Name>316 - Zipper</Name><idx>0x01AC0001017F0502</idx></Toy>
+        <Toy><Name>317 - Goldie</Name><idx>0x02EA000101800502</idx></Toy>
+        <Toy><Name>318 - Stitches</Name><idx>0x0282000101810502</idx></Toy>
+        <Toy><Name>319 - Pinky</Name><idx>0x0215000101820502</idx></Toy>
+        <Toy><Name>320 - Mott</Name><idx>0x03EC000101830502</idx></Toy>
+        <Toy><Name>321 - Mallary</Name><idx>0x030D000101840502</idx></Toy>
+        <Toy><Name>322 - Rocco</Name><idx>0x0390000101850502</idx></Toy>
+        <Toy><Name>323 - Katt</Name><idx>0x0272000101860502</idx></Toy>
+        <Toy><Name>324 - Graham</Name><idx>0x0380000101870502</idx></Toy>
+        <Toy><Name>325 - Peaches</Name><idx>0x03AC000101880502</idx></Toy>
+        <Toy><Name>326 - Dizzy</Name><idx>0x0324000101890502</idx></Toy>
+        <Toy><Name>327 - Penelope</Name><idx>0x041D0001018A0502</idx></Toy>
+        <Toy><Name>328 - Boone</Name><idx>0x036B0001018B0502</idx></Toy>
+        <Toy><Name>329 - Broffina</Name><idx>0x02A50001018C0502</idx></Toy>
+        <Toy><Name>330 - Croque</Name><idx>0x03490001018D0502</idx></Toy>
+        <Toy><Name>331 - Pashmina</Name><idx>0x035E0001018E0502</idx></Toy>
+        <Toy><Name>332 - Shep</Name><idx>0x02FC0001018F0502</idx></Toy>
+        <Toy><Name>333 - Lolly</Name><idx>0x026F000101900502</idx></Toy>
+        <Toy><Name>334 - Erik</Name><idx>0x02DF000101910502</idx></Toy>
+        <Toy><Name>335 - Dotty</Name><idx>0x0495000101920502</idx></Toy>
+        <Toy><Name>336 - Pierce</Name><idx>0x044D000101930502</idx></Toy>
+        <Toy><Name>337 - Queenie</Name><idx>0x0436000101940502</idx></Toy>
+        <Toy><Name>338 - Fang</Name><idx>0x0511000101950502</idx></Toy>
+        <Toy><Name>339 - Frita</Name><idx>0x04D0000101960502</idx></Toy>
+        <Toy><Name>340 - Tex</Name><idx>0x046B000101970502</idx></Toy>
+        <Toy><Name>341 - Melba</Name><idx>0x03BE000101980502</idx></Toy>
+        <Toy><Name>342 - Bones</Name><idx>0x02EE000101990502</idx></Toy>
+        <Toy><Name>343 - Anabelle</Name><idx>0x02030001019A0502</idx></Toy>
+        <Toy><Name>344 - Rudy</Name><idx>0x02710001019B0502</idx></Toy>
+        <Toy><Name>345 - Naomi</Name><idx>0x02B80001019C0502</idx></Toy>
+        <Toy><Name>346 - Peewee</Name><idx>0x036A0001019D0502</idx></Toy>
+        <Toy><Name>347 - Tammy</Name><idx>0x028E0001019E0502</idx></Toy>
+        <Toy><Name>348 - Olaf</Name><idx>0x02090001019F0502</idx></Toy>
+        <Toy><Name>349 - Lucy</Name><idx>0x047C000101A00502</idx></Toy>
+        <Toy><Name>350 - Elmer</Name><idx>0x03A7000101A10502</idx></Toy>
+        <Toy><Name>351 - Puddles</Name><idx>0x033E000101A20502</idx></Toy>
+        <Toy><Name>352 - Rory</Name><idx>0x03ED000101A30502</idx></Toy>
+        <Toy><Name>353 - Elise</Name><idx>0x03FE000101A40502</idx></Toy>
+        <Toy><Name>354 - Walt</Name><idx>0x03D9000101A50502</idx></Toy>
+        <Toy><Name>355 - Mira</Name><idx>0x04A7000101A60502</idx></Toy>
+        <Toy><Name>356 - Pietro</Name><idx>0x04D2000101A70502</idx></Toy>
+        <Toy><Name>357 - Aurora</Name><idx>0x045F000101A80502</idx></Toy>
+        <Toy><Name>358 - Papi</Name><idx>0x03B0000101A90502</idx></Toy>
+        <Toy><Name>359 - Apple</Name><idx>0x037F000101AA0502</idx></Toy>
+        <Toy><Name>360 - Rod</Name><idx>0x0411000101AB0502</idx></Toy>
+        <Toy><Name>361 - Purrl</Name><idx>0x0264000101AC0502</idx></Toy>
+        <Toy><Name>362 - Static</Name><idx>0x04E5000101AD0502</idx></Toy>
+        <Toy><Name>363 - Celia</Name><idx>0x0454000101AE0502</idx></Toy>
+        <Toy><Name>364 - Zucker</Name><idx>0x042B000101AF0502</idx></Toy>
+        <Toy><Name>365 - Peggy</Name><idx>0x0483000101B00502</idx></Toy>
+        <Toy><Name>366 - Ribbot</Name><idx>0x0339000101B10502</idx></Toy>
+        <Toy><Name>367 - Annalise</Name><idx>0x03AD000101B20502</idx></Toy>
+        <Toy><Name>368 - Chow</Name><idx>0x0217000101B30502</idx></Toy>
+        <Toy><Name>369 - Sylvia</Name><idx>0x03D7000101B40502</idx></Toy>
+        <Toy><Name>370 - Jacques</Name><idx>0x023D000101B50502</idx></Toy>
+        <Toy><Name>371 - Sally</Name><idx>0x04E4000101B60502</idx></Toy>
+        <Toy><Name>372 - Doc</Name><idx>0x049E000101B70502</idx></Toy>
+        <Toy><Name>373 - Pompom</Name><idx>0x030C000101B80502</idx></Toy>
+        <Toy><Name>374 - Tank</Name><idx>0x04B2000101B90502</idx></Toy>
+        <Toy><Name>375 - Becky</Name><idx>0x02A2000101BA0502</idx></Toy>
+        <Toy><Name>376 - Rizzo</Name><idx>0x0415000101BB0502</idx></Toy>
+        <Toy><Name>377 - Sydney</Name><idx>0x03BF000101BC0502</idx></Toy>
+        <Toy><Name>378 - Barold</Name><idx>0x028D000101BD0502</idx></Toy>
+        <Toy><Name>379 - Nibbles</Name><idx>0x04E1000101BE0502</idx></Toy>
+        <Toy><Name>380 - Kevin</Name><idx>0x0487000101BF0502</idx></Toy>
+        <Toy><Name>381 - Gloria</Name><idx>0x0316000101C00502</idx></Toy>
+        <Toy><Name>382 - Lobo</Name><idx>0x050C000101C10502</idx></Toy>
+        <Toy><Name>383 - Hippeux</Name><idx>0x0399000101C20502</idx></Toy>
+        <Toy><Name>384 - Margie</Name><idx>0x0327000101C30502</idx></Toy>
+        <Toy><Name>385 - Lucky</Name><idx>0x02EC000101C40502</idx></Toy>
+        <Toy><Name>386 - Rosie</Name><idx>0x025F000101C50502</idx></Toy>
+        <Toy><Name>387 - Rowan</Name><idx>0x04FB000101C60502</idx></Toy>
+        <Toy><Name>388 - Maelle</Name><idx>0x030A000101C70502</idx></Toy>
+        <Toy><Name>389 - Bruce</Name><idx>0x02D9000101C80502</idx></Toy>
+        <Toy><Name>390 - OHare</Name><idx>0x04A3000101C90502</idx></Toy>
+        <Toy><Name>391 - Gayle</Name><idx>0x02CA000101CA0502</idx></Toy>
+        <Toy><Name>392 - Cranston</Name><idx>0x043C000101CB0502</idx></Toy>
+        <Toy><Name>393 - Frobert</Name><idx>0x033A000101CC0502</idx></Toy>
+        <Toy><Name>394 - Grizzly</Name><idx>0x021D000101CD0502</idx></Toy>
+        <Toy><Name>395 - Cally</Name><idx>0x04E8000101CE0502</idx></Toy>
+        <Toy><Name>396 - Simon</Name><idx>0x03FB000101CF0502</idx></Toy>
+        <Toy><Name>397 - Iggly</Name><idx>0x046A000101D00502</idx></Toy>
+        <Toy><Name>398 - Angus</Name><idx>0x024A000101D10502</idx></Toy>
+        <Toy><Name>399 - Twiggy</Name><idx>0x0230000101D20502</idx></Toy>
+        <Toy><Name>400 - Robin</Name><idx>0x022E000101D30502</idx></Toy>
+        <Toy><Name>Mag Promo - Isabelle</Name><idx>0x0181000101D40502</idx></Toy>
+        <Toy><Name>Leaf - Goldie</Name><idx>0x02EA000101D50502</idx></Toy>
+        <Toy><Name>Leaf - Stitches</Name><idx>0x0282000101D60502</idx></Toy>
+        <Toy><Name>Leaf - Rosie</Name><idx>0x025F000101D70502</idx></Toy>
+        <Toy><Name>Mag Promo - K. K. Slider</Name><idx>0x0182000101D80502</idx></Toy>
+        <Toy><Name>1 - Vivian</Name><idx>0x0513000102E70502</idx></Toy>
+        <Toy><Name>2 - Hopkins</Name><idx>0x04A2000102E80502</idx></Toy>
+        <Toy><Name>3 - June</Name><idx>0x028A000102E90502</idx></Toy>
+        <Toy><Name>4 - Piper</Name><idx>0x0232000102EA0502</idx></Toy>
+        <Toy><Name>5 - Paolo</Name><idx>0x0328000102EB0502</idx></Toy>
+        <Toy><Name>6 - Hornsby</Name><idx>0x04B6000102EC0502</idx></Toy>
+        <Toy><Name>7 - Stella</Name><idx>0x04C8000102ED0502</idx></Toy>
+        <Toy><Name>8 - Tybalt</Name><idx>0x04FC000102EE0502</idx></Toy>
+        <Toy><Name>9 - Huck</Name><idx>0x0343000102EF0502</idx></Toy>
+        <Toy><Name>10 - Sylvana</Name><idx>0x04EB000102F00502</idx></Toy>
+        <Toy><Name>11 - Boris</Name><idx>0x0481000102F10502</idx></Toy>
+        <Toy><Name>12 - Wade</Name><idx>0x0468000102F20502</idx></Toy>
+        <Toy><Name>13 - Carrie</Name><idx>0x03D3000102F30502</idx></Toy>
+        <Toy><Name>14 - Ketchup</Name><idx>0x0314000102F40502</idx></Toy>
+        <Toy><Name>15 - Rex</Name><idx>0x03E8000102F50502</idx></Toy>
+        <Toy><Name>16 - Stu</Name><idx>0x024D000102F60502</idx></Toy>
+        <Toy><Name>17 - Ursala</Name><idx>0x021C000102F70502</idx></Toy>
+        <Toy><Name>18 - Jakey</Name><idx>0x0238000102F80502</idx></Toy>
+        <Toy><Name>19 - Maddie</Name><idx>0x02F3000102F90502</idx></Toy>
+        <Toy><Name>20 - Billy</Name><idx>0x0358000102FA0502</idx></Toy>
+        <Toy><Name>21 - Boyd</Name><idx>0x036E000102FB0502</idx></Toy>
+        <Toy><Name>22 - Bitty</Name><idx>0x0395000102FC0502</idx></Toy>
+        <Toy><Name>23 - Maggie</Name><idx>0x0482000102FD0502</idx></Toy>
+        <Toy><Name>24 - Murphy</Name><idx>0x0284000102FE0502</idx></Toy>
+        <Toy><Name>25 - Plucky</Name><idx>0x02A3000102FF0502</idx></Toy>
+        <Toy><Name>26 - Sandy</Name><idx>0x0438000103000502</idx></Toy>
+        <Toy><Name>27 - Claude</Name><idx>0x049F000103010502</idx></Toy>
+        <Toy><Name>28 - Raddle</Name><idx>0x0347000103020502</idx></Toy>
+        <Toy><Name>29 - Julia</Name><idx>0x043B000103030502</idx></Toy>
+        <Toy><Name>30 - Louie</Name><idx>0x036D000103040502</idx></Toy>
+        <Toy><Name>31 - Bea</Name><idx>0x02F4000103050502</idx></Toy>
+        <Toy><Name>32 - Admiral</Name><idx>0x0233000103060502</idx></Toy>
+        <Toy><Name>33 - Ellie</Name><idx>0x032A000103070502</idx></Toy>
+        <Toy><Name>34 - Boots</Name><idx>0x02C5000103080502</idx></Toy>
+        <Toy><Name>35 - Weber</Name><idx>0x0312000103090502</idx></Toy>
+        <Toy><Name>36 - Candi</Name><idx>0x04140001030A0502</idx></Toy>
+        <Toy><Name>37 - Leopold</Name><idx>0x03EA0001030B0502</idx></Toy>
+        <Toy><Name>38 - Spike</Name><idx>0x04B40001030C0502</idx></Toy>
+        <Toy><Name>39 - Cashmere</Name><idx>0x04C90001030D0502</idx></Toy>
+        <Toy><Name>40 - Tad</Name><idx>0x03410001030E0502</idx></Toy>
+        <Toy><Name>41 - Norma</Name><idx>0x02B70001030F0502</idx></Toy>
+        <Toy><Name>42 - Gonzo</Name><idx>0x03C0000103100502</idx></Toy>
+        <Toy><Name>43 - Sprocket</Name><idx>0x0439000103110502</idx></Toy>
+        <Toy><Name>44 - Snooty</Name><idx>0x0206000103120502</idx></Toy>
+        <Toy><Name>45 - Olive</Name><idx>0x0286000103130502</idx></Toy>
+        <Toy><Name>46 - Dobie</Name><idx>0x050F000103140502</idx></Toy>
+        <Toy><Name>47 - Buzz</Name><idx>0x044E000103150502</idx></Toy>
+        <Toy><Name>48 - Cleo</Name><idx>0x03AB000103160502</idx></Toy>
+        <Toy><Name>49 - Ike</Name><idx>0x021F000103170502</idx></Toy>
+        <Toy><Name>50 - Tasha</Name><idx>0x04EA000103180502</idx></Toy>
+        <Toy><Name>S1 - Rilla</Name><idx>0x0374010103190502</idx></Toy>
+        <Toy><Name>S2 - Marty</Name><idx>0x028F0101031A0502</idx></Toy>
+        <Toy><Name>S3 - Etoile</Name><idx>0x04D30101031B0502</idx></Toy>
+        <Toy><Name>S4 - Chai</Name><idx>0x032E0101031C0502</idx></Toy>
+        <Toy><Name>S5 - Chelsea</Name><idx>0x02E00101031D0502</idx></Toy>
+        <Toy><Name>S6 - Toby</Name><idx>0x04A80101031E0502</idx></Toy>
+        <Toy><Name>AC Figure - Cyrus</Name><idx>0x018B000002460502</idx></Toy>
+        <Toy><Name>AC Figure - Digby</Name><idx>0x018C000002430502</idx></Toy>
+        <Toy><Name>AC Figure - Isabelle</Name><idx>0x01810100023F0502</idx></Toy>
+        <Toy><Name>AC Figure - K. K. Slider</Name><idx>0x0182000002400502</idx></Toy>
+        <Toy><Name>AC Figure - Lottie</Name><idx>0x01C1000002440502</idx></Toy>
+        <Toy><Name>AC Figure - Mabel</Name><idx>0x0188000002410502</idx></Toy>
+        <Toy><Name>AC Figure - Reese</Name><idx>0x018A000002450502</idx></Toy>
+        <Toy><Name>AC Figure - Tom Nook</Name><idx>0x0183000002420502</idx></Toy>
+        <Toy><Name>AC Figure - Blathers</Name><idx>0x0192000002470502</idx></Toy>
+        <Toy><Name>AC Figure - Celeste</Name><idx>0x0193000002480502</idx></Toy>
+        <Toy><Name>AC Figure - Kicks</Name><idx>0x01940000024A0502</idx></Toy>
+        <Toy><Name>AC Figure - Resetti</Name><idx>0x018E000002490502</idx></Toy>
+        <Toy><Name>AC Figure - Kapp&#39;n</Name><idx>0x01960000024E0502</idx></Toy>
+        <Toy><Name>AC Figure - Rover</Name><idx>0x018D0000024C0502</idx></Toy>
+        <Toy><Name>AC Figure - Timmy (&amp; Tommy)</Name><idx>0x01840000024D0502</idx></Toy>
+        <Toy><Name>AC Figure - Isabelle</Name><idx>0x01810100023F0502</idx></Toy>
+    </Characters>
+    <Lists>
+        <List><idx>0</idx>
+            <Entries>
+                <Cheat><Name>NONE</Name>							<Desc></Desc>	<idx></idx>	<Data>ff</Data></Cheat>
+                <Cheat><Name>Increased running speed</Name>			<Desc></Desc>	<idx></idx>	<Data>0</Data></Cheat>
+                <Cheat><Name>Decreased running speed</Name>			<Desc></Desc>	<idx></idx>	<Data>1</Data></Cheat>
+                <Cheat><Name>Faster sideways air movement</Name>	<Desc></Desc>	<idx></idx>	<Data>2</Data></Cheat>
+                <Cheat><Name>Slower sideways air movement</Name>	<Desc></Desc>	<idx></idx>	<Data>3</Data></Cheat>
+                <Cheat><Name>Improved jumping ability</Name>		<Desc></Desc>	<idx></idx>	<Data>4</Data></Cheat>
+                <Cheat><Name>Weakened jumping ability</Name>		<Desc></Desc>	<idx></idx>	<Data>5</Data></Cheat>
+                <Cheat><Name>Skating</Name>							<Desc></Desc>	<idx></idx>	<Data>6</Data></Cheat>
+                <Cheat><Name>Improved ground jumps</Name>			<Desc></Desc>	<idx></idx>	<Data>7</Data></Cheat>
+                <Cheat><Name>Weakened ground jumps</Name>			<Desc></Desc>	<idx></idx>	<Data>8</Data></Cheat>
+                <Cheat><Name>Improved mid-air jumps</Name>			<Desc></Desc>	<idx></idx>	<Data>9</Data></Cheat>
+                <Cheat><Name>Weakened mid-air jumps</Name>			<Desc></Desc>	<idx></idx>	<Data>A</Data></Cheat>
+                <Cheat><Name>Floaty jumps</Name>					<Desc></Desc>	<idx></idx>	<Data>B</Data></Cheat>
+                <Cheat><Name>Heavy jump</Name>						<Desc></Desc>	<idx></idx>	<Data>C</Data></Cheat>
+                <Cheat><Name>Increased walking speed</Name>			<Desc></Desc>	<idx></idx>	<Data>D</Data></Cheat>
+                <Cheat><Name>Decreased walking speed</Name>			<Desc></Desc>	<idx></idx>	<Data>E</Data></Cheat>
+                <Cheat><Name>Increased edge-grab duration</Name>	<Desc></Desc>	<idx></idx>	<Data>F</Data></Cheat>
+                <Cheat><Name>Decreased edge-grab duration</Name>	<Desc></Desc>	<idx></idx>	<Data>10</Data></Cheat>
+                <Cheat><Name>Easier edge-grabbing</Name>			<Desc></Desc>	<idx></idx>	<Data>11</Data></Cheat>
+                <Cheat><Name>More difficult edge-grabbing</Name>	<Desc></Desc>	<idx></idx>	<Data>12</Data></Cheat>
+                <Cheat><Name>Improved braking ability</Name>		<Desc></Desc>	<idx></idx>	<Data>13</Data></Cheat>
+                <Cheat><Name>Easy perfect shield</Name>				<Desc></Desc>	<idx></idx>	<Data>14</Data></Cheat>
+                <Cheat><Name>No perfect shield</Name>				<Desc></Desc>	<idx></idx>	<Data>15</Data></Cheat>
+                <Cheat><Name>Faster Shield Recharge</Name>			<Desc></Desc>	<idx></idx>	<Data>16</Data></Cheat>
+                <Cheat><Name>Slower Shield Recharge</Name>			<Desc></Desc>	<idx></idx>	<Data>17</Data></Cheat>
+                <Cheat><Name>Improved air defence</Name>			<Desc></Desc>	<idx></idx>	<Data>18</Data></Cheat>
+                <Cheat><Name>Weakened air defence</Name>			<Desc></Desc>	<idx></idx>	<Data>19</Data></Cheat>
+                <Cheat><Name>Easier Dodging</Name>					<Desc></Desc>	<idx></idx>	<Data>1A</Data></Cheat>
+                <Cheat><Name>More difficult dodging</Name>			<Desc></Desc>	<idx></idx>	<Data>1B</Data></Cheat>
+                <Cheat><Name>Reduced landing stiffness</Name>		<Desc></Desc>	<idx></idx>	<Data>1C</Data></Cheat>
+                <Cheat><Name>Increased landing stiffness</Name>		<Desc></Desc>	<idx></idx>	<Data>1D</Data></Cheat>
+                <Cheat><Name>Quick smash</Name>						<Desc></Desc>	<idx></idx>	<Data>1E</Data></Cheat>
+                <Cheat><Name>Hyper smash</Name>						<Desc></Desc>	<idx></idx>	<Data>1F</Data></Cheat>
+                <Cheat><Name>Improved air attacks</Name>			<Desc></Desc>	<idx></idx>	<Data>20</Data></Cheat>
+                <Cheat><Name>Weakened air attacks</Name>			<Desc></Desc>	<idx></idx>	<Data>21</Data></Cheat>
+                <Cheat><Name>Improved meteor smashes</Name>			<Desc></Desc>	<idx></idx>	<Data>22</Data></Cheat>
+                <Cheat><Name>Improved attack in a crisis</Name>		<Desc></Desc>	<idx></idx>	<Data>23</Data></Cheat>
+                <Cheat><Name>Improved defense in a crisis</Name>	<Desc></Desc>	<idx></idx>	<Data>24</Data></Cheat>
+                <Cheat><Name>Improved speed in a crisis</Name>		<Desc></Desc>	<idx></idx>	<Data>25</Data></Cheat>
+                <Cheat><Name>Powered up in a crisis</Name>			<Desc></Desc>	<idx></idx>	<Data>26</Data></Cheat>
+                <Cheat><Name>Invincible in a crisis</Name>			<Desc></Desc>	<idx></idx>	<Data>27</Data></Cheat>
+                <Cheat><Name>Improved attack at 0 damage</Name>		<Desc></Desc>	<idx></idx>	<Data>28</Data></Cheat>
+                <Cheat><Name>Improved speed at 0 damage</Name>		<Desc></Desc>	<idx></idx>	<Data>29</Data></Cheat>
+                <Cheat><Name>Improved attack/speed at 0%</Name>		<Desc></Desc>	<idx></idx>	<Data>2A</Data></Cheat>
+                <Cheat><Name>Trade-off for improved attack</Name>	<Desc></Desc>	<idx></idx>	<Data>2B</Data></Cheat>
+                <Cheat><Name>Trade-off for improved defence</Name>	<Desc></Desc>	<idx></idx>	<Data>2C</Data></Cheat>
+                <Cheat><Name>Trade-off for improved speed</Name>	<Desc></Desc>	<idx></idx>	<Data>2D</Data></Cheat>
+                <Cheat><Name>Trade-off for improved abilities</Name><Desc></Desc>	<idx></idx>	<Data>2E</Data></Cheat>
+                <Cheat><Name>Improved upward launching</Name>		<Desc></Desc>	<idx></idx>	<Data>2F</Data></Cheat>
+                <Cheat><Name>Health-stealing ability</Name>			<Desc></Desc>	<idx></idx>	<Data>30</Data></Cheat>
+                <Cheat><Name>Resistant smash charge</Name>			<Desc></Desc>	<idx></idx>	<Data>31</Data></Cheat>
+                <Cheat><Name>Critical hits</Name>					<Desc></Desc>	<idx></idx>	<Data>32</Data></Cheat>
+                <Cheat><Name>Hit downed foes harder</Name>			<Desc></Desc>	<idx></idx>	<Data>33</Data></Cheat>
+                <Cheat><Name>first strike bonus</Name>				<Desc></Desc>	<idx></idx>	<Data>34</Data></Cheat>
+                <Cheat><Name>Countdown bonus</Name>					<Desc></Desc>	<idx></idx>	<Data>35</Data></Cheat>
+                <Cheat><Name>Crash run</Name>						<Desc></Desc>	<idx></idx>	<Data>36</Data></Cheat>
+                <Cheat><Name>Explosive perfect shield</Name>		<Desc></Desc>	<idx></idx>	<Data>37</Data></Cheat>
+                <Cheat><Name>Shield restores health</Name>			<Desc></Desc>	<idx></idx>	<Data>38</Data></Cheat>
+                <Cheat><Name>Shield counter</Name>					<Desc></Desc>	<idx></idx>	<Data>39</Data></Cheat>
+                <Cheat><Name>Quick escape</Name>					<Desc></Desc>	<idx></idx>	<Data>3A</Data></Cheat>
+                <Cheat><Name>Improved item throwing</Name>			<Desc></Desc>	<idx></idx>	<Data>3B</Data></Cheat>
+                <Cheat><Name>Weakened item throwing</Name>			<Desc></Desc>	<idx></idx>	<Data>3C</Data></Cheat>
+                <Cheat><Name>Bonus to battering items</Name>		<Desc></Desc>	<idx></idx>	<Data>3D</Data></Cheat>
+                <Cheat><Name>Bonus to thrown items</Name>			<Desc></Desc>	<idx></idx>	<Data>3E</Data></Cheat>
+                <Cheat><Name>Bonus to shooting items</Name>			<Desc></Desc>	<idx></idx>	<Data>3F</Data></Cheat>
+                <Cheat><Name>High-speed batting</Name>				<Desc></Desc>	<idx></idx>	<Data>40</Data></Cheat>
+                <Cheat><Name>Star rod equipped</Name>				<Desc></Desc>	<idx></idx>	<Data>41</Data></Cheat>
+                <Cheat><Name>Lip's Stick equipped</Name>			<Desc></Desc>	<idx></idx>	<Data>42</Data></Cheat>
+                <Cheat><Name>Nintendo Scope equipped</Name>			<Desc></Desc>	<idx></idx>	<Data>43</Data></Cheat>
+                <Cheat><Name>Ray Gun equipped</Name>				<Desc></Desc>	<idx></idx>	<Data>44</Data></Cheat>
+                <Cheat><Name>Fire Flower equipped</Name>			<Desc></Desc>	<idx></idx>	<Data>45</Data></Cheat>
+                <Cheat><Name>Beam Sword equipped</Name>				<Desc></Desc>	<idx></idx>	<Data>46</Data></Cheat>
+                <Cheat><Name>Home-Run Bat equipped</Name>			<Desc></Desc>	<idx></idx>	<Data>47</Data></Cheat>
+                <Cheat><Name>Bob-omb equipped</Name>				<Desc></Desc>	<idx></idx>	<Data>48</Data></Cheat>
+                <Cheat><Name>Mr. Saturn equipped</Name>				<Desc></Desc>	<idx></idx>	<Data>49</Data></Cheat>
+                <Cheat><Name>Increased healing from food</Name>		<Desc></Desc>	<idx></idx>	<Data>4a</Data></Cheat>
+                <Cheat><Name>Decreased healing from food</Name>		<Desc></Desc>	<idx></idx>	<Data>4b</Data></Cheat>
+                <Cheat><Name>Heal while crouching</Name>			<Desc></Desc>	<idx></idx>	<Data>4c</Data></Cheat>
+                <Cheat><Name>improved attack after eating</Name>	<Desc></Desc>	<idx></idx>	<Data>4D</Data></Cheat>
+                <Cheat><Name>improved speed after eating</Name>		<Desc></Desc>	<idx></idx>	<Data>4E</Data></Cheat>
+                <Cheat><Name>improved defence after eating</Name>	<Desc></Desc>	<idx></idx>	<Data>4F</Data></Cheat>
+                <Cheat><Name>Powered up after eating</Name>			<Desc></Desc>	<idx></idx>	<Data>50</Data></Cheat>
+                <Cheat><Name>KO healing</Name>						<Desc></Desc>	<idx></idx>	<Data>51</Data></Cheat>
+                <Cheat><Name>Invincible after eating</Name>			<Desc></Desc>	<idx></idx>	<Data>52</Data></Cheat>
+                <Cheat><Name>Auto-heal</Name>						<Desc></Desc>	<idx></idx>	<Data>53</Data></Cheat>
+                <Cheat><Name>Smash Ball gravitation</Name>			<Desc></Desc>	<idx></idx>	<Data>54</Data></Cheat>
+                <Cheat><Name>Final Smash after respawning</Name>	<Desc></Desc>	<idx></idx>	<Data>55</Data></Cheat>
+                <Cheat><Name>Keep Final Smash if hurt</Name>		<Desc></Desc>	<idx></idx>	<Data>56</Data></Cheat>
+                <Cheat><Name>Smash Ball powers you up</Name>		<Desc></Desc>	<idx></idx>	<Data>57</Data></Cheat>
+                <Cheat><Name>Healing Smash Ball</Name>				<Desc></Desc>	<idx></idx>	<Data>58</Data></Cheat>
+                <Cheat><Name>Double Final Smash</Name>				<Desc></Desc>	<idx></idx>	<Data>59</Data></Cheat>
+                <Cheat><Name>Lucky Sudden Death</Name>				<Desc></Desc>	<idx></idx>	<Data>5A</Data></Cheat>
+                <Cheat><Name>Extended Respawn Invincibility</Name>	<Desc></Desc>	<idx></idx>	<Data>5B</Data></Cheat>
+                <Cheat><Name>No Respawn Invincibility</Name>		<Desc></Desc>	<idx></idx>	<Data>5C</Data></Cheat>
+            </Entries>
+        </List>
+        <List><idx>1</idx>
+            <Entries>
+                <Cheat><Name>All Bases Available in Amiibo</Name>	<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Mushroom Base Selected</Name>			<Desc></Desc>	<idx></idx><Data>5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Coin Base Selected</Name>				<Desc></Desc>	<idx></idx><Data>1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Star Base Selected</Name>				<Desc></Desc>	<idx></idx><Data>1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Sunflower Base Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Flower Base Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Heart Base Selected</Name>				<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Orange Base Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Watermelon Base Selected</Name>		<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Kiwi Base Selected</Name>				<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Biscuit Base Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Doughnut Base Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Shortbread Base Selected</Name>		<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Football Base Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Baseball Base Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Tyre Base Selected</Name>				<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1</Data></Cheat>
+                <Cheat><Name>Bronze Base Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1</Data></Cheat>
+                <Cheat><Name>Silver Base Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1</Data></Cheat>
+                <Cheat><Name>Gold Base Selected</Name>				<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5</Data></Cheat>
+            </Entries>
+        </List>
+        <List><idx>2</idx>
+            <Entries>
+                <Cheat><Name>All Tokens Available in Amiibo</Name>	<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Mario Jump Selected</Name>				<Desc></Desc>	<idx></idx><Data>5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Luigi Jump Selected</Name>				<Desc></Desc>	<idx></idx><Data>1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>P Switch Selected</Name>				<Desc></Desc>	<idx></idx><Data>1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Bowser Jr. Selected</Name>				<Desc></Desc>	<idx></idx><Data>1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Plus 1 Selected</Name>					<Desc></Desc>	<idx></idx><Data>1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>1-2-3 Dice Block Selected</Name>		<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>4-5-6 Dice Block Selected</Name>		<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Reverse Dice Block Selected</Name>		<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Slow Dice Block Selected</Name>		<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Double Dice Block Selected</Name>		<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Bronze Selected</Name>					<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Pow Block Selected</Name>				<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Pipe Selected</Name>					<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>? Block Selected</Name>				<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Bowser Space Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Plus 5 Selected</Name>					<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Silver Selected</Name>					<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Dash Special Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Reverse Special Selected</Name>		<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Jump Special Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Coin special Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Star Special Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Gold Selected</Name>					<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Normal Board Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Mario Board Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Luigi Board Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Peach Board Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Toad Board Selected</Name>				<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Yoshi Board Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1 1</Data></Cheat>
+                <Cheat><Name>Wario Board Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1 1</Data></Cheat>
+                <Cheat><Name>Rosalina Board Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1 1</Data></Cheat>
+                <Cheat><Name>Donkey Kong Board Selected</Name>		<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5 1</Data></Cheat>
+                <Cheat><Name>Bowser Board Selected</Name>			<Desc></Desc>	<idx></idx><Data>1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 5</Data></Cheat>
+            </Entries>
+        </List>
+        <List><idx>3</idx>
+            <Entries>
+                <Cheat><Name>Stroke (Can be used in Three Slots Max)</Name>	<Desc></Desc>	<idx></idx><Data>1</Data></Cheat>
+                <Cheat><Name>Serve (Can be used in Two slots Max)</Name>	<Desc></Desc>	<idx></idx><Data>2</Data></Cheat>
+                <Cheat><Name>Acceleration (Can be used in Two slots Max)</Name>	<Desc></Desc>	<idx></idx><Data>3</Data></Cheat>
+                <Cheat><Name>Speed (Can be used in Three slots Max)</Name>	<Desc></Desc>	<idx></idx><Data>4</Data></Cheat>
+                <Cheat><Name>Curve (Can be used in Three slots Max)</Name>	<Desc></Desc>	<idx></idx><Data>5</Data></Cheat>
+                <Cheat><Name>Agility (Can be used in Four slots Max)</Name>	<Desc></Desc>	<idx></idx><Data>6</Data></Cheat>
+                <Cheat><Name>Control (Can be used in Two slots Max)</Name>	<Desc></Desc>	<idx></idx><Data>7</Data></Cheat>
+                <Cheat><Name>Skill (Can be used in Three slots Max)</Name>	<Desc></Desc>	<idx></idx><Data>8</Data></Cheat>
+            </Entries>
+        </List>
+    </Lists>
+    <Cheats>
+        <Folder><Name>Stats Codes</Name>				<Games>0,2</Games><idx>f000</idx><Type>Slider</Type>
+            <Cheat><Name>Attack</Name>					<Games>0,2</Games>	<idx></idx><Codes><Code><Addr>120ec</Addr><Data>ffffff38 c8</Data></Code></Codes></Cheat>
+            <Cheat><Name>Defense</Name>					<Games>0,2</Games>	<idx></idx><Codes><Code><Addr>120ee</Addr><Data>ffffff38 c8</Data></Code></Codes></Cheat>
+            <Cheat><Name>Speed</Name>					<Games>0,2</Games>	<idx></idx><Codes><Code><Addr>120f0</Addr><Data>ffffff38 c8</Data></Code></Codes></Cheat>
+        </Folder>
+        <Folder><Name>Random Cash &amp; Items</Name>	<Games>0,2</Games><idx>f001</idx><Type>Random</Type>
+            <Cheat><Name>Random Cash &amp; Items</Name>	<Games>0,2</Games>	<idx></idx><Codes><Code><Addr>14174</Addr><Data>1 1</Data></Code></Codes></Cheat>
+        </Folder>
+        <Folder><Name>Level Codes</Name>				<Games>0,2</Games><idx>f002</idx><Type>SliderVals</Type>
+            <Cheat><Name>Level</Name>					<Games>0,2</Games>	<idx></idx><Codes><Code><Addr>12158</Addr><Data>1 0 a c8 14 240 1e 440 28 6c0 32 93e</Data></Code></Codes></Cheat>
+        </Folder>
+        <Folder><Name>Appearance Codes</Name>			<Games>0,2</Games><idx>f003</idx><Type>Slider</Type>
+            <Cheat><Name>Appearance</Name>				<Games>0,2</Games>	<idx></idx><Codes><Code><Addr>110e4</Addr><Data>1 8</Data></Code></Codes></Cheat>
+        </Folder>
+        <Folder><Name>Special Moves</Name>				<Games>0,2</Games><idx>f004</idx><Type>Slider</Type>
+            <Cheat><Name>Standard</Name>				<Games>0,2</Games>	<idx></idx><Codes><Code><Addr>110e5</Addr><Data>1 3</Data></Code></Codes></Cheat>
+            <Cheat><Name>Side</Name>					<Games>0,2</Games>	<idx></idx><Codes><Code><Addr>110e6</Addr><Data>1 3</Data></Code></Codes></Cheat>
+            <Cheat><Name>Up</Name>						<Games>0,2</Games>	<idx></idx><Codes><Code><Addr>110e7</Addr><Data>1 3</Data></Code></Codes></Cheat>
+            <Cheat><Name>Down</Name>					<Games>0,2</Games>	<idx></idx><Codes><Code><Addr>110e8</Addr><Data>1 3</Data></Code></Codes></Cheat>
+        </Folder>
+        <Folder><Name>Bonus Effect Slot 1 Codes</Name>	<Games>0,2</Games><idx>f005</idx><Addr>210e9</Addr><Type>List</Type><List>0</List>
+        </Folder>
+        <Folder><Name>Bonus Effect Slot 2 Codes</Name>	<Games>0,2</Games><idx>f006</idx><Addr>210ea</Addr><Type>List</Type><List>0</List>
+        </Folder>
+        <Folder><Name>Bonus Effect Slot 3 Codes</Name>	<Games>0,2</Games><idx>f007</idx><Addr>210eb</Addr><Type>List</Type><List>0</List>
+        </Folder>
+        <Folder><Name>Base Codes</Name>					<Games>1</Games>  <idx>f008</idx><Addr>21109</Addr><Type>List</Type><List>1</List>
+        </Folder>
+        <Folder><Name>Token Codes</Name>				<Games>1</Games>  <idx>f009</idx><Addr>210de</Addr><Type>List</Type><List>2</List>
+        </Folder>
+        <Folder><Name>Games Played</Name>				<Games>3</Games><idx>f00a</idx><Type>SliderBig</Type>
+            <Cheat><Name>Games Played</Name>					<Games>3</Games>	<idx></idx><Codes><Code><Addr>120dc</Addr><Data>0 270e</Data></Code></Codes></Cheat>
+        </Folder>
+        <Folder><Name>Slot 1 Stats</Name>				<Games>3</Games><idx>f00b</idx><Addr>210de</Addr><Type>List</Type><List>3</List>
+        </Folder>
+        <Folder><Name>Slot 2 Stats</Name>				<Games>3</Games><idx>f00c</idx><Addr>210df</Addr><Type>List</Type><List>3</List>
+        </Folder>
+        <Folder><Name>Slot 3 Stats</Name>				<Games>3</Games><idx>f00d</idx><Addr>210e0</Addr><Type>List</Type><List>3</List>
+        </Folder>
+        <Folder><Name>Slot 4 Stats</Name>				<Games>3</Games><idx>f00e</idx><Addr>210e1</Addr><Type>List</Type><List>3</List>
+        </Folder>
+        <Folder><Name>Slot 5 Stats</Name>				<Games>3</Games><idx>f00f</idx><Addr>210e2</Addr><Type>List</Type><List>3</List>
+        </Folder>
+        <Folder><Name>Slot 6 Stats</Name>				<Games>3</Games><idx>f010</idx><Addr>210e3</Addr><Type>List</Type><List>3</List>
+        </Folder>
+        <Folder><Name>Slot 7 Stats</Name>				<Games>3</Games><idx>f011</idx><Addr>210e4</Addr><Type>List</Type><List>3</List>
+        </Folder>
+        <Folder><Name>Slot 8 Stats</Name>				<Games>3</Games><idx>f012</idx><Addr>210e5</Addr><Type>List</Type><List>3</List>
+        </Folder>
+        <Folder><Name>Slot 9 Stats</Name>				<Games>3</Games><idx>f013</idx><Addr>210e6</Addr><Type>List</Type><List>3</List>
+        </Folder>
+        <Folder><Name>Slot 10 Stats</Name>				<Games>3</Games><idx>f014</idx><Addr>210e7</Addr><Type>List</Type><List>3</List>
+        </Folder>
+
+
+
+        <Folder><Name>Quick Level Up</Name>			<Games>7</Games><idx>f015</idx><Type>Code</Type>
+            <Cheat><Name>Quick Level Up</Name>		<Games>7</Games>	<idx></idx><Codes><Code><Addr>11131</Addr><Data>5 5</Data></Code></Codes></Cheat>
+        </Folder>
+        <Folder><Name>Quick Level Up</Name>			<Games>8</Games><idx>f016</idx><Type>Code</Type>
+            <Cheat><Name>Quick Level Up</Name>		<Games>8</Games>	<idx></idx><Codes><Code><Addr>11131</Addr><Data>5 5</Data></Code></Codes></Cheat>
+        </Folder>
+        <Folder><Name>Reset Game Data</Name>			<Games>99</Games><idx>f017</idx><Type>Code</Type>
+            <Cheat><Name>Reset Game Data</Name>		<Games>99</Games>	<idx></idx><Codes><Code><Addr>1102c</Addr><Data>10</Data></Code></Codes></Cheat>
+        </Folder>
+
+        <Folder><Name>Wolf Hearts Code</Name>			<Games>9</Games><idx>f018</idx><Type>SliderVals</Type>
+            <Cheat><Name>Number Of Hearts</Name>		<Games>9</Games>	<idx></idx><Codes><Code><Addr>110ee</Addr><Data>1 4 2 8 3 c 4 10 5 14 6 18 7 1c 8 20 9 24 a 28 b 2c c 30 d 34 e 38 f 3c 10 40 11 44 12 48 13 4c 14 50</Data></Code></Codes></Cheat>
+        </Folder>
+
+        <Folder><Name>Random Serial Num</Name>			<Games>98</Games><idx>f019</idx><Type>Code</Type>
+            <Cheat><Name>Generate Serial Number</Name>	<Games>98</Games>	<idx></idx><Codes><Code><Addr>11fff</Addr><Data>0</Data></Code></Codes></Cheat>
+        </Folder>
+
+
+    </Cheats>
+</CheatList>

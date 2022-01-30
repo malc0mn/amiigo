@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings>
+    <codelistUrl>http://settings.powersaves.net/psa/codelist.xml</codelistUrl>
+    <authUrl>https://psaapp.powersaves.net/api/Authorisation</authUrl>
+    <applicationUrl>https://psaapp.powersaves.net/api/codes</applicationUrl>
+    <softwareUrl>http://www.codejunkies.com/powersaves-for-amiibo/</softwareUrl>
+    <clientVersion>1.32</clientVersion>
+    <active>true</active>
+</settings>
