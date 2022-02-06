@@ -3,6 +3,7 @@ package apii
 import (
 	"encoding/base64"
 	"encoding/xml"
+	"errors"
 )
 
 // Settings holds the urls needed to communicate with the PowerSaves API.
@@ -20,6 +21,10 @@ func NewSettings(data []byte) (*Settings, error) {
 	s := &Settings{}
 	if err := xml.Unmarshal(data, s); err != nil {
 		return nil, err
+	}
+
+	if *s == (Settings{}) {
+		return nil, errors.New("unmarshal resulted in empty struct")
 	}
 
 	return s, nil
@@ -62,6 +67,10 @@ func NewVerifyResponse(data []byte) (*VerifyResponse, error) {
 	vr := &VerifyResponse{}
 	if err := xml.Unmarshal(data, vr); err != nil {
 		return nil, err
+	}
+
+	if vr.Token == "" || vr.Vuid == nil {
+		return nil, errors.New("unmarshal failed at least partially")
 	}
 
 	return vr, nil

@@ -7,12 +7,15 @@ import (
 	"encoding/xml"
 	"errors"
 	"fmt"
+	"math/rand"
 	"strconv"
 	"strings"
 )
 
 const (
+	PS_TypeCode       = "Code"
 	PS_TypeList       = "List"
+	PS_TypeRandom     = "Random"
 	PS_TypeSlider     = "Slider"
 	PS_TypeSliderBig  = "SliderBig"
 	PS_TypeSliderVals = "SliderVals"
@@ -44,9 +47,9 @@ func (gi *GameIds) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 
 // Game represents a game that has cheats.
 type Game struct {
-	Idx    int     `xml:"idx"` // An internal index
-	Name   string  // The game name
-	Folder *Folder `xml:"-"` // The folder containing all cheats
+	Idx     int       `xml:"idx"` // An internal index
+	Name    string    // The game name
+	Folders []*Folder `xml:"-"` // The folders containing the cheats
 }
 
 // Toy represents an amiibo figure or card.
@@ -74,20 +77,87 @@ func (t *Toy) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	return nil
 }
 
+// Cheat represents a cheat that can be applied to a character.
 type Cheat struct {
-	Idx      int `xml:"idx"`
-	Name     string
-	GamesIds GameIds `xml:"Games"`
-	Desc     string
-	Data     string
-	Codes    []*Code `xml:"Codes>Code"`
+	Idx     int `xml:"idx"`
+	Name    string
+	GameIds GameIds `xml:"Games"`
+	Desc    string
+	Data    string
+	// Codes holds the payload for a cheat. The XML seems to cater for multiple codes per cheat but
+	// there is always just one code present. The array has been kept but currently only the first
+	// code (position 0) is being used.
+	Codes []*Code `xml:"Codes>Code"`
+	// Folder is a backreference to the folder the cheat is in. If the cheat is in a folder, we'll
+	// need to get the address from the folder to apply the cheat.
+	Folder *Folder // TODO: one cheat can be in multiple folders, ugh... Need to fix that still!
 }
 
+// SliderMinMax returns a slice of integers containing the min. and max. allowed value for a Cheat
+// that is inside a PS_TypeSlider or PS_TypeSliderBig folder.
+// Returns nil when the cheat is in a different type of folder.
+func (c *Cheat) SliderMinMax() []int {
+	if c.Folder.IsTypeSlider() {
+		return slider(c.Data)
+	}
+
+	return nil
+}
+
+// SliderVals returns a map of key value integers where the value will be the payload of the cheat.
+// Returns nil when the cheat is in a different type of folder.
+func (c *Cheat) SliderVals() map[int]int {
+	if c.Folder.IsTypeSliderVals() {
+		return sliderVals(c.Data)
+	}
+
+	return nil
+}
+
+// Payload returns the data that should be posted as Payload when applying the given Cheat.
+// The selection parameter is required when there is a range of values to choose from. If there are
+// no options to choose from, the parameter is ignored.
+// Code cheats require multiple selection values which is why the
+// Validating that the given selection is within the available range is the responsibility of the
+// caller!
+func (c *Cheat) Payload(selection ...int) ([]byte, error) {
+	switch c.Folder.Type {
+	case PS_TypeCode:
+		return multiDataToBytes(selection), nil
+	case PS_TypeList:
+		return dataToBytes(c.Data), nil
+	case PS_TypeRandom:
+		return randomBytes(8)
+	case PS_TypeSlider:
+		fallthrough
+	case PS_TypeSliderBig:
+		fallthrough
+	case PS_TypeSliderVals:
+		return int32ToByte(selection[0]), nil
+	}
+
+	return nil, errors.New("unknown folder type")
+}
+
+// Address returns the address the cheat will be applied to. This address must be posted to the API
+// to properly apply the cheat.
+func (c *Cheat) Address() string {
+	if len(c.Codes) > 0 {
+		return c.Codes[0].Address() // Only the address of the first code must be posted!
+	}
+
+	return c.Folder.Address()
+}
+
+// List represents a list of cheats inside a folder.
 type List struct {
 	Idx    int      `xml:"idx"`
 	Cheats []*Cheat `xml:"Entries>Cheat"`
 }
 
+// Code represents one part of a cheat. If a cheat has multiple codes, each code must be posted to
+// apply the cheat.
+// Only one address, the address of the first code, must be posted in the Address field.
 type Code struct {
 	Addr string
 	Data string
@@ -95,9 +165,10 @@ type Code struct {
 
 // Address returns the string that should be posted as Address when applying the cheat.
 func (co *Code) Address() string {
-	return addrToHexString(co.Addr[2:])
+	return addrToHexString(co.Addr)
 }
 
+// Folder represents a folder holding cheats.
 type Folder struct {
 	Name    string
 	GameIds GameIds `xml:"Games"`
@@ -106,7 +177,16 @@ type Folder struct {
 	Type    string   // The UI element to use for this folder
 	Cheats  []*Cheat `xml:"Cheat"`
 	ListIdx int      `xml:"List"`
-	List    *List    `xml:"-"`
+}
+
+// IsTypeSlider returns true if the folder is of type PS_TypeSlider or PS_TypeSliderBig.
+func (f *Folder) IsTypeSlider() bool {
+	return f.Type == PS_TypeSlider || f.Type == PS_TypeSliderBig
+}
+
+// IsTypeSliderVals returns true if the folder is of type PS_TypeSliderVals.
+func (f *Folder) IsTypeSliderVals() bool {
+	return f.Type == PS_TypeSliderVals
 }
 
 // Address returns the string that should be posted as Address when applying the cheat.
@@ -114,63 +194,10 @@ func (f *Folder) Address() string {
 	if f.Addr == "" {
 		return f.Addr
 	}
-	return addrToHexString(f.Addr[2:])
+	return addrToHexString(f.Addr)
 }
 
-// SliderMinMax returns a slice of integers containing the min. and max. allowed value for a Cheat
-// that is inside a PS_TypeSlider or PS_TypeSliderBig type of folder.
-// Returns nil when the cheat is not found in the folder.
-func (f *Folder) SliderMinMax(c *Cheat) []int {
-	for _, fc := range f.Cheats {
-		if c == fc && (f.Type == PS_TypeSlider || f.Type == PS_TypeSliderBig) {
-			return slider(f.Cheats[0].Data)
-		}
-	}
-
-	return nil
-}
-
-func (f *Folder) SliderVals(c *Cheat) map[int]int {
-	for _, fc := range f.Cheats {
-		if c == fc && (f.Type == PS_TypeSliderVals) {
-			return sliderVals(f.Cheats[0].Data)
-		}
-	}
-
-	return nil
-}
-
-// Payload returns the data that should be posted as Payload when applying the given Cheat.
-func (f *Folder) Payload(c *Cheat, selection int) ([]byte, error) {
-	for _, fc := range f.Cheats {
-		if f.Type == PS_TypeList {
-			for _, lc := range f.List.Cheats {
-				if c == lc {
-					if strings.Contains(lc.Data, " ") {
-						// add leading zeros
-					}
-				}
-			}
-		}
-		if c == fc {
-			switch f.Type {
-			case PS_TypeSliderVals:
-				fallthrough
-			case PS_TypeSliderBig:
-				fallthrough
-			case PS_TypeSlider:
-				return int32ToByte(selection), nil
-			case "Random":
-				// TODO
-			case "Code":
-				// TODO
-			}
-		}
-	}
-
-	return nil, errors.New("unknown cheat")
-}
-
+// CheatList holds the full cheat list data returned by the API.
 type CheatList struct {
 	// Games holds the list of games that have cheats.
 	Games []*Game `xml:"Games>Game"`
@@ -204,20 +231,29 @@ func NewCheatList(data []byte) (*CheatList, error) {
 		return nil, err
 	}
 
+	if len(cl.Games) == 0 || len(cl.GameIds) == 0 || len(cl.Lists) == 0 || len(cl.Folders) == 0 || len(cl.Toys) == 0 {
+		return nil, errors.New("unmarshal failed at least partially")
+	}
+
 	for _, f := range cl.Folders {
-		// Link lists to folders based on the list index and type.
-		if f.Type == "List" {
+		// Link list cheats to folder cheats based on the folder type and list index.
+		if f.Type == PS_TypeList {
 			for _, l := range cl.Lists {
 				if f.ListIdx == l.Idx {
-					f.List = l
+					f.Cheats = l.Cheats
 				}
 			}
+		}
+		// Backlink cheats to folders to allow easy applying of cheats. Note that this MUST be
+		// done AFTER the code block above!
+		for _, c := range f.Cheats {
+			c.Folder = f
 		}
 		// Link folders to games based on the game index.
 		for _, g := range cl.Games {
 			for _, id := range f.GameIds {
 				if id == g.Idx {
-					g.Folder = f
+					g.Folders = append(g.Folders, f)
 				}
 			}
 		}
@@ -226,10 +262,15 @@ func NewCheatList(data []byte) (*CheatList, error) {
 	return cl, nil
 }
 
+// TODO: we drop the first two bytes after investigating the post data, but what are they actually for?
+//  They are 11, 12, 14 and 21.
 func addrToHexString(a string) string {
 	return "0x" + strings.TrimPrefix(a[2:], "0")
 }
 
+// sliderVals expects a space separated list of key value pairs, e.g. "key1 value1 key2 value2",
+// that represent integers. Keys and values are in hexadecimal format.
+// The string will be converted to a usable map.
 func sliderVals(s string) map[int]int {
 	p := strings.Split(s, " ")
 
@@ -261,8 +302,16 @@ func slider(s string) []int {
 	return []int{min, max}
 }
 
+func hexTo8Bit(s string) []byte {
+	return hexToXBit(s, 2)
+}
+
 func hexTo32Bit(s string) []byte {
-	src := []byte(fmt.Sprintf("%08s", s))
+	return hexToXBit(s, 8)
+}
+
+func hexToXBit(s string, precision int) []byte {
+	src := []byte(fmt.Sprintf("%0"+strconv.Itoa(precision)+"s", s))
 
 	dst := make([]byte, hex.DecodedLen(len(src)))
 	_, err := hex.Decode(dst, src)
@@ -288,4 +337,35 @@ func int32ToByte(i int) []byte {
 		panic(err)
 	}
 	return buf.Bytes()
+}
+
+// dataToBytes expects a space separated string of hexadecimal integers that will be converted to a
+// byte array.
+func dataToBytes(d string) []byte {
+	r := strings.Split(d, " ")
+	var b []byte
+	for _, i := range r {
+		b = append(b, hexTo8Bit(i)...)
+	}
+
+	return b
+}
+
+// TODO: this will need some efficiency improvement.
+func multiDataToBytes(ints []int) []byte {
+	var s []string
+	for _, i := range ints {
+		s = append(s, strconv.Itoa(i))
+	}
+
+	return dataToBytes(strings.Join(s, " "))
+}
+
+func randomBytes(size int) ([]byte, error) {
+	b := make([]byte, size)
+	if _, err := rand.Read(b); err != nil {
+		return nil, err
+	}
+
+	return b, nil
 }

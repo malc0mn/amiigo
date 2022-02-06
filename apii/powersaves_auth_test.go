@@ -13,7 +13,6 @@ func TestSettings(t *testing.T) {
 		t.Errorf("could not unmarshal file %s, error %s", file, err)
 	}
 
-
 	want := "http://settings.powersaves.net/psa/codelist.xml"
 	got := s.CodelistUrl
 	if got != want {
