@@ -1,0 +1,1557 @@
+game: Super Smash Bros. (WiiU)
++-- folder: Stats Codes
+    type: Slider
+    address: 
+    +-- cheat: Attack
+        address: 0xec
+    +-- cheat: Defense
+        address: 0xee
+    +-- cheat: Speed
+        address: 0xf0
++-- folder: Random Cash & Items
+    type: Random
+    address: 
+    +-- cheat: Random Cash & Items
+        address: 0x174
++-- folder: Level Codes
+    type: SliderVals
+    address: 
+    +-- cheat: Level
+        address: 0x158
++-- folder: Appearance Codes
+    type: Slider
+    address: 
+    +-- cheat: Appearance
+        address: 0xe4
++-- folder: Special Moves
+    type: Slider
+    address: 
+    +-- cheat: Standard
+        address: 0xe5
+    +-- cheat: Side
+        address: 0xe6
+    +-- cheat: Up
+        address: 0xe7
+    +-- cheat: Down
+        address: 0xe8
++-- folder: Bonus Effect Slot 1 Codes
+    type: List
+    address: 0xe9
+    +-- cheat: NONE
+        address: 0xe9
+    +-- cheat: Increased running speed
+        address: 0xe9
+    +-- cheat: Decreased running speed
+        address: 0xe9
+    +-- cheat: Faster sideways air movement
+        address: 0xe9
+    +-- cheat: Slower sideways air movement
+        address: 0xe9
+    +-- cheat: Improved jumping ability
+        address: 0xe9
+    +-- cheat: Weakened jumping ability
+        address: 0xe9
+    +-- cheat: Skating
+        address: 0xe9
+    +-- cheat: Improved ground jumps
+        address: 0xe9
+    +-- cheat: Weakened ground jumps
+        address: 0xe9
+    +-- cheat: Improved mid-air jumps
+        address: 0xe9
+    +-- cheat: Weakened mid-air jumps
+        address: 0xe9
+    +-- cheat: Floaty jumps
+        address: 0xe9
+    +-- cheat: Heavy jump
+        address: 0xe9
+    +-- cheat: Increased walking speed
+        address: 0xe9
+    +-- cheat: Decreased walking speed
+        address: 0xe9
+    +-- cheat: Increased edge-grab duration
+        address: 0xe9
+    +-- cheat: Decreased edge-grab duration
+        address: 0xe9
+    +-- cheat: Easier edge-grabbing
+        address: 0xe9
+    +-- cheat: More difficult edge-grabbing
+        address: 0xe9
+    +-- cheat: Improved braking ability
+        address: 0xe9
+    +-- cheat: Easy perfect shield
+        address: 0xe9
+    +-- cheat: No perfect shield
+        address: 0xe9
+    +-- cheat: Faster Shield Recharge
+        address: 0xe9
+    +-- cheat: Slower Shield Recharge
+        address: 0xe9
+    +-- cheat: Improved air defence
+        address: 0xe9
+    +-- cheat: Weakened air defence
+        address: 0xe9
+    +-- cheat: Easier Dodging
+        address: 0xe9
+    +-- cheat: More difficult dodging
+        address: 0xe9
+    +-- cheat: Reduced landing stiffness
+        address: 0xe9
+    +-- cheat: Increased landing stiffness
+        address: 0xe9
+    +-- cheat: Quick smash
+        address: 0xe9
+    +-- cheat: Hyper smash
+        address: 0xe9
+    +-- cheat: Improved air attacks
+        address: 0xe9
+    +-- cheat: Weakened air attacks
+        address: 0xe9
+    +-- cheat: Improved meteor smashes
+        address: 0xe9
+    +-- cheat: Improved attack in a crisis
+        address: 0xe9
+    +-- cheat: Improved defense in a crisis
+        address: 0xe9
+    +-- cheat: Improved speed in a crisis
+        address: 0xe9
+    +-- cheat: Powered up in a crisis
+        address: 0xe9
+    +-- cheat: Invincible in a crisis
+        address: 0xe9
+    +-- cheat: Improved attack at 0 damage
+        address: 0xe9
+    +-- cheat: Improved speed at 0 damage
+        address: 0xe9
+    +-- cheat: Improved attack/speed at 0%
+        address: 0xe9
+    +-- cheat: Trade-off for improved attack
+        address: 0xe9
+    +-- cheat: Trade-off for improved defence
+        address: 0xe9
+    +-- cheat: Trade-off for improved speed
+        address: 0xe9
+    +-- cheat: Trade-off for improved abilities
+        address: 0xe9
+    +-- cheat: Improved upward launching
+        address: 0xe9
+    +-- cheat: Health-stealing ability
+        address: 0xe9
+    +-- cheat: Resistant smash charge
+        address: 0xe9
+    +-- cheat: Critical hits
+        address: 0xe9
+    +-- cheat: Hit downed foes harder
+        address: 0xe9
+    +-- cheat: first strike bonus
+        address: 0xe9
+    +-- cheat: Countdown bonus
+        address: 0xe9
+    +-- cheat: Crash run
+        address: 0xe9
+    +-- cheat: Explosive perfect shield
+        address: 0xe9
+    +-- cheat: Shield restores health
+        address: 0xe9
+    +-- cheat: Shield counter
+        address: 0xe9
+    +-- cheat: Quick escape
+        address: 0xe9
+    +-- cheat: Improved item throwing
+        address: 0xe9
+    +-- cheat: Weakened item throwing
+        address: 0xe9
+    +-- cheat: Bonus to battering items
+        address: 0xe9
+    +-- cheat: Bonus to thrown items
+        address: 0xe9
+    +-- cheat: Bonus to shooting items
+        address: 0xe9
+    +-- cheat: High-speed batting
+        address: 0xe9
+    +-- cheat: Star rod equipped
+        address: 0xe9
+    +-- cheat: Lip's Stick equipped
+        address: 0xe9
+    +-- cheat: Nintendo Scope equipped
+        address: 0xe9
+    +-- cheat: Ray Gun equipped
+        address: 0xe9
+    +-- cheat: Fire Flower equipped
+        address: 0xe9
+    +-- cheat: Beam Sword equipped
+        address: 0xe9
+    +-- cheat: Home-Run Bat equipped
+        address: 0xe9
+    +-- cheat: Bob-omb equipped
+        address: 0xe9
+    +-- cheat: Mr. Saturn equipped
+        address: 0xe9
+    +-- cheat: Increased healing from food
+        address: 0xe9
+    +-- cheat: Decreased healing from food
+        address: 0xe9
+    +-- cheat: Heal while crouching
+        address: 0xe9
+    +-- cheat: improved attack after eating
+        address: 0xe9
+    +-- cheat: improved speed after eating
+        address: 0xe9
+    +-- cheat: improved defence after eating
+        address: 0xe9
+    +-- cheat: Powered up after eating
+        address: 0xe9
+    +-- cheat: KO healing
+        address: 0xe9
+    +-- cheat: Invincible after eating
+        address: 0xe9
+    +-- cheat: Auto-heal
+        address: 0xe9
+    +-- cheat: Smash Ball gravitation
+        address: 0xe9
+    +-- cheat: Final Smash after respawning
+        address: 0xe9
+    +-- cheat: Keep Final Smash if hurt
+        address: 0xe9
+    +-- cheat: Smash Ball powers you up
+        address: 0xe9
+    +-- cheat: Healing Smash Ball
+        address: 0xe9
+    +-- cheat: Double Final Smash
+        address: 0xe9
+    +-- cheat: Lucky Sudden Death
+        address: 0xe9
+    +-- cheat: Extended Respawn Invincibility
+        address: 0xe9
+    +-- cheat: No Respawn Invincibility
+        address: 0xe9
++-- folder: Bonus Effect Slot 2 Codes
+    type: List
+    address: 0xea
+    +-- cheat: NONE
+        address: 0xea
+    +-- cheat: Increased running speed
+        address: 0xea
+    +-- cheat: Decreased running speed
+        address: 0xea
+    +-- cheat: Faster sideways air movement
+        address: 0xea
+    +-- cheat: Slower sideways air movement
+        address: 0xea
+    +-- cheat: Improved jumping ability
+        address: 0xea
+    +-- cheat: Weakened jumping ability
+        address: 0xea
+    +-- cheat: Skating
+        address: 0xea
+    +-- cheat: Improved ground jumps
+        address: 0xea
+    +-- cheat: Weakened ground jumps
+        address: 0xea
+    +-- cheat: Improved mid-air jumps
+        address: 0xea
+    +-- cheat: Weakened mid-air jumps
+        address: 0xea
+    +-- cheat: Floaty jumps
+        address: 0xea
+    +-- cheat: Heavy jump
+        address: 0xea
+    +-- cheat: Increased walking speed
+        address: 0xea
+    +-- cheat: Decreased walking speed
+        address: 0xea
+    +-- cheat: Increased edge-grab duration
+        address: 0xea
+    +-- cheat: Decreased edge-grab duration
+        address: 0xea
+    +-- cheat: Easier edge-grabbing
+        address: 0xea
+    +-- cheat: More difficult edge-grabbing
+        address: 0xea
+    +-- cheat: Improved braking ability
+        address: 0xea
+    +-- cheat: Easy perfect shield
+        address: 0xea
+    +-- cheat: No perfect shield
+        address: 0xea
+    +-- cheat: Faster Shield Recharge
+        address: 0xea
+    +-- cheat: Slower Shield Recharge
+        address: 0xea
+    +-- cheat: Improved air defence
+        address: 0xea
+    +-- cheat: Weakened air defence
+        address: 0xea
+    +-- cheat: Easier Dodging
+        address: 0xea
+    +-- cheat: More difficult dodging
+        address: 0xea
+    +-- cheat: Reduced landing stiffness
+        address: 0xea
+    +-- cheat: Increased landing stiffness
+        address: 0xea
+    +-- cheat: Quick smash
+        address: 0xea
+    +-- cheat: Hyper smash
+        address: 0xea
+    +-- cheat: Improved air attacks
+        address: 0xea
+    +-- cheat: Weakened air attacks
+        address: 0xea
+    +-- cheat: Improved meteor smashes
+        address: 0xea
+    +-- cheat: Improved attack in a crisis
+        address: 0xea
+    +-- cheat: Improved defense in a crisis
+        address: 0xea
+    +-- cheat: Improved speed in a crisis
+        address: 0xea
+    +-- cheat: Powered up in a crisis
+        address: 0xea
+    +-- cheat: Invincible in a crisis
+        address: 0xea
+    +-- cheat: Improved attack at 0 damage
+        address: 0xea
+    +-- cheat: Improved speed at 0 damage
+        address: 0xea
+    +-- cheat: Improved attack/speed at 0%
+        address: 0xea
+    +-- cheat: Trade-off for improved attack
+        address: 0xea
+    +-- cheat: Trade-off for improved defence
+        address: 0xea
+    +-- cheat: Trade-off for improved speed
+        address: 0xea
+    +-- cheat: Trade-off for improved abilities
+        address: 0xea
+    +-- cheat: Improved upward launching
+        address: 0xea
+    +-- cheat: Health-stealing ability
+        address: 0xea
+    +-- cheat: Resistant smash charge
+        address: 0xea
+    +-- cheat: Critical hits
+        address: 0xea
+    +-- cheat: Hit downed foes harder
+        address: 0xea
+    +-- cheat: first strike bonus
+        address: 0xea
+    +-- cheat: Countdown bonus
+        address: 0xea
+    +-- cheat: Crash run
+        address: 0xea
+    +-- cheat: Explosive perfect shield
+        address: 0xea
+    +-- cheat: Shield restores health
+        address: 0xea
+    +-- cheat: Shield counter
+        address: 0xea
+    +-- cheat: Quick escape
+        address: 0xea
+    +-- cheat: Improved item throwing
+        address: 0xea
+    +-- cheat: Weakened item throwing
+        address: 0xea
+    +-- cheat: Bonus to battering items
+        address: 0xea
+    +-- cheat: Bonus to thrown items
+        address: 0xea
+    +-- cheat: Bonus to shooting items
+        address: 0xea
+    +-- cheat: High-speed batting
+        address: 0xea
+    +-- cheat: Star rod equipped
+        address: 0xea
+    +-- cheat: Lip's Stick equipped
+        address: 0xea
+    +-- cheat: Nintendo Scope equipped
+        address: 0xea
+    +-- cheat: Ray Gun equipped
+        address: 0xea
+    +-- cheat: Fire Flower equipped
+        address: 0xea
+    +-- cheat: Beam Sword equipped
+        address: 0xea
+    +-- cheat: Home-Run Bat equipped
+        address: 0xea
+    +-- cheat: Bob-omb equipped
+        address: 0xea
+    +-- cheat: Mr. Saturn equipped
+        address: 0xea
+    +-- cheat: Increased healing from food
+        address: 0xea
+    +-- cheat: Decreased healing from food
+        address: 0xea
+    +-- cheat: Heal while crouching
+        address: 0xea
+    +-- cheat: improved attack after eating
+        address: 0xea
+    +-- cheat: improved speed after eating
+        address: 0xea
+    +-- cheat: improved defence after eating
+        address: 0xea
+    +-- cheat: Powered up after eating
+        address: 0xea
+    +-- cheat: KO healing
+        address: 0xea
+    +-- cheat: Invincible after eating
+        address: 0xea
+    +-- cheat: Auto-heal
+        address: 0xea
+    +-- cheat: Smash Ball gravitation
+        address: 0xea
+    +-- cheat: Final Smash after respawning
+        address: 0xea
+    +-- cheat: Keep Final Smash if hurt
+        address: 0xea
+    +-- cheat: Smash Ball powers you up
+        address: 0xea
+    +-- cheat: Healing Smash Ball
+        address: 0xea
+    +-- cheat: Double Final Smash
+        address: 0xea
+    +-- cheat: Lucky Sudden Death
+        address: 0xea
+    +-- cheat: Extended Respawn Invincibility
+        address: 0xea
+    +-- cheat: No Respawn Invincibility
+        address: 0xea
++-- folder: Bonus Effect Slot 3 Codes
+    type: List
+    address: 0xeb
+    +-- cheat: NONE
+        address: 0xeb
+    +-- cheat: Increased running speed
+        address: 0xeb
+    +-- cheat: Decreased running speed
+        address: 0xeb
+    +-- cheat: Faster sideways air movement
+        address: 0xeb
+    +-- cheat: Slower sideways air movement
+        address: 0xeb
+    +-- cheat: Improved jumping ability
+        address: 0xeb
+    +-- cheat: Weakened jumping ability
+        address: 0xeb
+    +-- cheat: Skating
+        address: 0xeb
+    +-- cheat: Improved ground jumps
+        address: 0xeb
+    +-- cheat: Weakened ground jumps
+        address: 0xeb
+    +-- cheat: Improved mid-air jumps
+        address: 0xeb
+    +-- cheat: Weakened mid-air jumps
+        address: 0xeb
+    +-- cheat: Floaty jumps
+        address: 0xeb
+    +-- cheat: Heavy jump
+        address: 0xeb
+    +-- cheat: Increased walking speed
+        address: 0xeb
+    +-- cheat: Decreased walking speed
+        address: 0xeb
+    +-- cheat: Increased edge-grab duration
+        address: 0xeb
+    +-- cheat: Decreased edge-grab duration
+        address: 0xeb
+    +-- cheat: Easier edge-grabbing
+        address: 0xeb
+    +-- cheat: More difficult edge-grabbing
+        address: 0xeb
+    +-- cheat: Improved braking ability
+        address: 0xeb
+    +-- cheat: Easy perfect shield
+        address: 0xeb
+    +-- cheat: No perfect shield
+        address: 0xeb
+    +-- cheat: Faster Shield Recharge
+        address: 0xeb
+    +-- cheat: Slower Shield Recharge
+        address: 0xeb
+    +-- cheat: Improved air defence
+        address: 0xeb
+    +-- cheat: Weakened air defence
+        address: 0xeb
+    +-- cheat: Easier Dodging
+        address: 0xeb
+    +-- cheat: More difficult dodging
+        address: 0xeb
+    +-- cheat: Reduced landing stiffness
+        address: 0xeb
+    +-- cheat: Increased landing stiffness
+        address: 0xeb
+    +-- cheat: Quick smash
+        address: 0xeb
+    +-- cheat: Hyper smash
+        address: 0xeb
+    +-- cheat: Improved air attacks
+        address: 0xeb
+    +-- cheat: Weakened air attacks
+        address: 0xeb
+    +-- cheat: Improved meteor smashes
+        address: 0xeb
+    +-- cheat: Improved attack in a crisis
+        address: 0xeb
+    +-- cheat: Improved defense in a crisis
+        address: 0xeb
+    +-- cheat: Improved speed in a crisis
+        address: 0xeb
+    +-- cheat: Powered up in a crisis
+        address: 0xeb
+    +-- cheat: Invincible in a crisis
+        address: 0xeb
+    +-- cheat: Improved attack at 0 damage
+        address: 0xeb
+    +-- cheat: Improved speed at 0 damage
+        address: 0xeb
+    +-- cheat: Improved attack/speed at 0%
+        address: 0xeb
+    +-- cheat: Trade-off for improved attack
+        address: 0xeb
+    +-- cheat: Trade-off for improved defence
+        address: 0xeb
+    +-- cheat: Trade-off for improved speed
+        address: 0xeb
+    +-- cheat: Trade-off for improved abilities
+        address: 0xeb
+    +-- cheat: Improved upward launching
+        address: 0xeb
+    +-- cheat: Health-stealing ability
+        address: 0xeb
+    +-- cheat: Resistant smash charge
+        address: 0xeb
+    +-- cheat: Critical hits
+        address: 0xeb
+    +-- cheat: Hit downed foes harder
+        address: 0xeb
+    +-- cheat: first strike bonus
+        address: 0xeb
+    +-- cheat: Countdown bonus
+        address: 0xeb
+    +-- cheat: Crash run
+        address: 0xeb
+    +-- cheat: Explosive perfect shield
+        address: 0xeb
+    +-- cheat: Shield restores health
+        address: 0xeb
+    +-- cheat: Shield counter
+        address: 0xeb
+    +-- cheat: Quick escape
+        address: 0xeb
+    +-- cheat: Improved item throwing
+        address: 0xeb
+    +-- cheat: Weakened item throwing
+        address: 0xeb
+    +-- cheat: Bonus to battering items
+        address: 0xeb
+    +-- cheat: Bonus to thrown items
+        address: 0xeb
+    +-- cheat: Bonus to shooting items
+        address: 0xeb
+    +-- cheat: High-speed batting
+        address: 0xeb
+    +-- cheat: Star rod equipped
+        address: 0xeb
+    +-- cheat: Lip's Stick equipped
+        address: 0xeb
+    +-- cheat: Nintendo Scope equipped
+        address: 0xeb
+    +-- cheat: Ray Gun equipped
+        address: 0xeb
+    +-- cheat: Fire Flower equipped
+        address: 0xeb
+    +-- cheat: Beam Sword equipped
+        address: 0xeb
+    +-- cheat: Home-Run Bat equipped
+        address: 0xeb
+    +-- cheat: Bob-omb equipped
+        address: 0xeb
+    +-- cheat: Mr. Saturn equipped
+        address: 0xeb
+    +-- cheat: Increased healing from food
+        address: 0xeb
+    +-- cheat: Decreased healing from food
+        address: 0xeb
+    +-- cheat: Heal while crouching
+        address: 0xeb
+    +-- cheat: improved attack after eating
+        address: 0xeb
+    +-- cheat: improved speed after eating
+        address: 0xeb
+    +-- cheat: improved defence after eating
+        address: 0xeb
+    +-- cheat: Powered up after eating
+        address: 0xeb
+    +-- cheat: KO healing
+        address: 0xeb
+    +-- cheat: Invincible after eating
+        address: 0xeb
+    +-- cheat: Auto-heal
+        address: 0xeb
+    +-- cheat: Smash Ball gravitation
+        address: 0xeb
+    +-- cheat: Final Smash after respawning
+        address: 0xeb
+    +-- cheat: Keep Final Smash if hurt
+        address: 0xeb
+    +-- cheat: Smash Ball powers you up
+        address: 0xeb
+    +-- cheat: Healing Smash Ball
+        address: 0xeb
+    +-- cheat: Double Final Smash
+        address: 0xeb
+    +-- cheat: Lucky Sudden Death
+        address: 0xeb
+    +-- cheat: Extended Respawn Invincibility
+        address: 0xeb
+    +-- cheat: No Respawn Invincibility
+        address: 0xeb
+game: Mario Party 10
++-- folder: Base Codes
+    type: List
+    address: 0x109
+    +-- cheat: All Bases Available in Amiibo
+        address: 0x109
+    +-- cheat: Mushroom Base Selected
+        address: 0x109
+    +-- cheat: Coin Base Selected
+        address: 0x109
+    +-- cheat: Star Base Selected
+        address: 0x109
+    +-- cheat: Sunflower Base Selected
+        address: 0x109
+    +-- cheat: Flower Base Selected
+        address: 0x109
+    +-- cheat: Heart Base Selected
+        address: 0x109
+    +-- cheat: Orange Base Selected
+        address: 0x109
+    +-- cheat: Watermelon Base Selected
+        address: 0x109
+    +-- cheat: Kiwi Base Selected
+        address: 0x109
+    +-- cheat: Biscuit Base Selected
+        address: 0x109
+    +-- cheat: Doughnut Base Selected
+        address: 0x109
+    +-- cheat: Shortbread Base Selected
+        address: 0x109
+    +-- cheat: Football Base Selected
+        address: 0x109
+    +-- cheat: Baseball Base Selected
+        address: 0x109
+    +-- cheat: Tyre Base Selected
+        address: 0x109
+    +-- cheat: Bronze Base Selected
+        address: 0x109
+    +-- cheat: Silver Base Selected
+        address: 0x109
+    +-- cheat: Gold Base Selected
+        address: 0x109
++-- folder: Token Codes
+    type: List
+    address: 0xde
+    +-- cheat: All Tokens Available in Amiibo
+        address: 0xde
+    +-- cheat: Mario Jump Selected
+        address: 0xde
+    +-- cheat: Luigi Jump Selected
+        address: 0xde
+    +-- cheat: P Switch Selected
+        address: 0xde
+    +-- cheat: Bowser Jr. Selected
+        address: 0xde
+    +-- cheat: Plus 1 Selected
+        address: 0xde
+    +-- cheat: 1-2-3 Dice Block Selected
+        address: 0xde
+    +-- cheat: 4-5-6 Dice Block Selected
+        address: 0xde
+    +-- cheat: Reverse Dice Block Selected
+        address: 0xde
+    +-- cheat: Slow Dice Block Selected
+        address: 0xde
+    +-- cheat: Double Dice Block Selected
+        address: 0xde
+    +-- cheat: Bronze Selected
+        address: 0xde
+    +-- cheat: Pow Block Selected
+        address: 0xde
+    +-- cheat: Pipe Selected
+        address: 0xde
+    +-- cheat: ? Block Selected
+        address: 0xde
+    +-- cheat: Bowser Space Selected
+        address: 0xde
+    +-- cheat: Plus 5 Selected
+        address: 0xde
+    +-- cheat: Silver Selected
+        address: 0xde
+    +-- cheat: Dash Special Selected
+        address: 0xde
+    +-- cheat: Reverse Special Selected
+        address: 0xde
+    +-- cheat: Jump Special Selected
+        address: 0xde
+    +-- cheat: Coin special Selected
+        address: 0xde
+    +-- cheat: Star Special Selected
+        address: 0xde
+    +-- cheat: Gold Selected
+        address: 0xde
+    +-- cheat: Normal Board Selected
+        address: 0xde
+    +-- cheat: Mario Board Selected
+        address: 0xde
+    +-- cheat: Luigi Board Selected
+        address: 0xde
+    +-- cheat: Peach Board Selected
+        address: 0xde
+    +-- cheat: Toad Board Selected
+        address: 0xde
+    +-- cheat: Yoshi Board Selected
+        address: 0xde
+    +-- cheat: Wario Board Selected
+        address: 0xde
+    +-- cheat: Rosalina Board Selected
+        address: 0xde
+    +-- cheat: Donkey Kong Board Selected
+        address: 0xde
+    +-- cheat: Bowser Board Selected
+        address: 0xde
+game: Super Smash Bros. (3DS)
++-- folder: Stats Codes
+    type: Slider
+    address: 
+    +-- cheat: Attack
+        address: 0xec
+    +-- cheat: Defense
+        address: 0xee
+    +-- cheat: Speed
+        address: 0xf0
++-- folder: Random Cash & Items
+    type: Random
+    address: 
+    +-- cheat: Random Cash & Items
+        address: 0x174
++-- folder: Level Codes
+    type: SliderVals
+    address: 
+    +-- cheat: Level
+        address: 0x158
++-- folder: Appearance Codes
+    type: Slider
+    address: 
+    +-- cheat: Appearance
+        address: 0xe4
++-- folder: Special Moves
+    type: Slider
+    address: 
+    +-- cheat: Standard
+        address: 0xe5
+    +-- cheat: Side
+        address: 0xe6
+    +-- cheat: Up
+        address: 0xe7
+    +-- cheat: Down
+        address: 0xe8
++-- folder: Bonus Effect Slot 1 Codes
+    type: List
+    address: 0xe9
+    +-- cheat: NONE
+        address: 0xe9
+    +-- cheat: Increased running speed
+        address: 0xe9
+    +-- cheat: Decreased running speed
+        address: 0xe9
+    +-- cheat: Faster sideways air movement
+        address: 0xe9
+    +-- cheat: Slower sideways air movement
+        address: 0xe9
+    +-- cheat: Improved jumping ability
+        address: 0xe9
+    +-- cheat: Weakened jumping ability
+        address: 0xe9
+    +-- cheat: Skating
+        address: 0xe9
+    +-- cheat: Improved ground jumps
+        address: 0xe9
+    +-- cheat: Weakened ground jumps
+        address: 0xe9
+    +-- cheat: Improved mid-air jumps
+        address: 0xe9
+    +-- cheat: Weakened mid-air jumps
+        address: 0xe9
+    +-- cheat: Floaty jumps
+        address: 0xe9
+    +-- cheat: Heavy jump
+        address: 0xe9
+    +-- cheat: Increased walking speed
+        address: 0xe9
+    +-- cheat: Decreased walking speed
+        address: 0xe9
+    +-- cheat: Increased edge-grab duration
+        address: 0xe9
+    +-- cheat: Decreased edge-grab duration
+        address: 0xe9
+    +-- cheat: Easier edge-grabbing
+        address: 0xe9
+    +-- cheat: More difficult edge-grabbing
+        address: 0xe9
+    +-- cheat: Improved braking ability
+        address: 0xe9
+    +-- cheat: Easy perfect shield
+        address: 0xe9
+    +-- cheat: No perfect shield
+        address: 0xe9
+    +-- cheat: Faster Shield Recharge
+        address: 0xe9
+    +-- cheat: Slower Shield Recharge
+        address: 0xe9
+    +-- cheat: Improved air defence
+        address: 0xe9
+    +-- cheat: Weakened air defence
+        address: 0xe9
+    +-- cheat: Easier Dodging
+        address: 0xe9
+    +-- cheat: More difficult dodging
+        address: 0xe9
+    +-- cheat: Reduced landing stiffness
+        address: 0xe9
+    +-- cheat: Increased landing stiffness
+        address: 0xe9
+    +-- cheat: Quick smash
+        address: 0xe9
+    +-- cheat: Hyper smash
+        address: 0xe9
+    +-- cheat: Improved air attacks
+        address: 0xe9
+    +-- cheat: Weakened air attacks
+        address: 0xe9
+    +-- cheat: Improved meteor smashes
+        address: 0xe9
+    +-- cheat: Improved attack in a crisis
+        address: 0xe9
+    +-- cheat: Improved defense in a crisis
+        address: 0xe9
+    +-- cheat: Improved speed in a crisis
+        address: 0xe9
+    +-- cheat: Powered up in a crisis
+        address: 0xe9
+    +-- cheat: Invincible in a crisis
+        address: 0xe9
+    +-- cheat: Improved attack at 0 damage
+        address: 0xe9
+    +-- cheat: Improved speed at 0 damage
+        address: 0xe9
+    +-- cheat: Improved attack/speed at 0%
+        address: 0xe9
+    +-- cheat: Trade-off for improved attack
+        address: 0xe9
+    +-- cheat: Trade-off for improved defence
+        address: 0xe9
+    +-- cheat: Trade-off for improved speed
+        address: 0xe9
+    +-- cheat: Trade-off for improved abilities
+        address: 0xe9
+    +-- cheat: Improved upward launching
+        address: 0xe9
+    +-- cheat: Health-stealing ability
+        address: 0xe9
+    +-- cheat: Resistant smash charge
+        address: 0xe9
+    +-- cheat: Critical hits
+        address: 0xe9
+    +-- cheat: Hit downed foes harder
+        address: 0xe9
+    +-- cheat: first strike bonus
+        address: 0xe9
+    +-- cheat: Countdown bonus
+        address: 0xe9
+    +-- cheat: Crash run
+        address: 0xe9
+    +-- cheat: Explosive perfect shield
+        address: 0xe9
+    +-- cheat: Shield restores health
+        address: 0xe9
+    +-- cheat: Shield counter
+        address: 0xe9
+    +-- cheat: Quick escape
+        address: 0xe9
+    +-- cheat: Improved item throwing
+        address: 0xe9
+    +-- cheat: Weakened item throwing
+        address: 0xe9
+    +-- cheat: Bonus to battering items
+        address: 0xe9
+    +-- cheat: Bonus to thrown items
+        address: 0xe9
+    +-- cheat: Bonus to shooting items
+        address: 0xe9
+    +-- cheat: High-speed batting
+        address: 0xe9
+    +-- cheat: Star rod equipped
+        address: 0xe9
+    +-- cheat: Lip's Stick equipped
+        address: 0xe9
+    +-- cheat: Nintendo Scope equipped
+        address: 0xe9
+    +-- cheat: Ray Gun equipped
+        address: 0xe9
+    +-- cheat: Fire Flower equipped
+        address: 0xe9
+    +-- cheat: Beam Sword equipped
+        address: 0xe9
+    +-- cheat: Home-Run Bat equipped
+        address: 0xe9
+    +-- cheat: Bob-omb equipped
+        address: 0xe9
+    +-- cheat: Mr. Saturn equipped
+        address: 0xe9
+    +-- cheat: Increased healing from food
+        address: 0xe9
+    +-- cheat: Decreased healing from food
+        address: 0xe9
+    +-- cheat: Heal while crouching
+        address: 0xe9
+    +-- cheat: improved attack after eating
+        address: 0xe9
+    +-- cheat: improved speed after eating
+        address: 0xe9
+    +-- cheat: improved defence after eating
+        address: 0xe9
+    +-- cheat: Powered up after eating
+        address: 0xe9
+    +-- cheat: KO healing
+        address: 0xe9
+    +-- cheat: Invincible after eating
+        address: 0xe9
+    +-- cheat: Auto-heal
+        address: 0xe9
+    +-- cheat: Smash Ball gravitation
+        address: 0xe9
+    +-- cheat: Final Smash after respawning
+        address: 0xe9
+    +-- cheat: Keep Final Smash if hurt
+        address: 0xe9
+    +-- cheat: Smash Ball powers you up
+        address: 0xe9
+    +-- cheat: Healing Smash Ball
+        address: 0xe9
+    +-- cheat: Double Final Smash
+        address: 0xe9
+    +-- cheat: Lucky Sudden Death
+        address: 0xe9
+    +-- cheat: Extended Respawn Invincibility
+        address: 0xe9
+    +-- cheat: No Respawn Invincibility
+        address: 0xe9
++-- folder: Bonus Effect Slot 2 Codes
+    type: List
+    address: 0xea
+    +-- cheat: NONE
+        address: 0xea
+    +-- cheat: Increased running speed
+        address: 0xea
+    +-- cheat: Decreased running speed
+        address: 0xea
+    +-- cheat: Faster sideways air movement
+        address: 0xea
+    +-- cheat: Slower sideways air movement
+        address: 0xea
+    +-- cheat: Improved jumping ability
+        address: 0xea
+    +-- cheat: Weakened jumping ability
+        address: 0xea
+    +-- cheat: Skating
+        address: 0xea
+    +-- cheat: Improved ground jumps
+        address: 0xea
+    +-- cheat: Weakened ground jumps
+        address: 0xea
+    +-- cheat: Improved mid-air jumps
+        address: 0xea
+    +-- cheat: Weakened mid-air jumps
+        address: 0xea
+    +-- cheat: Floaty jumps
+        address: 0xea
+    +-- cheat: Heavy jump
+        address: 0xea
+    +-- cheat: Increased walking speed
+        address: 0xea
+    +-- cheat: Decreased walking speed
+        address: 0xea
+    +-- cheat: Increased edge-grab duration
+        address: 0xea
+    +-- cheat: Decreased edge-grab duration
+        address: 0xea
+    +-- cheat: Easier edge-grabbing
+        address: 0xea
+    +-- cheat: More difficult edge-grabbing
+        address: 0xea
+    +-- cheat: Improved braking ability
+        address: 0xea
+    +-- cheat: Easy perfect shield
+        address: 0xea
+    +-- cheat: No perfect shield
+        address: 0xea
+    +-- cheat: Faster Shield Recharge
+        address: 0xea
+    +-- cheat: Slower Shield Recharge
+        address: 0xea
+    +-- cheat: Improved air defence
+        address: 0xea
+    +-- cheat: Weakened air defence
+        address: 0xea
+    +-- cheat: Easier Dodging
+        address: 0xea
+    +-- cheat: More difficult dodging
+        address: 0xea
+    +-- cheat: Reduced landing stiffness
+        address: 0xea
+    +-- cheat: Increased landing stiffness
+        address: 0xea
+    +-- cheat: Quick smash
+        address: 0xea
+    +-- cheat: Hyper smash
+        address: 0xea
+    +-- cheat: Improved air attacks
+        address: 0xea
+    +-- cheat: Weakened air attacks
+        address: 0xea
+    +-- cheat: Improved meteor smashes
+        address: 0xea
+    +-- cheat: Improved attack in a crisis
+        address: 0xea
+    +-- cheat: Improved defense in a crisis
+        address: 0xea
+    +-- cheat: Improved speed in a crisis
+        address: 0xea
+    +-- cheat: Powered up in a crisis
+        address: 0xea
+    +-- cheat: Invincible in a crisis
+        address: 0xea
+    +-- cheat: Improved attack at 0 damage
+        address: 0xea
+    +-- cheat: Improved speed at 0 damage
+        address: 0xea
+    +-- cheat: Improved attack/speed at 0%
+        address: 0xea
+    +-- cheat: Trade-off for improved attack
+        address: 0xea
+    +-- cheat: Trade-off for improved defence
+        address: 0xea
+    +-- cheat: Trade-off for improved speed
+        address: 0xea
+    +-- cheat: Trade-off for improved abilities
+        address: 0xea
+    +-- cheat: Improved upward launching
+        address: 0xea
+    +-- cheat: Health-stealing ability
+        address: 0xea
+    +-- cheat: Resistant smash charge
+        address: 0xea
+    +-- cheat: Critical hits
+        address: 0xea
+    +-- cheat: Hit downed foes harder
+        address: 0xea
+    +-- cheat: first strike bonus
+        address: 0xea
+    +-- cheat: Countdown bonus
+        address: 0xea
+    +-- cheat: Crash run
+        address: 0xea
+    +-- cheat: Explosive perfect shield
+        address: 0xea
+    +-- cheat: Shield restores health
+        address: 0xea
+    +-- cheat: Shield counter
+        address: 0xea
+    +-- cheat: Quick escape
+        address: 0xea
+    +-- cheat: Improved item throwing
+        address: 0xea
+    +-- cheat: Weakened item throwing
+        address: 0xea
+    +-- cheat: Bonus to battering items
+        address: 0xea
+    +-- cheat: Bonus to thrown items
+        address: 0xea
+    +-- cheat: Bonus to shooting items
+        address: 0xea
+    +-- cheat: High-speed batting
+        address: 0xea
+    +-- cheat: Star rod equipped
+        address: 0xea
+    +-- cheat: Lip's Stick equipped
+        address: 0xea
+    +-- cheat: Nintendo Scope equipped
+        address: 0xea
+    +-- cheat: Ray Gun equipped
+        address: 0xea
+    +-- cheat: Fire Flower equipped
+        address: 0xea
+    +-- cheat: Beam Sword equipped
+        address: 0xea
+    +-- cheat: Home-Run Bat equipped
+        address: 0xea
+    +-- cheat: Bob-omb equipped
+        address: 0xea
+    +-- cheat: Mr. Saturn equipped
+        address: 0xea
+    +-- cheat: Increased healing from food
+        address: 0xea
+    +-- cheat: Decreased healing from food
+        address: 0xea
+    +-- cheat: Heal while crouching
+        address: 0xea
+    +-- cheat: improved attack after eating
+        address: 0xea
+    +-- cheat: improved speed after eating
+        address: 0xea
+    +-- cheat: improved defence after eating
+        address: 0xea
+    +-- cheat: Powered up after eating
+        address: 0xea
+    +-- cheat: KO healing
+        address: 0xea
+    +-- cheat: Invincible after eating
+        address: 0xea
+    +-- cheat: Auto-heal
+        address: 0xea
+    +-- cheat: Smash Ball gravitation
+        address: 0xea
+    +-- cheat: Final Smash after respawning
+        address: 0xea
+    +-- cheat: Keep Final Smash if hurt
+        address: 0xea
+    +-- cheat: Smash Ball powers you up
+        address: 0xea
+    +-- cheat: Healing Smash Ball
+        address: 0xea
+    +-- cheat: Double Final Smash
+        address: 0xea
+    +-- cheat: Lucky Sudden Death
+        address: 0xea
+    +-- cheat: Extended Respawn Invincibility
+        address: 0xea
+    +-- cheat: No Respawn Invincibility
+        address: 0xea
++-- folder: Bonus Effect Slot 3 Codes
+    type: List
+    address: 0xeb
+    +-- cheat: NONE
+        address: 0xeb
+    +-- cheat: Increased running speed
+        address: 0xeb
+    +-- cheat: Decreased running speed
+        address: 0xeb
+    +-- cheat: Faster sideways air movement
+        address: 0xeb
+    +-- cheat: Slower sideways air movement
+        address: 0xeb
+    +-- cheat: Improved jumping ability
+        address: 0xeb
+    +-- cheat: Weakened jumping ability
+        address: 0xeb
+    +-- cheat: Skating
+        address: 0xeb
+    +-- cheat: Improved ground jumps
+        address: 0xeb
+    +-- cheat: Weakened ground jumps
+        address: 0xeb
+    +-- cheat: Improved mid-air jumps
+        address: 0xeb
+    +-- cheat: Weakened mid-air jumps
+        address: 0xeb
+    +-- cheat: Floaty jumps
+        address: 0xeb
+    +-- cheat: Heavy jump
+        address: 0xeb
+    +-- cheat: Increased walking speed
+        address: 0xeb
+    +-- cheat: Decreased walking speed
+        address: 0xeb
+    +-- cheat: Increased edge-grab duration
+        address: 0xeb
+    +-- cheat: Decreased edge-grab duration
+        address: 0xeb
+    +-- cheat: Easier edge-grabbing
+        address: 0xeb
+    +-- cheat: More difficult edge-grabbing
+        address: 0xeb
+    +-- cheat: Improved braking ability
+        address: 0xeb
+    +-- cheat: Easy perfect shield
+        address: 0xeb
+    +-- cheat: No perfect shield
+        address: 0xeb
+    +-- cheat: Faster Shield Recharge
+        address: 0xeb
+    +-- cheat: Slower Shield Recharge
+        address: 0xeb
+    +-- cheat: Improved air defence
+        address: 0xeb
+    +-- cheat: Weakened air defence
+        address: 0xeb
+    +-- cheat: Easier Dodging
+        address: 0xeb
+    +-- cheat: More difficult dodging
+        address: 0xeb
+    +-- cheat: Reduced landing stiffness
+        address: 0xeb
+    +-- cheat: Increased landing stiffness
+        address: 0xeb
+    +-- cheat: Quick smash
+        address: 0xeb
+    +-- cheat: Hyper smash
+        address: 0xeb
+    +-- cheat: Improved air attacks
+        address: 0xeb
+    +-- cheat: Weakened air attacks
+        address: 0xeb
+    +-- cheat: Improved meteor smashes
+        address: 0xeb
+    +-- cheat: Improved attack in a crisis
+        address: 0xeb
+    +-- cheat: Improved defense in a crisis
+        address: 0xeb
+    +-- cheat: Improved speed in a crisis
+        address: 0xeb
+    +-- cheat: Powered up in a crisis
+        address: 0xeb
+    +-- cheat: Invincible in a crisis
+        address: 0xeb
+    +-- cheat: Improved attack at 0 damage
+        address: 0xeb
+    +-- cheat: Improved speed at 0 damage
+        address: 0xeb
+    +-- cheat: Improved attack/speed at 0%
+        address: 0xeb
+    +-- cheat: Trade-off for improved attack
+        address: 0xeb
+    +-- cheat: Trade-off for improved defence
+        address: 0xeb
+    +-- cheat: Trade-off for improved speed
+        address: 0xeb
+    +-- cheat: Trade-off for improved abilities
+        address: 0xeb
+    +-- cheat: Improved upward launching
+        address: 0xeb
+    +-- cheat: Health-stealing ability
+        address: 0xeb
+    +-- cheat: Resistant smash charge
+        address: 0xeb
+    +-- cheat: Critical hits
+        address: 0xeb
+    +-- cheat: Hit downed foes harder
+        address: 0xeb
+    +-- cheat: first strike bonus
+        address: 0xeb
+    +-- cheat: Countdown bonus
+        address: 0xeb
+    +-- cheat: Crash run
+        address: 0xeb
+    +-- cheat: Explosive perfect shield
+        address: 0xeb
+    +-- cheat: Shield restores health
+        address: 0xeb
+    +-- cheat: Shield counter
+        address: 0xeb
+    +-- cheat: Quick escape
+        address: 0xeb
+    +-- cheat: Improved item throwing
+        address: 0xeb
+    +-- cheat: Weakened item throwing
+        address: 0xeb
+    +-- cheat: Bonus to battering items
+        address: 0xeb
+    +-- cheat: Bonus to thrown items
+        address: 0xeb
+    +-- cheat: Bonus to shooting items
+        address: 0xeb
+    +-- cheat: High-speed batting
+        address: 0xeb
+    +-- cheat: Star rod equipped
+        address: 0xeb
+    +-- cheat: Lip's Stick equipped
+        address: 0xeb
+    +-- cheat: Nintendo Scope equipped
+        address: 0xeb
+    +-- cheat: Ray Gun equipped
+        address: 0xeb
+    +-- cheat: Fire Flower equipped
+        address: 0xeb
+    +-- cheat: Beam Sword equipped
+        address: 0xeb
+    +-- cheat: Home-Run Bat equipped
+        address: 0xeb
+    +-- cheat: Bob-omb equipped
+        address: 0xeb
+    +-- cheat: Mr. Saturn equipped
+        address: 0xeb
+    +-- cheat: Increased healing from food
+        address: 0xeb
+    +-- cheat: Decreased healing from food
+        address: 0xeb
+    +-- cheat: Heal while crouching
+        address: 0xeb
+    +-- cheat: improved attack after eating
+        address: 0xeb
+    +-- cheat: improved speed after eating
+        address: 0xeb
+    +-- cheat: improved defence after eating
+        address: 0xeb
+    +-- cheat: Powered up after eating
+        address: 0xeb
+    +-- cheat: KO healing
+        address: 0xeb
+    +-- cheat: Invincible after eating
+        address: 0xeb
+    +-- cheat: Auto-heal
+        address: 0xeb
+    +-- cheat: Smash Ball gravitation
+        address: 0xeb
+    +-- cheat: Final Smash after respawning
+        address: 0xeb
+    +-- cheat: Keep Final Smash if hurt
+        address: 0xeb
+    +-- cheat: Smash Ball powers you up
+        address: 0xeb
+    +-- cheat: Healing Smash Ball
+        address: 0xeb
+    +-- cheat: Double Final Smash
+        address: 0xeb
+    +-- cheat: Lucky Sudden Death
+        address: 0xeb
+    +-- cheat: Extended Respawn Invincibility
+        address: 0xeb
+    +-- cheat: No Respawn Invincibility
+        address: 0xeb
+game: Mario Tennis Ultra Smash
++-- folder: Games Played
+    type: SliderBig
+    address: 
+    +-- cheat: Games Played
+        address: 0xdc
++-- folder: Slot 1 Stats
+    type: List
+    address: 0xde
+    +-- cheat: Stroke (Can be used in Three Slots Max)
+        address: 0xde
+    +-- cheat: Serve (Can be used in Two slots Max)
+        address: 0xde
+    +-- cheat: Acceleration (Can be used in Two slots Max)
+        address: 0xde
+    +-- cheat: Speed (Can be used in Three slots Max)
+        address: 0xde
+    +-- cheat: Curve (Can be used in Three slots Max)
+        address: 0xde
+    +-- cheat: Agility (Can be used in Four slots Max)
+        address: 0xde
+    +-- cheat: Control (Can be used in Two slots Max)
+        address: 0xde
+    +-- cheat: Skill (Can be used in Three slots Max)
+        address: 0xde
++-- folder: Slot 2 Stats
+    type: List
+    address: 0xdf
+    +-- cheat: Stroke (Can be used in Three Slots Max)
+        address: 0xdf
+    +-- cheat: Serve (Can be used in Two slots Max)
+        address: 0xdf
+    +-- cheat: Acceleration (Can be used in Two slots Max)
+        address: 0xdf
+    +-- cheat: Speed (Can be used in Three slots Max)
+        address: 0xdf
+    +-- cheat: Curve (Can be used in Three slots Max)
+        address: 0xdf
+    +-- cheat: Agility (Can be used in Four slots Max)
+        address: 0xdf
+    +-- cheat: Control (Can be used in Two slots Max)
+        address: 0xdf
+    +-- cheat: Skill (Can be used in Three slots Max)
+        address: 0xdf
++-- folder: Slot 3 Stats
+    type: List
+    address: 0xe0
+    +-- cheat: Stroke (Can be used in Three Slots Max)
+        address: 0xe0
+    +-- cheat: Serve (Can be used in Two slots Max)
+        address: 0xe0
+    +-- cheat: Acceleration (Can be used in Two slots Max)
+        address: 0xe0
+    +-- cheat: Speed (Can be used in Three slots Max)
+        address: 0xe0
+    +-- cheat: Curve (Can be used in Three slots Max)
+        address: 0xe0
+    +-- cheat: Agility (Can be used in Four slots Max)
+        address: 0xe0
+    +-- cheat: Control (Can be used in Two slots Max)
+        address: 0xe0
+    +-- cheat: Skill (Can be used in Three slots Max)
+        address: 0xe0
++-- folder: Slot 4 Stats
+    type: List
+    address: 0xe1
+    +-- cheat: Stroke (Can be used in Three Slots Max)
+        address: 0xe1
+    +-- cheat: Serve (Can be used in Two slots Max)
+        address: 0xe1
+    +-- cheat: Acceleration (Can be used in Two slots Max)
+        address: 0xe1
+    +-- cheat: Speed (Can be used in Three slots Max)
+        address: 0xe1
+    +-- cheat: Curve (Can be used in Three slots Max)
+        address: 0xe1
+    +-- cheat: Agility (Can be used in Four slots Max)
+        address: 0xe1
+    +-- cheat: Control (Can be used in Two slots Max)
+        address: 0xe1
+    +-- cheat: Skill (Can be used in Three slots Max)
+        address: 0xe1
++-- folder: Slot 5 Stats
+    type: List
+    address: 0xe2
+    +-- cheat: Stroke (Can be used in Three Slots Max)
+        address: 0xe2
+    +-- cheat: Serve (Can be used in Two slots Max)
+        address: 0xe2
+    +-- cheat: Acceleration (Can be used in Two slots Max)
+        address: 0xe2
+    +-- cheat: Speed (Can be used in Three slots Max)
+        address: 0xe2
+    +-- cheat: Curve (Can be used in Three slots Max)
+        address: 0xe2
+    +-- cheat: Agility (Can be used in Four slots Max)
+        address: 0xe2
+    +-- cheat: Control (Can be used in Two slots Max)
+        address: 0xe2
+    +-- cheat: Skill (Can be used in Three slots Max)
+        address: 0xe2
++-- folder: Slot 6 Stats
+    type: List
+    address: 0xe3
+    +-- cheat: Stroke (Can be used in Three Slots Max)
+        address: 0xe3
+    +-- cheat: Serve (Can be used in Two slots Max)
+        address: 0xe3
+    +-- cheat: Acceleration (Can be used in Two slots Max)
+        address: 0xe3
+    +-- cheat: Speed (Can be used in Three slots Max)
+        address: 0xe3
+    +-- cheat: Curve (Can be used in Three slots Max)
+        address: 0xe3
+    +-- cheat: Agility (Can be used in Four slots Max)
+        address: 0xe3
+    +-- cheat: Control (Can be used in Two slots Max)
+        address: 0xe3
+    +-- cheat: Skill (Can be used in Three slots Max)
+        address: 0xe3
++-- folder: Slot 7 Stats
+    type: List
+    address: 0xe4
+    +-- cheat: Stroke (Can be used in Three Slots Max)
+        address: 0xe4
+    +-- cheat: Serve (Can be used in Two slots Max)
+        address: 0xe4
+    +-- cheat: Acceleration (Can be used in Two slots Max)
+        address: 0xe4
+    +-- cheat: Speed (Can be used in Three slots Max)
+        address: 0xe4
+    +-- cheat: Curve (Can be used in Three slots Max)
+        address: 0xe4
+    +-- cheat: Agility (Can be used in Four slots Max)
+        address: 0xe4
+    +-- cheat: Control (Can be used in Two slots Max)
+        address: 0xe4
+    +-- cheat: Skill (Can be used in Three slots Max)
+        address: 0xe4
++-- folder: Slot 8 Stats
+    type: List
+    address: 0xe5
+    +-- cheat: Stroke (Can be used in Three Slots Max)
+        address: 0xe5
+    +-- cheat: Serve (Can be used in Two slots Max)
+        address: 0xe5
+    +-- cheat: Acceleration (Can be used in Two slots Max)
+        address: 0xe5
+    +-- cheat: Speed (Can be used in Three slots Max)
+        address: 0xe5
+    +-- cheat: Curve (Can be used in Three slots Max)
+        address: 0xe5
+    +-- cheat: Agility (Can be used in Four slots Max)
+        address: 0xe5
+    +-- cheat: Control (Can be used in Two slots Max)
+        address: 0xe5
+    +-- cheat: Skill (Can be used in Three slots Max)
+        address: 0xe5
++-- folder: Slot 9 Stats
+    type: List
+    address: 0xe6
+    +-- cheat: Stroke (Can be used in Three Slots Max)
+        address: 0xe6
+    +-- cheat: Serve (Can be used in Two slots Max)
+        address: 0xe6
+    +-- cheat: Acceleration (Can be used in Two slots Max)
+        address: 0xe6
+    +-- cheat: Speed (Can be used in Three slots Max)
+        address: 0xe6
+    +-- cheat: Curve (Can be used in Three slots Max)
+        address: 0xe6
+    +-- cheat: Agility (Can be used in Four slots Max)
+        address: 0xe6
+    +-- cheat: Control (Can be used in Two slots Max)
+        address: 0xe6
+    +-- cheat: Skill (Can be used in Three slots Max)
+        address: 0xe6
++-- folder: Slot 10 Stats
+    type: List
+    address: 0xe7
+    +-- cheat: Stroke (Can be used in Three Slots Max)
+        address: 0xe7
+    +-- cheat: Serve (Can be used in Two slots Max)
+        address: 0xe7
+    +-- cheat: Acceleration (Can be used in Two slots Max)
+        address: 0xe7
+    +-- cheat: Speed (Can be used in Three slots Max)
+        address: 0xe7
+    +-- cheat: Curve (Can be used in Three slots Max)
+        address: 0xe7
+    +-- cheat: Agility (Can be used in Four slots Max)
+        address: 0xe7
+    +-- cheat: Control (Can be used in Two slots Max)
+        address: 0xe7
+    +-- cheat: Skill (Can be used in Three slots Max)
+        address: 0xe7
+game: Shovel Knight (WiiU)
++-- folder: Quick Level Up
+    type: Code
+    address: 
+    +-- cheat: Quick Level Up
+        address: 0x131
+game: Shovel Knight (3DS)
++-- folder: Quick Level Up
+    type: Code
+    address: 
+    +-- cheat: Quick Level Up
+        address: 0x131
+game: Zelda: Breath of the Wild
++-- folder: Wolf Hearts Code
+    type: SliderVals
+    address: 
+    +-- cheat: Number Of Hearts
+        address: 0xee
+game: Random Serial Number
++-- folder: Random Serial Num
+    type: Code
+    address: 
+    +-- cheat: Generate Serial Number
+        address: 0xfff
+game: Reset Game Data
++-- folder: Reset Game Data
+    type: Code
+    address: 
+    +-- cheat: Reset Game Data
+        address: 0x2c

@@ -90,7 +90,7 @@ type Cheat struct {
 	Codes []*Code `xml:"Codes>Code"`
 	// Folder is a backreference to the folder the cheat is in. If the cheat is in a folder, we'll
 	// need to get the address from the folder to apply the cheat.
-	Folder *Folder // TODO: one cheat can be in multiple folders, ugh... Need to fix that still!
+	Folder *Folder
 }
 
 // SliderMinMax returns a slice of integers containing the min. and max. allowed value for a Cheat
@@ -236,11 +236,15 @@ func NewCheatList(data []byte) (*CheatList, error) {
 	}
 
 	for _, f := range cl.Folders {
-		// Link list cheats to folder cheats based on the folder type and list index.
+		// Copy list cheats to folder cheats based on the folder type and list index.
 		if f.Type == PS_TypeList {
 			for _, l := range cl.Lists {
 				if f.ListIdx == l.Idx {
-					f.Cheats = l.Cheats
+					f.Cheats = make([]*Cheat, len(l.Cheats))
+					for i, c := range l.Cheats {
+						cc := *c
+						f.Cheats[i] = &cc
+					}
 				}
 			}
 		}
@@ -258,6 +262,9 @@ func NewCheatList(data []byte) (*CheatList, error) {
 			}
 		}
 	}
+
+	// Drop the now obsolete lists to free up memory.
+	cl.Lists = nil
 
 	return cl, nil
 }

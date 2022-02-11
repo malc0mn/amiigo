@@ -2,6 +2,8 @@ package apii
 
 import (
 	"bytes"
+	"encoding/xml"
+	"fmt"
 	"reflect"
 	"testing"
 )
@@ -18,6 +20,92 @@ func TestCharacterNameById(t *testing.T) {
 
 	if got != want {
 		t.Errorf("got %s, want %s", got, want)
+	}
+}
+
+func TestNewCheatListTree(t *testing.T) {
+	file := "codelist.xml"
+	cl, err := NewCheatList(readFile(t, file))
+	if err != nil {
+		t.Fatalf("could not unmarshal file %s, error %s", file, err)
+	}
+
+	file = "tree.txt"
+	want := readFile(t, file)
+
+	var got bytes.Buffer
+	for _, g := range cl.Games {
+		got.WriteString("game: " + g.Name + "\n")
+		for _, f := range g.Folders {
+			got.WriteString("+-- folder: " + f.Name + "\n")
+			got.WriteString("    type: " + f.Type + "\n")
+			got.WriteString("    address: " + f.Address() + "\n")
+			for _, c := range f.Cheats {
+				got.WriteString("    +-- cheat: " + c.Name + "\n")
+				got.WriteString("        address: " + c.Address() + "\n")
+			}
+		}
+	}
+
+	if !bytes.Equal(got.Bytes(), want) {
+		t.Errorf("incorrect tree structure")
+		fmt.Println("---------------------------------------------   got    ---------------------------------------------")
+		fmt.Println(got.String())
+		fmt.Println("--------------------------------------------- end got  ---------------------------------------------")
+		fmt.Println("")
+		fmt.Println("---------------------------------------------   want   ---------------------------------------------")
+		fmt.Println(string(want))
+		fmt.Println("--------------------------------------------- end want ---------------------------------------------")
+	}
+}
+
+func TestLists(t *testing.T) {
+	file := "codelist.xml"
+	cl := &CheatList{}
+	if err := xml.Unmarshal(readFile(t, file), cl); err != nil {
+		t.Fatalf("could not unmarshal file %s, error %s", file, err)
+	}
+
+	wanti := 4
+	goti := len(cl.Lists)
+	if goti != wanti {
+		t.Errorf("len(cl.Lists) got %d, want %d", goti, wanti)
+	}
+
+	wanti = 2
+	goti = cl.Lists[2].Idx
+	if goti != wanti {
+		t.Errorf("cl.Lists.Id got %d, want %d", goti, wanti)
+	}
+
+	wanti = 34
+	goti = len(cl.Lists[2].Cheats)
+	if goti != wanti {
+		t.Errorf("cl.Lists.Cheats got %d, want %d", goti, wanti)
+	}
+
+	wants := "Agility (Can be used in Four slots Max)"
+	gots := cl.Lists[3].Cheats[5].Name
+	if gots != wants {
+		t.Errorf("cl.Lists.Cheats.Name got %s, want %s", gots, wants)
+	}
+
+	wants = ""
+	gots = cl.Lists[3].Cheats[5].Desc
+	if gots != wants {
+		t.Errorf("cl.Lists.Cheats.Desc got %s, want %s", gots, wants)
+	}
+
+	wanti = 0
+	goti = cl.Lists[3].Cheats[5].Idx
+	if goti != wanti {
+		t.Errorf("cl.Lists.Cheats.Id got %d, want %d", goti, wanti)
+	}
+
+	wants = "6"
+	gots = cl.Lists[3].Cheats[5].Data
+	if gots != wants {
+		t.Errorf("cl.Lists.Cheats.Data got %s, want %s", gots, wants)
 	}
 }
 
@@ -76,46 +164,10 @@ func TestNewCheatList(t *testing.T) {
 		t.Errorf("cl.Toys.Id got %#016x, want %#016x", goti, wanti)
 	}
 
-	wanti = 4
+	wanti = 0
 	goti = len(cl.Lists)
 	if goti != wanti {
 		t.Errorf("len(cl.Lists) got %d, want %d", goti, wanti)
-	}
-
-	wanti = 2
-	goti = cl.Lists[2].Idx
-	if goti != wanti {
-		t.Errorf("cl.Lists.Id got %d, want %d", goti, wanti)
-	}
-
-	wanti = 34
-	goti = len(cl.Lists[2].Cheats)
-	if goti != wanti {
-		t.Errorf("cl.Lists.Cheats got %d, want %d", goti, wanti)
-	}
-
-	wants = "Agility (Can be used in Four slots Max)"
-	gots = cl.Lists[3].Cheats[5].Name
-	if gots != wants {
-		t.Errorf("cl.Lists.Cheats.Name got %s, want %s", gots, wants)
-	}
-
-	wants = ""
-	gots = cl.Lists[3].Cheats[5].Desc
-	if gots != wants {
-		t.Errorf("cl.Lists.Cheats.Desc got %s, want %s", gots, wants)
-	}
-
-	wanti = 0
-	goti = cl.Lists[3].Cheats[5].Idx
-	if goti != wanti {
-		t.Errorf("cl.Lists.Cheats.Id got %d, want %d", goti, wanti)
-	}
-
-	wants = "6"
-	gots = cl.Lists[3].Cheats[5].Data
-	if gots != wants {
-		t.Errorf("cl.Lists.Cheats.Data got %s, want %s", gots, wants)
 	}
 
 	wanti = 26
