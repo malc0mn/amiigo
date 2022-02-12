@@ -7,7 +7,7 @@ import (
 )
 
 func TestSettings(t *testing.T) {
-	file := "settings.xml"
+	file := "ps_settings.xml"
 	s, err := NewSettings(readFile(t, file))
 	if err != nil {
 		t.Errorf("could not unmarshal file %s, error %s", file, err)
@@ -51,7 +51,7 @@ func TestSettings(t *testing.T) {
 }
 
 func TestAuthorisation(t *testing.T) {
-	file := "authorisation.xml"
+	file := "ps_authorisation.xml"
 	v, err := NewVerifyResponse(readFile(t, file))
 	if err != nil {
 		t.Errorf("could not unmarshal file %s, error %s", file, err)

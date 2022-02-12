@@ -9,7 +9,7 @@ import (
 )
 
 func TestCharacterNameById(t *testing.T) {
-	file := "codelist.xml"
+	file := "ps_codelist.xml"
 	c, err := NewCheatList(readFile(t, file))
 	if err != nil {
 		t.Errorf("could not unmarshal file %s, error %s", file, err)
@@ -24,13 +24,13 @@ func TestCharacterNameById(t *testing.T) {
 }
 
 func TestNewCheatListTree(t *testing.T) {
-	file := "codelist.xml"
+	file := "ps_codelist.xml"
 	cl, err := NewCheatList(readFile(t, file))
 	if err != nil {
 		t.Fatalf("could not unmarshal file %s, error %s", file, err)
 	}
 
-	file = "tree.txt"
+	file = "ps_cheats_tree.txt"
 	want := readFile(t, file)
 
 	var got bytes.Buffer
@@ -60,7 +60,7 @@ func TestNewCheatListTree(t *testing.T) {
 }
 
 func TestLists(t *testing.T) {
-	file := "codelist.xml"
+	file := "ps_codelist.xml"
 	cl := &CheatList{}
 	if err := xml.Unmarshal(readFile(t, file), cl); err != nil {
 		t.Fatalf("could not unmarshal file %s, error %s", file, err)
@@ -110,7 +110,7 @@ func TestLists(t *testing.T) {
 }
 
 func TestNewCheatList(t *testing.T) {
-	file := "codelist.xml"
+	file := "ps_codelist.xml"
 	cl, err := NewCheatList(readFile(t, file))
 	if err != nil {
 		t.Fatalf("could not unmarshal file %s, error %s", file, err)
@@ -265,7 +265,7 @@ func TestNewCheatList(t *testing.T) {
 }
 
 func TestCheatNoCodes(t *testing.T) {
-	file := "codelist.xml"
+	file := "ps_codelist.xml"
 	cl, err := NewCheatList(readFile(t, file))
 	if err != nil {
 		t.Fatalf("could not unmarshal file %s, error %s", file, err)
@@ -319,7 +319,7 @@ func TestCheatNoCodes(t *testing.T) {
 }
 
 func TestCheatWithCodes(t *testing.T) {
-	file := "codelist.xml"
+	file := "ps_codelist.xml"
 	cl, err := NewCheatList(readFile(t, file))
 	if err != nil {
 		t.Fatalf("could not unmarshal file %s, error %s", file, err)

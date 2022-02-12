@@ -9,7 +9,7 @@ import (
 )
 
 func getSettings(t *testing.T) *Settings {
-	file := "settings.xml"
+	file := "ps_settings.xml"
 	s, err := NewSettings(readFile(t, file))
 	if err != nil {
 		t.Fatalf("could not unmarshal file %s, error %s", file, err)
@@ -42,7 +42,7 @@ func TestPowerSavesAPI_GetSettings(t *testing.T) {
 		assertRequest(t, req, "http://settings.powersaves.net/psa/settings.xml", "GET")
 		return &http.Response{
 			StatusCode: 200,
-			Body:       fromFile(t, "settings.xml"),
+			Body:       fromFile(t, "ps_settings.xml"),
 		}
 	}))
 
@@ -60,7 +60,7 @@ func TestPowerSavesAPI_GetCodelist(t *testing.T) {
 		assertRequest(t, req, "http://settings.powersaves.net/psa/codelist.xml", "GET")
 		return &http.Response{
 			StatusCode: 200,
-			Body:       fromFile(t, "codelist.xml"),
+			Body:       fromFile(t, "ps_codelist.xml"),
 		}
 	}))
 
@@ -78,7 +78,7 @@ func TestPowerSavesAPI_GetAuthorization(t *testing.T) {
 		assertRequest(t, req, "https://psaapp.powersaves.net/api/Authorisation", "GET")
 		return &http.Response{
 			StatusCode: 200,
-			Body:       fromFile(t, "authorisation.xml"),
+			Body:       fromFile(t, "ps_authorisation.xml"),
 		}
 	}))
 
@@ -145,7 +145,7 @@ func TestPowerSavesAPI_PostCheat(t *testing.T) {
 
 		return &http.Response{
 			StatusCode: 200,
-			Body:       fromFile(t, "authorisation.xml"), // Return body not important in this test
+			Body:       fromFile(t, "ps_authorisation.xml"), // Return body not important in this test
 		}
 	}))
 
