@@ -3,7 +3,6 @@ package apii
 import (
 	"bytes"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 	"testing"
@@ -102,8 +101,6 @@ func TestPowerSavesAPI_PostCheat(t *testing.T) {
 		}
 
 		req.ParseMultipartForm(0)
-
-		log.Printf("%v", req.MultipartForm.File["Character"][0].Filename)
 
 		type file struct {
 			name string
