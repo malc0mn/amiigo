@@ -151,8 +151,8 @@ func (c *Cheat) Address() string {
 
 // List represents a list of cheats inside a folder.
 type List struct {
-	Idx    int      `xml:"idx"`
-	Cheats []*Cheat `xml:"Entries>Cheat"`
+	Idx    int     `xml:"idx"`
+	Cheats []Cheat `xml:"Entries>Cheat"`
 }
 
 // Code represents one part of a cheat. If a cheat has multiple codes, each code must be posted to
@@ -207,7 +207,7 @@ type CheatList struct {
 	// character name for a toy placed on the portal.
 	Toys []*Toy `xml:"Characters>Toy"`
 	// Lists hold cheats that are attached to folders.
-	Lists []*List `xml:"Lists>List"`
+	Lists []List `xml:"Lists>List"`
 	// Folders hold lists of cheats that are attached to games.
 	Folders []*Folder `xml:"Cheats>Folder"`
 }
@@ -242,7 +242,7 @@ func NewCheatList(data []byte) (*CheatList, error) {
 				if f.ListIdx == l.Idx {
 					f.Cheats = make([]*Cheat, len(l.Cheats))
 					for i, c := range l.Cheats {
-						cc := *c
+						cc := c
 						f.Cheats[i] = &cc
 					}
 				}
