@@ -1,0 +1,16 @@
+{
+  "amiibo": [
+    {
+      "key": "0x00",
+      "name": "Figure"
+    },
+    {
+      "key": "0x01",
+      "name": "Card"
+    },
+    {
+      "key": "0x02",
+      "name": "Yarn"
+    }
+  ]
+}

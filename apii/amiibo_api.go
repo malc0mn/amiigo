@@ -1,6 +1,7 @@
 package apii
 
 import (
+	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"net/http"
@@ -8,6 +9,8 @@ import (
 	"strings"
 	"unicode"
 )
+
+type queryHandler func(interface{}, *http.Request)
 
 type AmiiboAPI struct {
 	client  *http.Client
@@ -18,42 +21,7 @@ type AmiiboAPI struct {
 // query sent to the API by means of the AmiiboInfoRequest struct.
 // Pass nil if you want to get a full list.
 func (aa *AmiiboAPI) GetAmiiboInfo(ar *AmiiboInfoRequest) ([]*AmiiboInfo, error) {
-	req, err := http.NewRequest("GET", aa.baseUrl+"/api/amiibo/", nil)
-	if err != nil {
-		return nil, err
-	}
-
-	if ar != nil {
-		var bool []string
-		q := req.URL.Query()
-		v := reflect.Indirect(reflect.ValueOf(ar))
-		for i := 0; i < v.NumField(); i++ {
-			f := v.Field(i)
-			switch f.Kind() {
-			case reflect.String:
-				if f.String() != "" {
-					q.Add(lcFirst(v.Type().Field(i).Name), f.String())
-				}
-			case reflect.Bool:
-				if f.Bool() {
-					bool = append(bool, lcFirst(v.Type().Field(i).Name))
-				}
-			}
-		}
-		if len(q) > 0 {
-			req.URL.RawQuery = q.Encode()
-		}
-		// Weird in this API that booleans only have a 'key' and no value.
-		if len(bool) > 0 {
-			join := ""
-			if req.URL.RawQuery != "" {
-				join = "&"
-			}
-			req.URL.RawQuery += join + strings.Join(bool, "&")
-		}
-	}
-
-	b, err := aa.doRequest(req)
+	b, err := aa.doGetRequest("/api/amiibo/", ar, addKeyValParams)
 	if err != nil {
 		return nil, err
 	}
@@ -62,13 +30,7 @@ func (aa *AmiiboAPI) GetAmiiboInfo(ar *AmiiboInfoRequest) ([]*AmiiboInfo, error)
 }
 
 func (aa *AmiiboAPI) GetType(kn *KeyNameRequest) ([]*Type, error) {
-	req, err := http.NewRequest("GET", aa.baseUrl+"/api/type", nil)
-	if err != nil {
-		return nil, err
-	}
-	addKeyNameFilter(kn, req)
-
-	b, err := aa.doRequest(req)
+	b, err := aa.doGetRequest("/api/type", kn, addKeyNameFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -77,13 +39,7 @@ func (aa *AmiiboAPI) GetType(kn *KeyNameRequest) ([]*Type, error) {
 }
 
 func (aa *AmiiboAPI) GetGameSeries(kn *KeyNameRequest) ([]*GameSeries, error) {
-	req, err := http.NewRequest("GET", aa.baseUrl+"/api/gameseries", nil)
-	if err != nil {
-		return nil, err
-	}
-	addKeyNameFilter(kn, req)
-
-	b, err := aa.doRequest(req)
+	b, err := aa.doGetRequest("/api/gameseries", kn, addKeyNameFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -92,13 +48,7 @@ func (aa *AmiiboAPI) GetGameSeries(kn *KeyNameRequest) ([]*GameSeries, error) {
 }
 
 func (aa *AmiiboAPI) GetAmiiboSeries(kn *KeyNameRequest) ([]*AmiiboSeries, error) {
-	req, err := http.NewRequest("GET", aa.baseUrl+"/api/amiiboseries", nil)
-	if err != nil {
-		return nil, err
-	}
-	addKeyNameFilter(kn, req)
-
-	b, err := aa.doRequest(req)
+	b, err := aa.doGetRequest("/api/amiiboseries", kn, addKeyNameFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -106,14 +56,8 @@ func (aa *AmiiboAPI) GetAmiiboSeries(kn *KeyNameRequest) ([]*AmiiboSeries, error
 	return NewAmiiboSeriesList(b)
 }
 
-func (aa *AmiiboAPI) GetCharactr(kn *KeyNameRequest) ([]*Character, error) {
-	req, err := http.NewRequest("GET", aa.baseUrl+"/api/character", nil)
-	if err != nil {
-		return nil, err
-	}
-	addKeyNameFilter(kn, req)
-
-	b, err := aa.doRequest(req)
+func (aa *AmiiboAPI) GetCharacter(kn *KeyNameRequest) ([]*Character, error) {
+	b, err := aa.doGetRequest("/api/character", kn, addKeyNameFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +65,42 @@ func (aa *AmiiboAPI) GetCharactr(kn *KeyNameRequest) ([]*Character, error) {
 	return NewCharacterList(b)
 }
 
-func (aa *AmiiboAPI) doRequest(req *http.Request) ([]byte, error) {
+func (aa *AmiiboAPI) GetLastUpdated() (string, error) {
+	resp, err := aa.client.Get(aa.baseUrl + "/api/lastupdated")
+	if err != nil {
+		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", errors.New(resp.Status)
+	}
+
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	d := &struct {
+		LastUpdated string
+	}{}
+
+	if err = json.Unmarshal(b, d); err != nil {
+		return "", err
+	}
+
+	return d.LastUpdated, nil
+}
+
+func (aa *AmiiboAPI) doGetRequest(path string, q interface{}, qh queryHandler) ([]byte, error) {
+	req, err := http.NewRequest("GET", aa.baseUrl+path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if qh != nil {
+		qh(q, req)
+	}
+
 	resp, err := aa.client.Do(req)
 	if err != nil {
 		return nil, err
@@ -153,7 +132,8 @@ func lcFirst(s string) string {
 }
 
 // addKeyNameFilter adds key OR name to query string. Key will take precedence!
-func addKeyNameFilter(kn *KeyNameRequest, req *http.Request) {
+func addKeyNameFilter(query interface{}, req *http.Request) {
+	kn := query.(*KeyNameRequest)
 	if kn == nil {
 		return
 	}
@@ -166,5 +146,41 @@ func addKeyNameFilter(kn *KeyNameRequest, req *http.Request) {
 			q.Add("name", kn.Name)
 		}
 		req.URL.RawQuery = q.Encode()
+	}
+}
+
+// addKeyValParams adds key value query parameters to the request.
+func addKeyValParams(query interface{}, req *http.Request) {
+	ar := query.(*AmiiboInfoRequest)
+	if ar == nil {
+		return
+	}
+
+	var bools []string
+	q := req.URL.Query()
+	v := reflect.Indirect(reflect.ValueOf(ar))
+	for i := 0; i < v.NumField(); i++ {
+		f := v.Field(i)
+		switch f.Kind() {
+		case reflect.String:
+			if f.String() != "" {
+				q.Add(lcFirst(v.Type().Field(i).Name), f.String())
+			}
+		case reflect.Bool:
+			if f.Bool() {
+				bools = append(bools, lcFirst(v.Type().Field(i).Name))
+			}
+		}
+	}
+	if len(q) > 0 {
+		req.URL.RawQuery = q.Encode()
+	}
+	// Weird in this API that booleans only have a 'key' and no value.
+	if len(bools) > 0 {
+		join := ""
+		if req.URL.RawQuery != "" {
+			join = "&"
+		}
+		req.URL.RawQuery += join + strings.Join(bools, "&")
 	}
 }

@@ -1,0 +1,12 @@
+{
+  "amiibo": [
+    {
+      "key": "0x000",
+      "name": "Super Mario"
+    },
+    {
+      "key": "0x008",
+      "name": "Yoshi's Woolly World"
+    }
+  ]
+}

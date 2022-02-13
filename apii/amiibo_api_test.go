@@ -11,28 +11,16 @@ import (
 )
 
 func emptyBody() io.ReadCloser {
-	return io.NopCloser(strings.NewReader("{\"amiibo\":[]}"))
+	return stringBody("{\"amiibo\":[]}")
 }
 
-func TestAmiiboAPI_GetAmiiboInfo(t *testing.T) {
-	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
-		assertRequest(t, req, "http://example.com/api/amiibo/", "GET")
-		return &http.Response{
-			StatusCode: 200,
-			Body:       fromFile(t, "aa_amiibo_list.json"),
-		}
-	}), "http://example.com")
+func stringBody(s string) io.ReadCloser {
+	return io.NopCloser(strings.NewReader(s))
+}
 
-	air, err := a.GetAmiiboInfo(nil)
-	if err != nil {
-		t.Errorf("got %s, want nil", err)
-	}
-	if air == nil {
-		t.Errorf("got %v, want AmiiboList struct", air)
-	}
-
-	want := readFile(t, "aa_amiibo_list_processed.json")
-	got, err := json.MarshalIndent(air, "", "  ")
+func assertResponse(t *testing.T, file string, res interface{}) {
+	want := readFile(t, file)
+	got, err := json.MarshalIndent(res, "", "  ")
 	if err != nil {
 		t.Fatal("unable to marshal data")
 	}
@@ -48,6 +36,26 @@ func TestAmiiboAPI_GetAmiiboInfo(t *testing.T) {
 	}
 }
 
+func TestAmiiboAPI_GetAmiiboInfo(t *testing.T) {
+	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
+		assertRequest(t, req, "http://example.com/api/amiibo/", "GET")
+		return &http.Response{
+			StatusCode: 200,
+			Body:       fromFile(t, "aa_amiibo_list.json"),
+		}
+	}), "http://example.com")
+
+	ai, err := a.GetAmiiboInfo(nil)
+	if err != nil {
+		t.Errorf("got %s, want nil", err)
+	}
+	if ai == nil {
+		t.Errorf("got %v, want AmiiboInfo slice", ai)
+	}
+
+	assertResponse(t, "aa_amiibo_list_processed.json", ai)
+}
+
 func TestAmiiboAPI_GetAmiiboInfoWitParams(t *testing.T) {
 	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
 		assertRequest(t, req, "http://example.com/api/amiibo/?amiiboSeries=BoxBoy%21&character=0x1996&gameseries=Chibi+Robo&head=01010000&id=01010000000e0002&name=zelda&tail=000e0002&type=0x02&showgames&showusage", "GET")
@@ -57,7 +65,7 @@ func TestAmiiboAPI_GetAmiiboInfoWitParams(t *testing.T) {
 		}
 	}), "http://example.com")
 
-	air, err := a.GetAmiiboInfo(&AmiiboInfoRequest{
+	ai, err := a.GetAmiiboInfo(&AmiiboInfoRequest{
 		Name:         "zelda",
 		Id:           "01010000000e0002",
 		Head:         "01010000",
@@ -72,8 +80,8 @@ func TestAmiiboAPI_GetAmiiboInfoWitParams(t *testing.T) {
 	if err != nil {
 		t.Errorf("got %s, want nil", err)
 	}
-	if air == nil {
-		t.Errorf("got %v, want AmiiboList struct", air)
+	if ai == nil {
+		t.Errorf("got %v, want AmiiboInfo slice", ai)
 	}
 }
 
@@ -86,15 +94,150 @@ func TestAmiiboAPI_GetAmiiboInfoWitBoolParams(t *testing.T) {
 		}
 	}), "http://example.com")
 
-	air, err := a.GetAmiiboInfo(&AmiiboInfoRequest{
+	ai, err := a.GetAmiiboInfo(&AmiiboInfoRequest{
 		Showgames: true,
 		Showusage: true,
 	})
 	if err != nil {
 		t.Errorf("got %s, want nil", err)
 	}
-	if air == nil {
-		t.Errorf("got %v, want AmiiboList struct", air)
+	if ai == nil {
+		t.Errorf("got %v, want AmiiboInfo slice", ai)
+	}
+}
+
+func TestAmiiboAPI_GetType(t *testing.T) {
+	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
+		assertRequest(t, req, "http://example.com/api/type", "GET")
+		return &http.Response{
+			StatusCode: 200,
+			Body:       fromFile(t, "aa_type_list.json"),
+		}
+	}), "http://example.com")
+
+	typ, err := a.GetType(nil)
+	if err != nil {
+		t.Errorf("got %s, want nil", err)
+	}
+	if typ == nil {
+		t.Errorf("got %v, want Type slice", typ)
+	}
+
+	assertResponse(t, "aa_type_list_processed.json", typ)
+}
+
+func TestAmiiboAPI_GetTypeWithParams(t *testing.T) {
+	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
+		assertRequest(t, req, "http://example.com/api/type?key=0x01", "GET")
+		return &http.Response{
+			StatusCode: 200,
+			Body:       emptyBody(),
+		}
+	}), "http://example.com")
+
+	typ, err := a.GetType(&KeyNameRequest{Key: "0x01", Name: "Card"})
+	if err != nil {
+		t.Errorf("got %s, want nil", err)
+	}
+	if typ == nil {
+		t.Errorf("got %v, want Type slice", typ)
+	}
+}
+
+func TestAmiiboAPI_GetTypeWithNameParam(t *testing.T) {
+	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
+		assertRequest(t, req, "http://example.com/api/type?name=Card", "GET")
+		return &http.Response{
+			StatusCode: 200,
+			Body:       emptyBody(),
+		}
+	}), "http://example.com")
+
+	typ, err := a.GetType(&KeyNameRequest{Name: "Card"})
+	if err != nil {
+		t.Errorf("got %s, want nil", err)
+	}
+	if typ == nil {
+		t.Errorf("got %v, want Type slice", typ)
+	}
+}
+
+func TestAmiiboAPI_GetGameSeries(t *testing.T) {
+	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
+		assertRequest(t, req, "http://example.com/api/gameseries", "GET")
+		return &http.Response{
+			StatusCode: 200,
+			Body:       fromFile(t, "aa_gameseries_list.json"),
+		}
+	}), "http://example.com")
+
+	gs, err := a.GetGameSeries(nil)
+	if err != nil {
+		t.Errorf("got %s, want nil", err)
+	}
+	if gs == nil {
+		t.Errorf("got %v, want GameSeries slice", gs)
+	}
+
+	assertResponse(t, "aa_gameseries_list_processed.json", gs)
+}
+
+func TestAmiiboAPI_GetAmiiboSeries(t *testing.T) {
+	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
+		assertRequest(t, req, "http://example.com/api/amiiboseries", "GET")
+		return &http.Response{
+			StatusCode: 200,
+			Body:       fromFile(t, "aa_amiiboseries_list.json"),
+		}
+	}), "http://example.com")
+
+	as, err := a.GetAmiiboSeries(nil)
+	if err != nil {
+		t.Errorf("got %s, want nil", err)
+	}
+	if as == nil {
+		t.Errorf("got %v, want AmiiboSeries slice", as)
+	}
+
+	assertResponse(t, "aa_amiiboseries_list_processed.json", as)
+}
+
+func TestAmiiboAPI_GetCharacter(t *testing.T) {
+	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
+		assertRequest(t, req, "http://example.com/api/character", "GET")
+		return &http.Response{
+			StatusCode: 200,
+			Body:       fromFile(t, "aa_character_list.json"),
+		}
+	}), "http://example.com")
+
+	char, err := a.GetCharacter(nil)
+	if err != nil {
+		t.Errorf("got %s, want nil", err)
+	}
+	if char == nil {
+		t.Errorf("got %v, want Character slice", char)
+	}
+
+	assertResponse(t, "aa_character_list_processed.json", char)
+}
+
+func TestAmiiboAPI_GetLastUpdated(t *testing.T) {
+	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
+		assertRequest(t, req, "http://example.com/api/lastupdated", "GET")
+		return &http.Response{
+			StatusCode: 200,
+			Body:       stringBody("{\"lastUpdated\": \"2019-03-18T16:34:10.688417\"}"),
+		}
+	}), "http://example.com")
+
+	want := "2019-03-18T16:34:10.688417"
+	got, err := a.GetLastUpdated()
+	if err != nil {
+		t.Errorf("got %s, want nil", err)
+	}
+	if got != want {
+		t.Errorf("got %s, want %s", got, want)
 	}
 }
 
