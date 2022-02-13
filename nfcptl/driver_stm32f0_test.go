@@ -250,7 +250,7 @@ func TestStm32f0_getEventForDriverCommand(t *testing.T) {
 		},
 		{
 			dc:   STM32F0_SetLedState,
-			args: []byte{STM32F0_LedOn},
+			args: []byte{STM32F0_LedOnFull},
 			want: FrontLedOn,
 		},
 		{

@@ -138,9 +138,9 @@ const (
 	// STM32F0_LedOff represents the off state of the front LED.
 	STM32F0_LedOff = 0x00
 
-	// STM32F0_LedOn represents the on state of the front LED in full brightness. Any value
-	// starting from 0x01 will turn the LED on.
-	STM32F0_LedOn = 0xff
+	// STM32F0_LedOnFull represents the on state of the front LED in full brightness. Any value
+	// starting from 0x01 will turn the LED on using different brightness levels.
+	STM32F0_LedOnFull = 0xff
 )
 
 // stm32f0 implements the Driver interface for STM32F0 based devices.
@@ -469,7 +469,7 @@ func (stm *stm32f0) handleToken(c *Client, buff []byte) {
 	if c.Debug() {
 		log.Println("stm32f0: enabling front led")
 	}
-	stm.sendCommand(c, STM32F0_SetLedState, []byte{STM32F0_LedOn})
+	stm.sendCommand(c, STM32F0_SetLedState, []byte{STM32F0_LedOnFull})
 
 	//MsgOneAfterTokenDetect = []byte{0x20, 0xff}
 	//  set led to full brightness
