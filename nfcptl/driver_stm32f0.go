@@ -19,10 +19,6 @@ func init() {
 const (
 	// STM32F0_GetDeviceName used as the payload in an interrupt message returns the device name
 	// "NFC-Portal". This is the first command send when the device has been detected.
-	//   00000000  4e 46 43 2d 50 6f 72 74  61 6c 00 00 00 00 00 00  |NFC-Portal......|
-	//   00000010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-	//   00000020  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-	//   00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
 	STM32F0_GetDeviceName DriverCommand = 0x02
 
 	// STM32F0_Reset resets the STM32F0 MCU.
@@ -116,9 +112,9 @@ const (
 	// doing a GET call to https://psaapp.powersaves.net/api/Authorisation. The base64 decrypted
 	// Vuid must be sent as an argument for the STM32F0_GenerateApiPassword command. The response
 	// data of STM32F0_GenerateApiPassword will then be used as an HTTP basic auth password to
-	// authenticate to the API using the previously returned Token, a uuid, as a username. So
+	// authenticate to the API using the previously returned Token, a UUID, as a username. So
 	// constructing the Authorization header will be:
-	//   auth := "Basic " + base64.StdEncoding.EncodeToString([]byte(Token:ResultOfCmd0x80))
+	//   auth = "Basic " + base64encode(Token:ResultOfCmd0x80)
 	STM32F0_GenerateApiPassword DriverCommand = 0x80
 
 	// STM32F0_GetHardwareInfo used as the payload in an interrupt message returns a yet unknown
@@ -367,7 +363,7 @@ func (stm *stm32f0) getDriverCommandForClientCommand(cc ClientCommand) (DriverCo
 }
 
 // commandListener listens for commands sent by the Client. If no commands are received it will
-// execute a single three-step poll sequence to check if a token is placed on the device.
+// execute a single poll sequence to check if a token is placed on the device.
 // commandListener uses a ticker to ensure command intervals adhere to the poll interval as defined
 // by the device.
 func (stm *stm32f0) commandListener(c *Client) {
