@@ -464,7 +464,7 @@ func (stm *stm32f0) handleToken(c *Client, buff []byte) {
 	s := 5               // The NUID starts at byte 5.
 	uid := buff[s : s+l] // Read the full NUID starting on byte 5 with length l.
 
-	log.Printf("stm32f0: token detected with id %#07x", uid)
+	log.Printf("stm32f0: token detected with id %#0"+fmt.Sprintf("%d", l)+"x", uid)
 
 	if c.Debug() {
 		log.Println("stm32f0: enabling front led")
