@@ -7,6 +7,13 @@ The `amiibo` package can be used independently to work with amiibodumps being a
 classic NTAG215 raw dump or a decrypted amiitool bin file.
 It can decrypt and encrypt both formats and inspect or modify the amiibo data.
 
+## apii
+The `apii` package is another package that can be used separately to talk to
+the [AmiiboAPI](https://amiiboapi.com/) or Datel's PowerSaves API. Do note that
+to apply cheats with Datel's PowerSaves API, you will need access to the
+hardware of one of their PowerSaves products to allow proper API
+authentication.
+
 ## nfcptl
 The `nfcptl` package handles communications with NFC portal devices over USB. it
 depends on the `gousb` package and provides a Client struct that handles the
