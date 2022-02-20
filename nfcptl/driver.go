@@ -16,6 +16,10 @@ var (
 // Driver defines the interface for an NFC portal driver. All drivers must implement the Driver
 // interface to be usable by the Client.
 type Driver interface {
+	// Connect connects to the device.
+	Connect(c *Client) error
+	// Disconnect cleanly disconnects from the device.
+	Disconnect() error
 	// Supports returns a list of vendors and products supported by the driver.
 	Supports() []Vendor
 	// VendorId returns the USB vendor ID for the given alias which the client should search for.
@@ -25,26 +29,10 @@ type Driver interface {
 	// Setup returns the parameters needed to initialise the device, so it's ready for use. We're
 	// forcing the driver to hardcode it since it will give the most flexibility in writing other
 	// drivers where auto-detection might be harder or simply incorrect.
-	Setup() DeviceSetup
+	Setup() interface{}
 	// Drive is where the main driver logic sits. The client starts this function as a goroutine
 	// after the USB connection is established and the driver must take over to control the device.
 	Drive(c *Client)
-}
-
-// DeviceSetup describes which config, interface, setting and in/out endpoints to use for the
-// device.
-type DeviceSetup struct {
-	// Config holds the bConfigurationValue that needs to be set on the device for proper
-	// initialisation. Most likely 1.
-	Config int
-	// Interface holds the bInterfaceNumber that needs to be used. Usually 0.
-	Interface int
-	// AlternateSetting holds the bAlternateSetting that needs to be used. Usually 0.
-	AlternateSetting int
-	// InEndpoint holds the device-to-host bEndpointAddress. In most cases this will be 1.
-	InEndpoint int
-	// OutEndpoint holds the host-to-device bEndpointAddress. In most cases this will be 1.
-	OutEndpoint int
 }
 
 // ErrDriverNotFound defines the error structure returned when a requested driver is not found.

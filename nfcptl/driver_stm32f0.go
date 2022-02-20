@@ -13,7 +13,7 @@ import (
 // init MUST be used in drivers to register the driver by calling RegisterDriver. If the driver is
 // not registered, it will not be recognised!
 func init() {
-	RegisterDriver(&stm32f0{totalErrors: 10})
+	RegisterDriver(&stm32f0{totalErrors: 10, USB: &USB{}})
 }
 
 const (
@@ -152,6 +152,8 @@ type stm32f0 struct {
 	totalErrors uint8 // Total consecutive errors before a token is to be considered removed.
 
 	optimised bool // Defines the driver behavior. Setting to false mimics the original software as closely as possible.
+
+	*USB // The protocol this driver works with
 }
 
 // Supports implements these USB devices:
@@ -270,7 +272,7 @@ func (stm *stm32f0) ProductId(alias string) (uint16, error) {
 	return 0, fmt.Errorf("stm32f0: unknown product %s", alias)
 }
 
-func (stm *stm32f0) Setup() DeviceSetup {
+func (stm *stm32f0) Setup() interface{} {
 	return DeviceSetup{
 		Config:           1,
 		Interface:        0,
@@ -285,7 +287,7 @@ func (stm *stm32f0) Drive(c *Client) {
 		log.Println("stm32f0: driving")
 	}
 
-	c.SetIdle(0, 0)
+	stm.SetIdle(0, 0)
 
 	// TODO: how to set optimised to true? Another interface function SetOptimised?
 	if stm.optimised {
@@ -367,7 +369,7 @@ func (stm *stm32f0) getDriverCommandForClientCommand(cc ClientCommand) (DriverCo
 // commandListener uses a ticker to ensure command intervals adhere to the poll interval as defined
 // by the device.
 func (stm *stm32f0) commandListener(c *Client) {
-	ticker := time.NewTicker(c.PollInterval())
+	ticker := time.NewTicker(stm.PollInterval())
 	defer ticker.Stop()
 
 	if stm.optimised {
@@ -638,7 +640,7 @@ func (stm *stm32f0) getEventForDriverCommand(dc DriverCommand, args []byte) Even
 // together with a boolean value indicating if the response contains an error (first two bytes 0x01
 // 0x02) or not.
 func (stm *stm32f0) sendCommand(c *Client, cmd DriverCommand, args []byte) ([]byte, bool) {
-	maxSize := c.MaxPacketSize()
+	maxSize := stm.MaxPacketSize()
 
 	// Send command.
 	usbCmd := NewUsbCommand(
@@ -649,7 +651,7 @@ func (stm *stm32f0) sendCommand(c *Client, cmd DriverCommand, args []byte) ([]by
 		log.Println("stm32f0: sending command:")
 		fmt.Fprint(os.Stderr, hex.Dump(usbCmd.Marshal())) // No Println here since hex.Dump() prints a newline.
 	}
-	n, _ := c.Out().Write(usbCmd.Marshal())
+	n, _ := stm.Write(usbCmd.Marshal())
 	if c.Debug() {
 		log.Printf("stm32f0: written %d bytes", n)
 	}
@@ -658,7 +660,7 @@ func (stm *stm32f0) sendCommand(c *Client, cmd DriverCommand, args []byte) ([]by
 	b := make([]byte, maxSize)
 	// STM32F0_SetLedState does not get a response!
 	if cmd != STM32F0_SetLedState {
-		c.In().Read(b)
+		stm.Read(b)
 		if c.Debug() {
 			log.Println("stm32f0: command reply:")
 			fmt.Fprintln(os.Stderr, hex.Dump(b))

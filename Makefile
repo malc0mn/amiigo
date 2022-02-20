@@ -4,14 +4,14 @@ VERSION := 0 #$(shell git describe --tags)
 BUILD_TIME := $(shell date +%FT%T%z)
 
 LDFLAGS=-ldflags "-s -w -X main.version=${VERSION} -X main.buildTime=${BUILD_TIME}"
-# TODO use trimpath: go build -gcflags=-trimpath=$GOPATH -asmflags=-trimpath=$GOPATH
+
 .DEFAULT_GOAL: all
 
 .PHONY: all
 all: amiigo
 
 amiigo:
-	cd cmd; go build ${LDFLAGS} -o ../${BINARY}
+	cd cmd; go build -trimpath ${LDFLAGS} -o ../${BINARY}
 
 .PHONY: test
 test:

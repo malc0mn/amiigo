@@ -40,7 +40,9 @@ NTAG215 as well from the data gathered. 1K MFC tag support is not present yet.
 
 ### Would be cool to also support
 - All amiibo related devices from Datel
-- N2Elite USB reader/writer
+- N2Elite USB reader/writer: from the software manual and by reverse engineering
+the N2Elite desktop app we know this device uses the CP2102 USB to UART bridge
+by Silicon Labs, so the communication will be serial and not USB.
 
 Ideally hardware access to these devices is needed. Alternatively a full
 wireshark dump of **all** operations would also be helpful.
