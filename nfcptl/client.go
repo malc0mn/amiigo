@@ -2,6 +2,7 @@ package nfcptl
 
 import (
 	"log"
+	"sync"
 )
 
 // Client allows easy communications with an NFC portal connected over USB.
@@ -10,6 +11,8 @@ type Client struct {
 	pa string // The product alias to use
 
 	driver Driver // The driver to use for communicating with the NFC portal
+
+	wg sync.WaitGroup // The client will use this to wait for the driver's goroutine(s) to finish.
 
 	debug bool // Will enable verbose logging
 
@@ -57,14 +60,24 @@ func (c *Client) Connect() error {
 	}
 
 	// Pass control to the driver now.
+	c.wg.Add(1)
 	go c.driver.Drive(c)
 
 	return nil
 }
 
+// Done can be used by drivers to signal the end of a goroutine which will allow the client to
+// ensure a clean shutdown.
+func (c *Client) Done() {
+	c.wg.Done()
+}
+
 // Disconnect cleanly disconnects the client and frees up all resources.
 func (c *Client) Disconnect() error {
 	close(c.terminate)
+
+	// Wait for a clean shutdown of the driver's goroutines.
+	c.wg.Wait()
 
 	if err := c.driver.Disconnect(); err != nil {
 		return err

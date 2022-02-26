@@ -390,11 +390,13 @@ func (stm *stm32f0) commandListener(c *Client) {
 				stm.pollForToken(c, ticker)
 			}
 		case <-c.Terminate():
-			// TODO: actually make this work properly, seems we're not cleanly shutting down!
 			// Ensure the NFC field is off before termination.
 			stm.sendCommand(c, STM32F0_RFFieldOff, []byte{})
 			// Ensure front LED is off before termination.
 			stm.sendCommand(c, STM32F0_SetLedState, []byte{STM32F0_LedOff})
+			// Signal the client we're done with this goroutine informing it that it's safe to
+			// disconnect.
+			c.Done()
 			return
 		}
 	}
