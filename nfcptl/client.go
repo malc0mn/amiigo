@@ -66,8 +66,8 @@ func (c *Client) Connect() error {
 	return nil
 }
 
-// Done can be used by drivers to signal the end of a goroutine which will allow the client to
-// ensure a clean shutdown.
+// Done MUST be used by drivers to signal the end of the main goroutine which will allow the client
+// to ensure a clean shutdown.
 func (c *Client) Done() {
 	c.wg.Done()
 }
