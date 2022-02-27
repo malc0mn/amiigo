@@ -153,6 +153,8 @@ type stm32f0 struct {
 
 	optimised bool // Defines the driver behavior. Setting to false mimics the original software as closely as possible.
 
+	c *Client
+
 	*USB // The protocol this driver works with
 }
 
@@ -283,7 +285,8 @@ func (stm *stm32f0) Setup() interface{} {
 }
 
 func (stm *stm32f0) Drive(c *Client) {
-	if c.Debug() {
+	stm.c = c
+	if stm.c.Debug() {
 		log.Println("stm32f0: driving")
 	}
 
@@ -294,7 +297,7 @@ func (stm *stm32f0) Drive(c *Client) {
 		stm.totalErrors = 2
 	}
 
-	stm.commandListener(c)
+	stm.commandListener()
 }
 
 // wasTokenPlaced will update the tokenPlaced state if the return of the STM32F0_GetTokenUid
@@ -368,35 +371,35 @@ func (stm *stm32f0) getDriverCommandForClientCommand(cc ClientCommand) (DriverCo
 // execute a single poll sequence to check if a token is placed on the device.
 // commandListener uses a ticker to ensure command intervals adhere to the poll interval as defined
 // by the device.
-func (stm *stm32f0) commandListener(c *Client) {
+func (stm *stm32f0) commandListener() {
 	ticker := time.NewTicker(stm.PollInterval())
 	defer ticker.Stop()
 
 	if stm.optimised {
-		stm.sendCommand(c, STM32F0_RFFieldOn, []byte{})
+		stm.sendCommand(STM32F0_RFFieldOn, []byte{})
 	}
 
 	for {
 		select {
 		case <-ticker.C:
 			select {
-			case cmd := <-c.Commands():
+			case cmd := <-stm.c.Commands():
 				if dc, err := stm.getDriverCommandForClientCommand(cmd.Command); err != nil {
-					c.PublishEvent(NewEvent(UnknownCommand, []byte{}))
+					stm.c.PublishEvent(NewEvent(UnknownCommand, []byte{}))
 				} else {
-					stm.sendCommand(c, dc, cmd.Arguments)
+					stm.sendCommand(dc, cmd.Arguments)
 				}
 			default:
-				stm.pollForToken(c, ticker)
+				stm.pollForToken(ticker)
 			}
-		case <-c.Terminate():
+		case <-stm.c.Terminate():
 			// Ensure the NFC field is off before termination.
-			stm.sendCommand(c, STM32F0_RFFieldOff, []byte{})
+			stm.sendCommand(STM32F0_RFFieldOff, []byte{})
 			// Ensure front LED is off before termination.
-			stm.sendCommand(c, STM32F0_SetLedState, []byte{STM32F0_LedOff})
+			stm.sendCommand(STM32F0_SetLedState, []byte{STM32F0_LedOff})
 			// Signal the client we're done with this goroutine informing it that it's safe to
 			// disconnect.
-			c.Done()
+			stm.c.Done()
 			return
 		}
 	}
@@ -407,10 +410,10 @@ func (stm *stm32f0) commandListener(c *Client) {
 // experimenting, this can be optimised to a single message on each poll.
 // When a token is detected, it will read the token contents  and send a TokenDetected event to the
 // client.
-func (stm *stm32f0) pollForToken(c *Client, ticker *time.Ticker) {
+func (stm *stm32f0) pollForToken(ticker *time.Ticker) {
 	if stm.optimised {
-		res, isErr := stm.sendCommand(c, STM32F0_GetTokenUid, []byte{})
-		stm.handleGetTokenUidReturn(c, res, isErr)
+		res, isErr := stm.sendCommand(STM32F0_GetTokenUid, []byte{})
+		stm.handleGetTokenUidReturn(res, isErr)
 		return
 	}
 
@@ -421,24 +424,24 @@ func (stm *stm32f0) pollForToken(c *Client, ticker *time.Ticker) {
 		select {
 		case <-ticker.C:
 			next, cmd = stm.getNextPollCommand(next)
-			res, isErr := stm.sendCommand(c, cmd, []byte{})
+			res, isErr := stm.sendCommand(cmd, []byte{})
 			if cmd == STM32F0_GetTokenUid {
-				stm.handleGetTokenUidReturn(c, res, isErr)
+				stm.handleGetTokenUidReturn(res, isErr)
 			}
-		case <-c.Terminate():
+		case <-stm.c.Terminate():
 			return
 		}
 	}
 }
 
 // handleGetTokenUidReturn will handle the result returned by the STM32F0_GetTokenUid command.
-func (stm *stm32f0) handleGetTokenUidReturn(c *Client, res []byte, isErr bool) {
+func (stm *stm32f0) handleGetTokenUidReturn(res []byte, isErr bool) {
 	if isErr {
 		if stm.wasTokenRemoved() {
-			stm.sendCommand(c, STM32F0_SetLedState, []byte{STM32F0_LedOff})
+			stm.sendCommand(STM32F0_SetLedState, []byte{STM32F0_LedOff})
 		}
 	} else if stm.wasTokenPlaced() {
-		stm.handleToken(c, res)
+		stm.handleToken(res)
 	}
 }
 
@@ -463,17 +466,17 @@ func (stm *stm32f0) getNextPollCommand(pos int) (int, DriverCommand) {
 }
 
 // handleToken processes the token placed on the NFC portal.
-func (stm *stm32f0) handleToken(c *Client, buff []byte) {
+func (stm *stm32f0) handleToken(buff []byte) {
 	l := int(buff[4])    // Byte 4 in the sequence is the NUID length which can be 4 or 7 bytes long.
 	s := 5               // The NUID starts at byte 5.
 	uid := buff[s : s+l] // Read the full NUID starting on byte 5 with length l.
 
 	log.Printf("stm32f0: token detected with id %#0"+fmt.Sprintf("%d", l)+"x", uid)
 
-	if c.Debug() {
+	if stm.c.Debug() {
 		log.Println("stm32f0: enabling front led")
 	}
-	stm.sendCommand(c, STM32F0_SetLedState, []byte{STM32F0_LedOnFull})
+	stm.sendCommand(STM32F0_SetLedState, []byte{STM32F0_LedOnFull})
 
 	//MsgOneAfterTokenDetect = []byte{0x20, 0xff}
 	//  set led to full brightness
@@ -526,7 +529,7 @@ func (stm *stm32f0) handleToken(c *Client, buff []byte) {
 				args = append([]byte{0x00}, key...)
 			}
 
-			r, _ := stm.sendCommand(c, cmd, args)
+			r, _ := stm.sendCommand(cmd, args)
 
 			switch cmd {
 			case STM32F0_Read:
@@ -538,36 +541,36 @@ func (stm *stm32f0) handleToken(c *Client, buff []byte) {
 	}
 
 	// Actual read.
-	token, err := stm.readToken(c)
+	token, err := stm.readToken()
 	if err != nil {
-		if c.Debug() {
+		if stm.c.Debug() {
 			log.Printf("%s", err)
 		}
-		c.PublishEvent(NewEvent(TokenTagDataError, token))
+		stm.c.PublishEvent(NewEvent(TokenTagDataError, token))
 	} else if !stm.optimised {
 		// The original software reads the token twice, probably for validation purposes.
-		verify, _ := stm.readToken(c)
+		verify, _ := stm.readToken()
 		if !bytes.Equal(token, verify) {
-			c.PublishEvent(NewEvent(TokenTagDataError, token))
+			stm.c.PublishEvent(NewEvent(TokenTagDataError, token))
 			return
 		}
 	}
-	if c.Debug() {
+	if stm.c.Debug() {
 		log.Println("stm32f0: full token data:")
 		fmt.Fprintln(os.Stderr, hex.Dump(token))
 	}
-	c.PublishEvent(NewEvent(TokenTagData, token))
+	stm.c.PublishEvent(NewEvent(TokenTagData, token))
 }
 
 // readToken actually reads the token data and returns it as a byte slice.
-func (stm *stm32f0) readToken(c *Client) ([]byte, error) {
+func (stm *stm32f0) readToken() ([]byte, error) {
 	var i byte
 	token := make([]byte, 540)
 	n := 0
 	for i = 0; i < 0x88; i += 4 {
 		pageErrors := 0
 	read:
-		res, isErr := stm.sendCommand(c, STM32F0_Read, []byte{i})
+		res, isErr := stm.sendCommand(STM32F0_Read, []byte{i})
 		if isErr {
 			if pageErrors++; pageErrors > 2 {
 				return token, fmt.Errorf("stm32f0: failed to read page %#02x", i)
@@ -597,7 +600,7 @@ func (stm *stm32f0) readToken(c *Client) ([]byte, error) {
 //    0x1c 0x00 => read page 0 ... it keeps reading until page 0x84, possibly for validation?
 //    0x1c 0x00 => and it starts reading from the start all over again (not very efficient is it)
 //    now it starts the 'token on portal' polling sequence
-func (stm *stm32f0) writeToken(c *Client) error {
+func (stm *stm32f0) writeToken() error {
 	return nil
 }
 
@@ -617,7 +620,7 @@ func (stm *stm32f0) writeToken(c *Client) error {
 //    0x1c 0x00 => read page 0 ... it keeps reading until page 0x84, possibly for validation?
 //    0x1c 0x00 => and it starts reading from the start again
 //    now it starts the 'token on portal' polling sequence
-func (stm *stm32f0) applyCheat(c *Client) error {
+func (stm *stm32f0) applyCheat() error {
 	return nil
 }
 
@@ -641,7 +644,7 @@ func (stm *stm32f0) getEventForDriverCommand(dc DriverCommand, args []byte) Even
 // sendCommand sends a command to the device and reads the response. It will return the response
 // together with a boolean value indicating if the response contains an error (first two bytes 0x01
 // 0x02) or not.
-func (stm *stm32f0) sendCommand(c *Client, cmd DriverCommand, args []byte) ([]byte, bool) {
+func (stm *stm32f0) sendCommand(cmd DriverCommand, args []byte) ([]byte, bool) {
 	maxSize := stm.MaxPacketSize()
 
 	// Send command.
@@ -649,12 +652,12 @@ func (stm *stm32f0) sendCommand(c *Client, cmd DriverCommand, args []byte) ([]by
 		cmd,
 		stm.createArguments(maxSize-1, args),
 	)
-	if c.Debug() {
+	if stm.c.Debug() {
 		log.Println("stm32f0: sending command:")
 		fmt.Fprint(os.Stderr, hex.Dump(usbCmd.Marshal())) // No Println here since hex.Dump() prints a newline.
 	}
-	n, _ := stm.Write(usbCmd.Marshal())
-	if c.Debug() {
+	n, _ := stm.Write(usbCmd.Marshal()) // TODO: error handling
+	if stm.c.Debug() {
 		log.Printf("stm32f0: written %d bytes", n)
 	}
 
@@ -662,14 +665,14 @@ func (stm *stm32f0) sendCommand(c *Client, cmd DriverCommand, args []byte) ([]by
 	b := make([]byte, maxSize)
 	// STM32F0_SetLedState does not get a response!
 	if cmd != STM32F0_SetLedState {
-		stm.Read(b)
-		if c.Debug() {
+		stm.Read(b) // TODO: error handling
+		if stm.c.Debug() {
 			log.Println("stm32f0: command reply:")
 			fmt.Fprintln(os.Stderr, hex.Dump(b))
 		}
 	}
 	if event := stm.getEventForDriverCommand(cmd, args); event != NoEvent {
-		c.PublishEvent(NewEvent(event, b))
+		stm.c.PublishEvent(NewEvent(event, b))
 	}
 
 	return b, bytes.Equal(b[:2], []byte{0x01, 0x02})
