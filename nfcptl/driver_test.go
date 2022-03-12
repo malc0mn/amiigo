@@ -5,7 +5,25 @@ import (
 	"testing"
 )
 
-func TestRegisterDriverPanic(t *testing.T) {
+func TestErrDriverNotFound(t *testing.T) {
+	e := ErrDriverNotFound{Vendor: "vend", Product: "prod"}
+	got := e.Error()
+	want := "nfcptl: no driver found for vendor=vend and product=prod"
+	if got != want {
+		t.Errorf("got '%s', want '%s'", got, want)
+	}
+}
+
+func TestRegisterDriverPanicOne(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Errorf("RegisterDriver did not panic!")
+		}
+	}()
+	RegisterDriver(nil)
+}
+
+func TestRegisterDriverPanicTwo(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
 			t.Errorf("RegisterDriver did not panic!")

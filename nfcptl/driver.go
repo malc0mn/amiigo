@@ -43,7 +43,7 @@ type ErrDriverNotFound struct {
 
 // Error implements the error interface
 func (e ErrDriverNotFound) Error() string {
-	return "nfcptl: no driver found for vendor=" + e.Vendor + "and product=" + e.Product
+	return "nfcptl: no driver found for vendor=" + e.Vendor + " and product=" + e.Product
 }
 
 // RegisterDriver is responsible for registering all drivers at runtime. Each driver should call

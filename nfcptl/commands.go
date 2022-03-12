@@ -21,7 +21,7 @@ const (
 // String returns the string representation of the ClientCommand.
 func (cc ClientCommand) String() string {
 	return []string{
-		"GetHardwareInfo",
+		"GetDeviceName",
 		"GetHardwareInfo",
 		"GetApiPassword",
 		"FetchTokenData",
