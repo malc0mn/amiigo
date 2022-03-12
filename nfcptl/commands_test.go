@@ -28,13 +28,13 @@ func TestNewUsbCommand(t *testing.T) {
 	got := u.DriverCommand()
 	want := DriverCommand(0x68)
 	if got != want {
-		t.Errorf("got %x, want %x", got, want)
+		t.Errorf("got %#x, want %#x", got, want)
 	}
 
 	gotb := u.Marshal()
 	wantb := []byte{0x68, 0x36, 0x19}
 	if !bytes.Equal(gotb, wantb) {
-		t.Errorf("got %x, want %x", got, want)
+		t.Errorf("got %#x, want %#x", got, want)
 	}
 }
 
