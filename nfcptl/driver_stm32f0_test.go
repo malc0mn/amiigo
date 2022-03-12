@@ -25,7 +25,14 @@ func TestStm32f0_VendorId(t *testing.T) {
 		}
 	}
 
-	// TODO: test error return
+	gotv, gote := p.VendorId("test")
+	if gotv != 0 {
+		t.Errorf("got %d, want 0", gotv)
+	}
+	wante := "stm32f0: unknown vendor test"
+	if gote.Error() != wante {
+		t.Errorf("got %s, want %s", gote, wante)
+	}
 }
 
 func TestStm32f0_ProductId(t *testing.T) {
@@ -47,7 +54,14 @@ func TestStm32f0_ProductId(t *testing.T) {
 		}
 	}
 
-	// TODO: test error return
+	gotv, gote := p.ProductId("test")
+	if gotv != 0 {
+		t.Errorf("got %d, want 0", gotv)
+	}
+	wante := "stm32f0: unknown product test"
+	if gote.Error() != wante {
+		t.Errorf("got %s, want %s", gote, wante)
+	}
 }
 
 func TestStm32f0_Setup(t *testing.T) {
