@@ -1,23 +1,28 @@
 package nfcptl
 
 import (
-	"github.com/tarm/serial"
+	"github.com/pkg/term"
 )
+
+type Serial struct {
+	Port string
+	Baud int
+}
 
 // UART implements the Protocol interface to allow drivers to support UART devices.
 type UART struct {
-	prt *serial.Port
+	prt *term.Term
 }
 
 func (uart *UART) Connect(c *Client) error {
 	var err error
 
-	setup, ok := c.Setup().(serial.Config)
+	setup, ok := c.Setup().(Serial)
 	if !ok {
-		panic("uart drivers must return a serial.Config struct")
+		panic("uart drivers must return a Serial struct")
 	}
 
-	if uart.prt, err = serial.OpenPort(&setup); err != nil {
+	if uart.prt, err = term.Open(setup.Port, term.Speed(setup.Baud), term.RawMode); err != nil {
 		return err
 	}
 
@@ -38,4 +43,8 @@ func (uart *UART) Read(p []byte) (int, error) {
 
 func (uart *UART) Write(p []byte) (int, error) {
 	return uart.prt.Write(p)
+}
+
+func (uart *UART) Speed(s int) error {
+	return uart.prt.SetSpeed(s)
 }
