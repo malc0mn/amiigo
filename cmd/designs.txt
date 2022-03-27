@@ -1,0 +1,41 @@
+┌ ┐ ─ ┬ ├ ┼ ┤ ┴ │ └ ┘ ¬
+
+╔ ╗ ═ ╦ ╠ ╬ ╣ ╩ ║ ╚ ╝
+
+░ ▒ ▓ █  // native ASCII fade in
+
+▄ ■ ▀ ▌ ▐  // nice sequence for a funny cursor blink
+
+ ╧ ╤ ╨ ╥ ╙ ╜ ╘ ╛ ╒ ╕ ╓ ╖ ╫ ╪ ╞ ╡ ╟ ╢ ⌠ ⌡ ≡ ≈ ¦ ¯ # < = > _ ‡ / \ { } ( ) + - ± |
+
+
+
+// Logo: the box drawing characters will be rendered in a grey colour, the block characters will be silver or white.
+// Additional box drawing characters in the darkest grey will be added still when rendering the logo on screen.
+// The logo will 'materialise' somehow: from the 'classic' randomized ones and zeros; from a full base64 charset? Or
+// maybe rendered using a CRT like 'scanline'?
+
+   ¬        .        _  _      .   ____‡¬
+   ╞▄█▀▀▀█╗ ▄█▀█▀█┐ ╒╬ ╧╣ ╔█▀▀▀▄  ▄█▀▀▀█╗
+  |│█╠═══██ █╠╕▀─██ ██ ██ █╠══─▄▄ █ ´  ██│
+   ╡▀╩╤  ▀▀ ▀╩╤  ▀▀ ▀▀ ▀▀ `╙▀▀▀▀´ ╚▀▀▀▀▀⌡
+      :  ⌠.   ¦   ┴──╥─‡   ¯─¯    ┌┴±─≡:
+
+
+// Boxes will be visually drawn on screen, diagonally from the top left to the bottom right whereby the ASCII
+// characters will be fading in by using the appropriate dark to light colours.
+
+   ╓─────═‡¯` logs ´¯‡═─────╖    ╓─────═‡¯´ logs `¯‡═─────╖    ╓───────═[ logs ]═───────╖
+   │                        │    │                        │    │                        │
+   │                        │    │                        │    │                        │
+   │                        │    │                        │    │                        │
+   │                        │    │                        │    │                        │
+   │                        │    │                        │    │                        │
+   │                        │    │                        │    │                        │
+   │                        │    │                        │    │                        │
+   │                        │    │                        │    │                        │
+   │                        │    │                        │    │                        │
+   │                        │    │                        │    │                        │
+   │                        │    │                        │    │                        │
+   │                        │    │                        │    │                        │
+   ╚────────────────────────╝    ╚────────────────────────╝    ╚────────────────────────╝
