@@ -8,8 +8,8 @@ const (
 	backColour    = tcell.Color17
 	fontColour    = tcell.Color51
 	shadowColour1 = tcell.Color19
-	shadowColour2 = tcell.Color26
-	shadowColour3 = tcell.Color31
+	shadowColour2 = tcell.Color21
+	shadowColour3 = tcell.Color24
 )
 
 // initScreen initializes a new tcell.Screen.
