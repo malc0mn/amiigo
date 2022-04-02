@@ -9,11 +9,23 @@ import (
 // logo returns the logo data in the form of a string array.
 func logo() []string {
 	return []string{
-		" ¬        .        _  _      .   ____‡¬ ",
+		" ¬        .  -     _  _      .   ____‡¬ ",
 		" ╞▄█▀▀▀█╗ ▄█▀█▀█┐ ╒╬ ╧╣ ╔█▀▀▀▄  ▄█▀▀▀█╗ ",
 		"|│█╠═══██ █╠╕▀─██ ██ ██ █╠══─▄▄ █ ´  ██│",
 		" ╡▀╩╤  ▀▀ ▀╩╤  ▀▀ ▀▀ ▀▀ `╙▀▀▀▀´ ╚▀▀▀▀▀⌡ ",
 		"    :  ⌠.   ¦   ┴──╥─‡   ¯─¯    ┌┴±─≡:  ",
+	}
+}
+
+// logoShadow returns the parts of the logo that need to be rendered in a darker colour. Spaces
+// MUST NOT be rendered.
+func logoShadow() []string {
+	return []string{
+		"└ ┬═‡─≡─:_ ¯` `─_.. .. +¬┘¯¦┴ ╖╨─      .",
+		"         :       :     :      │        :",
+		"         ¦       ¦     ¦           ¯    ",
+		"─    ─┴  :   ╝┬  :  .  :               :",
+		" ┘¬═ ≡┐  ┴ ¯ ╖─┬      ─╩─   ╒┴═─      ⌠.",
 	}
 }
 
@@ -40,9 +52,12 @@ func logoHeight() int {
 func drawLogo(s tcell.Screen, x, y int, animated bool) {
 	if animated {
 		drawLogoAnimated(s, x, y)
+		drawLogoShadowAnimated(s, x, y)
 		return
 	}
+
 	drawLogoPlain(s, x, y)
+	drawLogoShadow(s, x, y, 0, shadowColour3)
 }
 
 // drawLogoPlain will simply draw the logo on screen. This is used when redrawing the UI on screen resize.
@@ -94,6 +109,30 @@ func drawLogoAnimated(s tcell.Screen, x, y int) {
 			}
 			vpos++
 		}
+		s.Show()
+		time.Sleep(time.Millisecond * 65)
+	}
+}
+
+// drawLogoShadow draws the darker parts of the logo.
+func drawLogoShadow(s tcell.Screen, x, y, vpos int, c tcell.Color) {
+	style := tcell.Style{}
+
+	for _, line := range logoShadow() {
+		for hpos, r := range []rune(line) {
+			if r != ' ' {
+				s.SetContent(x+hpos, y+vpos, r, nil, style.Background(backColour).Foreground(c))
+			}
+		}
+		vpos++
+	}
+}
+
+// drawLogoShadowAnimated does the same as drawLogoShadow but makes the parts fade in.
+func drawLogoShadowAnimated(s tcell.Screen, x, y int) {
+	for _, c := range []tcell.Color{shadowColour1, shadowColour2, shadowColour3} {
+		vpos := 0
+		drawLogoShadow(s, x, y, vpos, c)
 		s.Show()
 		time.Sleep(time.Millisecond * 65)
 	}
