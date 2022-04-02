@@ -16,7 +16,7 @@ func initScreen() (tcell.Screen, error) {
 	}
 
 	s.HideCursor()
-	s.SetStyle(tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorBlack))
+	s.SetStyle(tcell.StyleDefault.Background(tcell.Color17).Foreground(tcell.Color51))
 	s.Clear()
 
 	return s, nil

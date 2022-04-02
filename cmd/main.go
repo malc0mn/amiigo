@@ -1,18 +1,18 @@
 package main
 
 import (
-	"encoding/hex"
 	"fmt"
-	"github.com/malc0mn/amiigo/nfcptl"
-	"log"
 	"os"
-	"os/signal"
 	"path/filepath"
-	"syscall"
 )
 
 const (
-	ok = 0
+	ok               = 0
+	errGeneral       = 1
+	errInvalidArgs   = 2
+	errOpenConfig    = 102
+	errCreateClient  = 104
+	errPortalConnect = 105
 )
 
 var (
@@ -36,38 +36,7 @@ func main() {
 		os.Exit(ok)
 	}
 
-	sigs := make(chan os.Signal, 1)
-	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		sig := <-sigs
-		fmt.Printf("Received signal %s, shutting down...\n", sig)
-		close(quit)
-	}()
-
-	client, err := nfcptl.NewClient(conf.vendor, conf.device, verbose)
-	if err != nil {
-		log.Fatalf("Error initialising client: %s", err)
-	}
-
-	err = client.Connect()
-	defer client.Disconnect()
-	if err != nil {
-		log.Fatalf("Error connecting to device: %v", err)
-	}
-
-	//client.SendCommand(nfcptl.GetDeviceName)
-	//client.SendCommand(nfcptl.GetHardwareInfo)
-
-	for {
-		select {
-		case e := <-client.Events():
-			fmt.Println("Received event:")
-			fmt.Println(e.String())
-			fmt.Println(hex.Dump(e.Data()))
-		case <-quit:
-			return
-		}
-	}
-
+	tui()
 	fmt.Println("Bye bye!")
+	os.Exit(ok)
 }
