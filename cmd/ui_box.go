@@ -125,10 +125,17 @@ func animateBoxLine(s tcell.Screen, line []rune, x, y int) {
 	center := len(line) / 2
 	bc := []rune{'█', '▓', '▒', '░'}
 
-	for pass := 0; pass < center; pass++ {
-		for n := 0; n < pass+1; n++ { // we draw pass + 1 amount of cursor frames on the left AND right of the center.
+	// Extend the amount of passes with the amount of cursor frames to ensure all runes are drawn
+	// in the end.
+	for pass := 0; pass < center+len(bc); pass++ {
+		// We draw pass + 1 amount of cursor frames on the left AND right of the center.
+		for n := 0; n < pass+1; n++ {
 			posl := center - n // position left of center
 			posr := center + n // position right of center
+			if posl < 0 || posr >= len(line) {
+				// Protect bounds.
+				continue
+			}
 			// First get what has already been drawn.
 			curl, _, _, _ := s.GetContent(x+posl, y)
 			curr, _, _, _ := s.GetContent(x+posr, y)
