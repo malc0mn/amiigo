@@ -44,5 +44,6 @@ func drawUi(s tcell.Screen, sync bool) {
 
 	x := width/2 - logoWidth()/2
 	drawLogo(s, x, 0, !sync)
-	drawBox(s, 1, logoHeight()+1, 30, 15, "logs", !sync)
+	box := newBox(s, 1, logoHeight()+1, 15, 30, "logs", boxWidthTypePercent)
+	box.draw(!sync)
 }
