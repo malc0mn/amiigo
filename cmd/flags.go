@@ -12,7 +12,7 @@ var (
 )
 
 func initFlags() {
-	flag.StringVar(&conf.vendor, "v", defaultVendor, "The vendor of the responder that will be connected to.")
+	flag.StringVar(&conf.vendor, "v", defaultVendor, "The vendor of the portal that will be connected to.")
 	flag.StringVar(&conf.device, "d", defaultDevice, "The NFC portal to connect to.")
 
 	flag.BoolVar(&verbose, "verbose", false, "Output lots and lots of debug information.")
