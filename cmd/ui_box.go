@@ -32,7 +32,8 @@ type box struct {
 	heightC   int          // The height in characters of the box.
 	heightP   int          // The height in percent of the box.
 	minHeight int          // The minimal with of the box.
-	content   chan string  // The channel that will receive the box content.
+	// TODO: use buffers to allow scrolling and preserve content after resize!
+	content chan string // The channel that will receive the box content.
 }
 
 // newBox creates a new box struct ready for display on screen by calling box.draw(). newBox also
@@ -104,33 +105,51 @@ func (b *box) destroy() {
 // or box.destroy() is called. It is therefore meant to be executed as a go routine.
 // When the content reaches the end of the box, all content is shifted up one line.
 func (b *box) update() {
-	margin := 2
-	marginLeft := b.x + margin
-	marginRight := b.width() - margin
-	marginTop := b.y + margin
-	marginBottom := b.height() - margin
+	hmargin := 2
+	vmargin := 1
+	marginLeft := b.x + hmargin
+	marginRight := b.width() - hmargin
+	marginTop := b.y + vmargin
+	marginBottom := b.height() - vmargin
 	hpos := marginLeft
-	vpos := b.y + margin
+	vpos := marginTop
 	for s := range b.content {
-		b.s.SetContent(hpos, vpos, []rune(s)[0], nil, tcell.StyleDefault)
-		hpos++
-		if hpos > marginRight {
-			hpos = marginLeft
-			vpos++
-		}
-		if vpos > marginBottom {
-			// Stay on the last line
-			vpos = marginBottom
-			// Shift all content up one line.
-			for x := marginLeft; x <= marginRight; x++ {
-				// We need to drop the first line, so start at one line after the top.
+		for _, r := range []rune(s) {
+			// Don't render leading spaces.
+			if hpos == marginLeft && r == ' ' {
+				continue
+			}
+			// Handle newlines.
+			if r == '\n' {
+				vpos++
+				hpos = marginLeft
+				continue
+			}
+			b.s.SetContent(hpos, vpos, r, nil, tcell.StyleDefault)
+			hpos++
+			if hpos > marginRight {
+				hpos = marginLeft
+				vpos++
+			}
+			// TODO: this part still has bugs!
+			if vpos > marginBottom {
 				for y := marginTop + 1; y <= marginBottom; y++ {
-					r, _, _, _ := b.s.GetContent(x, y)
-					// Place this rune one line up.
-					b.s.SetContent(x, y-1, r, nil, tcell.StyleDefault)
+					// Shift all content up one line.
+					for x := marginLeft; x <= marginRight; x++ {
+						or, _, _, _ := b.s.GetContent(x, y)
+						// Place this rune one line up.
+						b.s.SetContent(x, y-1, or, nil, tcell.StyleDefault)
+					}
 				}
+				// Clear the last line.
+				for x := marginLeft; x <= marginRight; x++ {
+					b.s.SetContent(x, marginBottom, 0, nil, tcell.StyleDefault)
+				}
+				// Stay on the last line
+				vpos = marginBottom
 			}
 		}
+		b.s.Show()
 	}
 }
 

@@ -9,7 +9,7 @@ func tui() {
 	ui.draw(true)
 
 	// Connect to the portal when the UI is visible, so it can display the client logs etc.
-	//go portal()
+	go portal(ui.boxes[0].content) // TODO: fix this so we don't use indexes here!
 
 	for {
 		ui.show()
