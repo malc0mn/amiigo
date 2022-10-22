@@ -31,7 +31,7 @@ type box struct {
 	minWidth  int          // The minimal with of the box.
 	heightC   int          // The height in characters of the box.
 	heightP   int          // The height in percent of the box.
-	minHeight int          // The minimal with of the box.
+	minHeight int          // The minimal height of the box.
 	// TODO: use buffers to allow scrolling and preserve content after resize!
 	content chan string // The channel that will receive the box content.
 }
