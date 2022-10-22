@@ -108,9 +108,9 @@ func (b *box) update() {
 	hmargin := 2
 	vmargin := 1
 	marginLeft := b.x + hmargin
-	marginRight := b.width() - hmargin
+	marginRight := b.x - 1 + b.width() - hmargin
 	marginTop := b.y + vmargin
-	marginBottom := b.height() - vmargin
+	marginBottom := b.y - 1 + b.height() - vmargin
 	hpos := marginLeft
 	vpos := marginTop
 	for s := range b.content {
@@ -131,7 +131,6 @@ func (b *box) update() {
 				hpos = marginLeft
 				vpos++
 			}
-			// TODO: this part still has bugs!
 			if vpos > marginBottom {
 				for y := marginTop + 1; y <= marginBottom; y++ {
 					// Shift all content up one line.
