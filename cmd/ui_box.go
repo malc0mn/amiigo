@@ -26,6 +26,8 @@ type box struct {
 	s         tcell.Screen // The screen to display the box on.
 	x         int          // The x position to start drawing on.
 	y         int          // The y position to start drawing on.
+	autoX     bool         // When true will calculate the x pos based on the previously drawn box.
+	autoY     bool         // When true will calculate the y pos based on the previously drawn box.
 	widthC    int          // The with in characters of the box.
 	widthP    int          // The with in percent of the box.
 	minWidth  int          // The minimal with of the box.
@@ -38,6 +40,8 @@ type box struct {
 
 // newBox creates a new box struct ready for display on screen by calling box.draw(). newBox also
 // launches a single go routine to update the box contents as it comes in.
+// Passing -1 as x and/or y value will ensure the box is automatically positioned after the previous
+// box in the set of drawn boxes.
 // Type can be boxWidthTypePercent or boxWidthTypeCharacter
 func newBox(s tcell.Screen, x, y, width, height int, title, typ string) *box {
 	b := &box{
@@ -45,6 +49,8 @@ func newBox(s tcell.Screen, x, y, width, height int, title, typ string) *box {
 		s:         s,
 		x:         x,
 		y:         y,
+		autoX:     x == -1,
+		autoY:     y == -1,
 		minWidth:  len([]rune(string(boxTopLeftCorner) + string(boxLineHorizontal) + boxTitleLeft + " " + boxTitleRight + string(boxLineHorizontal) + string(boxTopRightCorner))),
 		minHeight: 5, // nothing to calculate really: top line + margin line + content line + margin line + bottom line
 		content:   make(chan string, 10),
@@ -61,6 +67,17 @@ func newBox(s tcell.Screen, x, y, width, height int, title, typ string) *box {
 	go b.update()
 
 	return b
+}
+
+// setStartXY returns the x and y positions where drawing needs to start. If the box's x and/or y
+// position are set to -1, the respective values passed in are used as a start position.
+func (b *box) setStartXY(x, y int) {
+	if b.autoX {
+		b.x = x
+	}
+	if b.autoY {
+		b.y = y
+	}
 }
 
 // width returns the with of the box in number of characters. If the box width is set in percent
@@ -153,19 +170,25 @@ func (b *box) update() {
 }
 
 // draw draws a box with title where the 'animated' parameter defines how the box will be drawn.
-func (b *box) draw(animated bool) {
+// The return values will be the first x column to the right side of the box and the first y column
+// below the box.
+func (b *box) draw(animated bool, x, y int) (int, int) {
 	if animated {
-		b.drawAnimated()
-		return
+		b.drawAnimated(x, y)
+	} else {
+		b.drawPlain(x, y)
 	}
 
-	b.drawPlain()
+	return b.x + len(b.r[0]), b.y + len(b.r)
 }
 
 // drawAnimated does the same as drawPlain but will add animation. This is used when drawing
 // the UI for the first time.
-func (b *box) drawAnimated() {
+// x and y should be the x and y position after the horizontal and vertical end of the last box
+// drawn. Will only be used when the box has been set to auto calculate x and/or y
+func (b *box) drawAnimated(x, y int) {
 	b.render()
+	b.setStartXY(x, y)
 	for vpos, l := range b.r {
 		if vpos == 0 {
 			b.animateLine(l, vpos)
@@ -179,9 +202,12 @@ func (b *box) drawAnimated() {
 	}
 }
 
-// drawPlain draws a full box with title. This is used when redrawing the UI on s resize.
-func (b *box) drawPlain() {
+// drawPlain draws a full box with title. This is used when redrawing the UI on tcell.EventResize.
+// x and y should be the x and y position after the horizontal and vertical end of the last box
+// drawn. Will only be used when the box has been set to auto calculate x and/or y
+func (b *box) drawPlain(x, y int) {
 	b.render()
+	b.setStartXY(x, y)
 	for vpos, l := range b.r {
 		for hpos, r := range l {
 			if r == 0 {

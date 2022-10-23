@@ -33,17 +33,26 @@ func tui() {
 
 // ui holds all the user interface components and the screen to render them on.
 type ui struct {
-	s     tcell.Screen
-	boxes []*box
+	s        tcell.Screen
+	boxes    []*box
+	infoBox  *box
+	imageBox *box
+	logBox   *box
 }
 
 // newUi create a new ui structure.
 func newUi() *ui {
 	s, _ := initScreen()
-	logs := newBox(s, 1, logoHeight()+1, 15, 30, "logs", boxWidthTypePercent)
+	y := logoHeight() + 1
+	info := newBox(s, 1, y, 15, 70, "info", boxWidthTypePercent)
+	image := newBox(s, -1, y, 75, 70, "image", boxWidthTypePercent)
+	logs := newBox(s, 1, -1, 90, 20, "logs", boxWidthTypePercent)
 	return &ui{
-		s:     s,
-		boxes: []*box{logs},
+		s:        s,
+		boxes:    []*box{info, image, logs},
+		infoBox:  info,
+		imageBox: image,
+		logBox:   logs,
 	}
 }
 
@@ -53,8 +62,11 @@ func (u *ui) draw(animate bool) {
 
 	x := width/2 - logoWidth()/2
 	drawLogo(u.s, x, 0, animate)
+	nextX := -1
+	nextY := 0
 	for _, b := range u.boxes {
-		b.draw(animate)
+		// nextX+1 to have a vertical margin of one char.
+		nextX, nextY = b.draw(animate, nextX+1, nextY)
 	}
 }
 
