@@ -41,8 +41,9 @@ func TestRingBuffer_WriteSingleBig(t *testing.T) {
 
 	rb := newRingBuffer(int64(size))
 	rb.Write(all)
-	if rb.writePos != int64(size) {
-		t.Errorf("rb.writepos: want %d, got %d", size, rb.writePos)
+	wantPos := int64(0)
+	if rb.writePos != wantPos {
+		t.Errorf("rb.writepos: want %d, got %d", wantPos, rb.writePos)
 	}
 	p := make([]byte, size)
 	rb.Read(p)
@@ -76,7 +77,7 @@ func TestRingBuffer_WriteLines(t *testing.T) {
 				t.Errorf("rb.writepos: want %d, got %d", want, rb.writePos)
 			}
 
-			wantLen = size - 1 // TODO: -1 should not be here: cannot figure out what is wrong; must be staring me in the face and mocking me for being a complete and utter idiot.
+			wantLen = size
 		}
 
 		got := rb.len()
@@ -125,11 +126,11 @@ func TestRingBuffer_ReadAfterWrap(t *testing.T) {
 	if err != nil {
 		t.Errorf("want nil, got %s", err)
 	}
-	if i != rSize-1 { // TODO: -1 should not be here: cannot figure out what is wrong; must be staring me in the face and mocking me for being a complete and utter idiot.
+	if i != rSize {
 		t.Errorf("want %d, got %d", rSize, i)
 	}
 
-	offset := len(all) - bufSize + 1 // TODO: +1 should not be here: cannot figure out what is wrong; must be staring me in the face and mocking me for being a complete and utter idiot.
+	offset := len(all) - bufSize
 	want := string(all[offset : rSize+offset])
 	if string(p) != want {
 		t.Errorf("\nwant\n '%s'\ngot\n '%s'", want, string(p))

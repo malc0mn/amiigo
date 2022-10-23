@@ -10,6 +10,7 @@ import (
 // box with limited history.
 type ringBuffer struct {
 	mu       sync.Mutex // Ensure no reading while writing and vice versa.
+	pristine bool       // When true, the buffer has never been written to.
 	buffer   []byte     // The actual buffer itself.
 	size     int64      // The size of the buffer.
 	writePos int64      // Position where to start writing.
@@ -19,13 +20,17 @@ type ringBuffer struct {
 // newRingBuffer creates a new ringBuffer structure.
 func newRingBuffer(size int64) *ringBuffer {
 	return &ringBuffer{
-		buffer: make([]byte, size),
-		size:   size,
+		pristine: true,
+		buffer:   make([]byte, size),
+		size:     size,
 	}
 }
 
 // len returns the current length of the buffer.
 func (r *ringBuffer) len() int {
+	if !r.pristine && r.writePos == r.headPos {
+		return int(r.size)
+	}
 	if r.writePos < r.headPos {
 		return int(r.size - r.headPos + r.writePos)
 	}
@@ -40,11 +45,14 @@ func (r *ringBuffer) Write(p []byte) (int, error) {
 	defer r.mu.Unlock()
 
 	length := int64(len(p))
+	if length > 0 {
+		r.pristine = false
+	}
 
 	// Bluntly overwrite the entire buffer with the last part of p.
 	if length >= r.size {
 		copy(r.buffer, p[length-r.size:])
-		r.writePos = r.size
+		r.writePos = 0
 		r.headPos = 0
 		return int(length), nil
 	}
@@ -67,8 +75,9 @@ func (r *ringBuffer) Write(p []byte) (int, error) {
 
 	// If we have written past the old head position...
 	if (oldWritePos < r.headPos && r.writePos > r.headPos) || (oldWritePos > r.headPos && r.writePos > r.headPos && oldWritePos-r.headPos > r.writePos-r.headPos) {
-		// ...we have overwritten old data, so adjust the head position to one past the last written byte.
-		r.headPos = r.writePos + 1
+		// ...we have overwritten old data, so adjust the head position to where the next char will
+		// be written to.
+		r.headPos = r.writePos
 	}
 
 	return int(length), nil
@@ -84,7 +93,7 @@ func (r *ringBuffer) Read(p []byte) (int, error) {
 		return 0, errors.New("ringBuffer: destination has zero length")
 	}
 
-	if r.headPos == r.writePos {
+	if r.pristine && r.headPos == r.writePos {
 		return 0, nil
 	}
 
