@@ -70,7 +70,7 @@ func (u *ui) draw(animate bool) {
 	}
 }
 
-// show shows all ui content.
+// show makes all ui content visible on the display.
 func (u *ui) show() {
 	u.s.Show()
 }
