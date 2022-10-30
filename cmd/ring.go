@@ -60,7 +60,7 @@ func (r *ringBuffer) Write(p []byte) (int, error) {
 	oldWritePos := r.writePos
 
 	// Simple write.
-	if r.writePos < r.headPos || r.size-r.writePos >= length {
+	if r.size-r.writePos >= length {
 		copy(r.buffer[r.writePos:], p)
 		r.writePos = (r.writePos + length) % r.size
 	} else {
@@ -74,7 +74,7 @@ func (r *ringBuffer) Write(p []byte) (int, error) {
 	}
 
 	// If we have written past the old head position...
-	if (oldWritePos < r.headPos && r.writePos > r.headPos) || (oldWritePos > r.headPos && r.writePos > r.headPos && oldWritePos-r.headPos > r.writePos-r.headPos) {
+	if (oldWritePos < r.headPos && r.headPos < r.writePos) || (((oldWritePos > r.headPos && r.writePos > r.headPos) || (oldWritePos < r.headPos && r.writePos < r.headPos)) && oldWritePos > r.writePos) {
 		// ...we have overwritten old data, so adjust the head position to where the next char will
 		// be written to.
 		r.headPos = r.writePos

@@ -14,6 +14,16 @@ func getTestData() [][]byte {
 	}
 }
 
+func getFlattenedTestData() []byte {
+	var all []byte
+
+	for _, v := range getTestData() {
+		all = append(all, v...)
+	}
+
+	return all
+}
+
 func TestNewRingBuffer(t *testing.T) {
 	size := 483
 	rb := newRingBuffer(int64(size))
@@ -34,10 +44,7 @@ func TestNewRingBuffer(t *testing.T) {
 func TestRingBuffer_WriteSingleBig(t *testing.T) {
 	size := 379
 
-	var all []byte
-	for _, v := range getTestData() {
-		all = append(all, v...)
-	}
+	all := getFlattenedTestData()
 
 	rb := newRingBuffer(int64(size))
 	rb.Write(all)
@@ -134,5 +141,47 @@ func TestRingBuffer_ReadAfterWrap(t *testing.T) {
 	want := string(all[offset : rSize+offset])
 	if string(p) != want {
 		t.Errorf("\nwant\n '%s'\ngot\n '%s'", want, string(p))
+	}
+}
+
+func TestRingBuffer_WriteWithWritePosLowerThanHeadPosWrap(t *testing.T) {
+	data := []byte("Integer feugiat scelerisque varius morbi enim nunc faucibus a pellentesque.")
+	bufSize := 379
+	p := make([]byte, len(data))
+
+	rb := newRingBuffer(int64(bufSize))
+	rb.Write(getFlattenedTestData()[:bufSize])
+
+	rb.writePos = 360
+	rb.headPos = 370
+
+	rb.Write(data)
+	rb.Read(p)
+	want := " sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Ut enim "
+	got := string(p)
+	if got != want {
+		t.Errorf("\nwant\n '%s'\ngot\n '%s'", want, got)
+	}
+}
+
+func TestRingBuffer_WriteWithWritePosLowerThanHeadPosNoWrap(t *testing.T) {
+	bufSize := 379
+
+	// A buffer holding some data
+	rb := newRingBuffer(int64(bufSize))
+	rb.writePos = 370
+	rb.Write(getTestData()[3])
+	// Simulate overwriting old data while making sure we do not pass our reader head.
+	rb.writePos = 360
+	rb.headPos = 370
+	rb.Write([]byte("Lorem"))
+
+	// Reading should not return the data we just wrote but data that was already in the buffer.
+	p := make([]byte, 9)
+	rb.Read(p)
+	want := "Excepteur"
+	got := string(p)
+	if got != want {
+		t.Errorf("\nwant\n '%s'\ngot\n '%s'", want, got)
 	}
 }
