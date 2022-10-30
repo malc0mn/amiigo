@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"io"
 	"time"
 )
 
@@ -21,21 +22,21 @@ const (
 
 // box represents a ui box element that can display content.
 type box struct {
-	title     string       // The title of the box.
-	r         [][]rune     // The internal render array.
-	s         tcell.Screen // The screen to display the box on.
-	x         int          // The x position to start drawing on.
-	y         int          // The y position to start drawing on.
-	autoX     bool         // When true will calculate the x pos based on the previously drawn box.
-	autoY     bool         // When true will calculate the y pos based on the previously drawn box.
-	widthC    int          // The with in characters of the box.
-	widthP    int          // The with in percent of the box.
-	minWidth  int          // The minimal with of the box.
-	heightC   int          // The height in characters of the box.
-	heightP   int          // The height in percent of the box.
-	minHeight int          // The minimal height of the box.
-	// TODO: use buffers to allow scrolling and preserve content after resize!
-	content chan string // The channel that will receive the box content.
+	title     string        // The title of the box.
+	r         [][]rune      // The internal render array.
+	s         tcell.Screen  // The screen to display the box on.
+	x         int           // The x position to start drawing on.
+	y         int           // The y position to start drawing on.
+	autoX     bool          // When true will calculate the x pos based on the previously drawn box.
+	autoY     bool          // When true will calculate the y pos based on the previously drawn box.
+	widthC    int           // The with in characters of the box.
+	widthP    int           // The with in percent of the box.
+	minWidth  int           // The minimal with of the box.
+	heightC   int           // The height in characters of the box.
+	heightP   int           // The height in percent of the box.
+	minHeight int           // The minimal height of the box.
+	content   chan string   // The channel that will receive the box content.
+	buffer    io.ReadWriter // The buffer holding the box content
 }
 
 // newBox creates a new box struct ready for display on screen by calling box.draw(). newBox also
@@ -54,6 +55,7 @@ func newBox(s tcell.Screen, x, y, width, height int, title, typ string) *box {
 		minWidth:  len([]rune(string(boxTopLeftCorner) + string(boxLineHorizontal) + boxTitleLeft + " " + boxTitleRight + string(boxLineHorizontal) + string(boxTopRightCorner))),
 		minHeight: 5, // nothing to calculate really: top line + margin line + content line + margin line + bottom line
 		content:   make(chan string, 10),
+		buffer:    newRingBuffer(4069),
 	}
 
 	if typ == boxWidthTypePercent {
@@ -111,10 +113,11 @@ func (b *box) height() int {
 }
 
 // destroy destroys a box structure. It will close and nullify the content channel and will nullify
-// the tcell.Screen reference it holds.
+// the buffer and tcell.Screen reference it holds.
 func (b *box) destroy() {
 	close(b.content)
 	b.content = nil
+	b.buffer = nil
 	b.s = nil
 }
 
@@ -122,6 +125,15 @@ func (b *box) destroy() {
 // or box.destroy() is called. It is therefore meant to be executed as a go routine.
 // When the content reaches the end of the box, all content is shifted up one line.
 func (b *box) update() {
+	for s := range b.content {
+		b.buffer.Write([]byte(s))
+
+		b.drawContent()
+	}
+}
+
+// drawContent draws the contents from the buffer inside borders of the box.
+func (b *box) drawContent() {
 	hmargin := 2
 	vmargin := 1
 	marginLeft := b.x + hmargin
@@ -130,43 +142,54 @@ func (b *box) update() {
 	marginBottom := b.y - 1 + b.height() - vmargin
 	hpos := marginLeft
 	vpos := marginTop
-	for s := range b.content {
-		for _, r := range []rune(s) {
-			// Don't render leading spaces.
-			if hpos == marginLeft && r == ' ' {
-				continue
-			}
-			// Handle newlines.
-			if r == '\n' {
-				vpos++
-				hpos = marginLeft
-				continue
-			}
-			b.s.SetContent(hpos, vpos, r, nil, tcell.StyleDefault)
-			hpos++
-			if hpos > marginRight {
-				hpos = marginLeft
-				vpos++
-			}
-			if vpos > marginBottom {
-				for y := marginTop + 1; y <= marginBottom; y++ {
-					// Shift all content up one line.
-					for x := marginLeft; x <= marginRight; x++ {
-						or, _, _, _ := b.s.GetContent(x, y)
-						// Place this rune one line up.
-						b.s.SetContent(x, y-1, or, nil, tcell.StyleDefault)
-					}
-				}
-				// Clear the last line.
-				for x := marginLeft; x <= marginRight; x++ {
-					b.s.SetContent(x, marginBottom, 0, nil, tcell.StyleDefault)
-				}
-				// Stay on the last line
-				vpos = marginBottom
-			}
-		}
-		b.s.Show()
+
+	p := make([]byte, 4069)
+	n, err := b.buffer.Read(p)
+	if err != nil {
+		// TODO: log an error to the yet to be defined main logfile, or output the error in this box?
+		return
 	}
+
+	for _, r := range []rune(string(p[:n])) {
+		// Don't render null bytes
+		if r == rune(0) {
+			continue
+		}
+
+		// Don't render leading spaces.
+		if hpos == marginLeft && r == ' ' {
+			continue
+		}
+		// Handle newlines.
+		if r == '\n' {
+			vpos++
+			hpos = marginLeft
+			continue
+		}
+		b.s.SetContent(hpos, vpos, r, nil, tcell.StyleDefault)
+		hpos++
+		if hpos > marginRight {
+			hpos = marginLeft
+			vpos++
+		}
+		if vpos > marginBottom {
+			for y := marginTop + 1; y <= marginBottom; y++ {
+				// Shift all content up one line.
+				for x := marginLeft; x <= marginRight; x++ {
+					or, _, _, _ := b.s.GetContent(x, y)
+					// Place this rune one line up.
+					b.s.SetContent(x, y-1, or, nil, tcell.StyleDefault)
+				}
+			}
+			// Clear the last line.
+			for x := marginLeft; x <= marginRight; x++ {
+				b.s.SetContent(x, marginBottom, 0, nil, tcell.StyleDefault)
+			}
+			// Stay on the last line
+			vpos = marginBottom
+		}
+	}
+	b.s.Show()
 }
 
 // draw draws a box with title where the 'animated' parameter defines how the box will be drawn.
@@ -174,19 +197,21 @@ func (b *box) update() {
 // below the box.
 func (b *box) draw(animated bool, x, y int) (int, int) {
 	if animated {
-		b.drawAnimated(x, y)
+		b.drawBordersAnimated(x, y)
 	} else {
-		b.drawPlain(x, y)
+		b.drawBordersPlain(x, y)
 	}
+
+	b.drawContent()
 
 	return b.x + len(b.r[0]), b.y + len(b.r)
 }
 
-// drawAnimated does the same as drawPlain but will add animation. This is used when drawing
-// the UI for the first time.
+// drawBordersAnimated does the same as drawBordersPlain but will add animation. This is used when
+// drawing the UI for the first time.
 // x and y should be the x and y position after the horizontal and vertical end of the last box
-// drawn. Will only be used when the box has been set to auto calculate x and/or y
-func (b *box) drawAnimated(x, y int) {
+// drawn. Will only be used when the box has been set to auto calculate x and/or y.
+func (b *box) drawBordersAnimated(x, y int) {
 	b.render()
 	b.setStartXY(x, y)
 	for vpos, l := range b.r {
@@ -202,10 +227,11 @@ func (b *box) drawAnimated(x, y int) {
 	}
 }
 
-// drawPlain draws a full box with title. This is used when redrawing the UI on tcell.EventResize.
+// drawBordersPlain draws a full box with title. This is used when redrawing the UI on
+// tcell.EventResize.
 // x and y should be the x and y position after the horizontal and vertical end of the last box
-// drawn. Will only be used when the box has been set to auto calculate x and/or y
-func (b *box) drawPlain(x, y int) {
+// drawn. Will only be used when the box has been set to auto calculate x and/or y.
+func (b *box) drawBordersPlain(x, y int) {
 	b.render()
 	b.setStartXY(x, y)
 	for vpos, l := range b.r {
