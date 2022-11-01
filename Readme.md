@@ -15,8 +15,8 @@ hardware of one of their PowerSaves products to allow proper API
 authentication.
 
 ## nfcptl
-The `nfcptl` package handles communications with NFC portal devices over USB. it
-depends on the `gousb` package and provides a Client struct that handles the
+The `nfcptl` package handles communications with NFC portal devices over USB.
+It depends on the `gousb` package and provides a Client struct that handles the
 device connection and communications.
 This package can be used fully independently.
 
@@ -40,13 +40,24 @@ NTAG215 as well from the data gathered. 1K MFC tag support is not present yet.
 
 ### Would be cool to also support
 - All amiibo related devices from Datel
-- N2Elite USB reader/writer: from the software manual and by reverse engineering
-the N2Elite desktop app we know this device uses the CP2102 USB to UART bridge
-by Silicon Labs, so the communication will be serial and not USB.
+- N2Elite USB reader/writer: from the software manual and by reverse
+engineering the N2Elite desktop app we know this device uses the CP2102 USB to
+UART bridge by Silicon Labs, so the communication will be serial and not USB.
+**There _is_ a driver for the N2Elite USB portal in the codebase which is
+ported from the original disassembled Windows binary but without access to the
+hardware, chances of this being remotely functional are virtually
+non-existent.**
 
 Ideally hardware access to these devices is needed. Alternatively a full
 wireshark dump of **all** operations would also be helpful.
 **Or just create a pull request yourself!**
+
+## Running tests
+Run the tests by calling `make test`. **Do note that for the `amiibo` package
+you need additional files for the crypto test to succeed.**
+Since these files contain real amiibo data they are unfit for distribution, so
+you need to supply these yourself. See the comments in
+[crypto_test.go](amiibo/crypto_test.go) for the specifics.
 
 ## Credits
 - https://github.com/socram8888/amiitool
