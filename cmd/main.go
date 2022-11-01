@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -35,6 +36,8 @@ func main() {
 		fmt.Printf("%s version %s built on %s\n", exe, version, buildTime)
 		os.Exit(ok)
 	}
+
+	log.SetOutput(logging{log.Writer()})
 
 	tui()
 	fmt.Println("Bye bye!")
