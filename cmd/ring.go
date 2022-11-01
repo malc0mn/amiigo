@@ -5,9 +5,9 @@ import (
 	"sync"
 )
 
-// ringBuffer represents a circular buffer. This ring buffer implementation is blunt and will
-// shamelessly overwrite unread data. It is intended primarily as a buffer for a scrollable text
-// box with limited history.
+// ringBuffer represents a circular buffer. This ring buffer implementation is very specific, blunt
+// and will shamelessly overwrite unread data. It is intended primarily as a buffer for a
+// scrollable text box with limited history.
 type ringBuffer struct {
 	mu       sync.Mutex // Ensure no reading while writing and vice versa.
 	pristine bool       // When true, the buffer has never been written to.
@@ -40,6 +40,7 @@ func (r *ringBuffer) len() int {
 // Write implements io.Writer and writes from p to the ring buffer. This will always overwrite
 // unread data. If unread data has been overwritten, the head position will be adjusted to the
 // last non-overwritten byte.
+// Write is thread safe.
 func (r *ringBuffer) Write(p []byte) (int, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -83,7 +84,11 @@ func (r *ringBuffer) Write(p []byte) (int, error) {
 	return int(length), nil
 }
 
-// Read implements io.Reader and reads from the ring buffer into p.
+// Read implements io.Reader and reads from the ring buffer into p. Consecutive reads may return
+// data that has already been read by a previous call to Read because the head position is
+// preserved after a read. The head position only changes if old data has been overwritten by the
+// Write method.
+// Read is thread safe.
 func (r *ringBuffer) Read(p []byte) (int, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -125,6 +130,5 @@ func (r *ringBuffer) Read(p []byte) (int, error) {
 		copy(p[first:], r.buffer[:last])
 	}
 
-	r.headPos = (r.headPos + readLength) % r.size
 	return int(readLength), nil
 }

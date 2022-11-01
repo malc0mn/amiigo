@@ -62,13 +62,19 @@ func TestRingBuffer_WriteSingleBig(t *testing.T) {
 	}
 }
 
-func TestRingBuffer_WriteLines(t *testing.T) {
+func TestRingBuffer_WriteLinesAndRead(t *testing.T) {
 	size := 379
 	rb := newRingBuffer(int64(size))
 	newLen := 0
+	wantString := ""
 	for _, v := range getTestData() {
 		rb.Write(v)
 
+		wantString += string(v)
+		// The ring buffer drops the oldest content, so we do the same with our expectation.
+		if len(wantString) > size {
+			wantString = wantString[len(wantString)-size:]
+		}
 		newLen += len(v)
 		wantLen := 0
 
@@ -87,32 +93,26 @@ func TestRingBuffer_WriteLines(t *testing.T) {
 			wantLen = size
 		}
 
-		got := rb.len()
-		if got != wantLen {
-			t.Errorf("rb.len(): want %d, got %d", wantLen, got)
+		gotLen := rb.len()
+		if gotLen != wantLen {
+			t.Errorf("rb.len(): want %d, got %d", wantLen, gotLen)
 		}
-	}
-}
 
-func TestRingBuffer_ReadAfterWrite(t *testing.T) {
-	bufSize := 379
-	rSize := 300
-
-	// Read immediately after write should return what was written.
-	rb := newRingBuffer(int64(bufSize))
-	for _, v := range getTestData() {
-		rb.Write(v)
-		p := make([]byte, rSize)
-		i, err := rb.Read(p)
+		p := make([]byte, size)
+		got, err := rb.Read(p)
 		if err != nil {
 			t.Errorf("read error: want nil, got %s", err)
 		}
-		if i != len(v) {
-			t.Errorf("bytes read: want %d, got %d", len(v), i)
+		if got != wantLen {
+			t.Errorf("bytes read: want %d, got %d", wantLen, got)
 		}
-		// Drop the null bytes from the p slice before converting to string!
-		if string(p[:bytes.Index(p, []byte{0})]) != string(v) {
-			t.Errorf("\nwant\n '%s'\ngot\n '%s'", string(v), string(p))
+		gotString := string(p)
+		// Drop any null bytes from the p slice before converting to string!
+		if pos := bytes.Index(p, []byte{0}); pos != -1 {
+			gotString = string(p[:pos])
+		}
+		if gotString != wantString {
+			t.Errorf("\nwant\n '%s'\ngot\n '%s'", wantString, string(p))
 		}
 	}
 }
