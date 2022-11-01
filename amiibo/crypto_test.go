@@ -14,9 +14,10 @@ import (
 )
 
 const (
-	testKeyRetail   = "key_retail.bin"
-	testPlainAmiibo = "plain_amiibo.bin"
-	testRealAmiibo  = "real_amiibo.bin"
+	testKeyRetail           = "key_retail.bin"
+	testPlainAmiibo         = "plain_amiibo.bin"
+	testPlainAmiiboAmiitool = "plain_amiibo_amiitool.bin"
+	testRealAmiibo          = "real_amiibo.bin"
 )
 
 func loadRetailKey(t *testing.T) *RetailKey {
@@ -83,7 +84,7 @@ func TestEncryptAmiibo(t *testing.T) {
 
 func TestEncryptAmiitool(t *testing.T) {
 	want := readFileWithError(t, testRealAmiibo, "failed to load file %s, provide a real amiibo dump for testing")
-	data := readFileWithError(t, "plain_amiibo_amiitool.bin", "failed to load file %s, provide a decrypted amiibo dump for testing")
+	data := readFileWithError(t, testPlainAmiiboAmiitool, "failed to load file %s, provide a decrypted amiibo dump for testing")
 
 	amiitool, err := NewAmiitool(data, nil)
 	if err != nil {
