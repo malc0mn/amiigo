@@ -2,6 +2,16 @@ package main
 
 import "github.com/gdamore/tcell/v2"
 
+// drawer defines the draw method which any ui element should implement.
+// When the 'animated' parameter is set to true, the box must be drawn with animation. When the
+// tcell.Screen is refreshed or resized, 'animated' will be false so that the ui is instantly
+// displayed.
+// The return values must be the first x column to the right side of the element and the first y
+// column below the element.
+type drawer interface {
+	draw(animated bool, x, y int) (int, int)
+}
+
 // tui is the main terminal user interface loop. It sets up a tcell.Screen, draws the UI and
 // handles UI related events.
 func tui() {
@@ -9,7 +19,7 @@ func tui() {
 	ui.draw(true)
 
 	// Connect to the portal when the UI is visible, so it can display the client logs etc.
-	go portal(ui.logBox.content)
+	go portal(ui.logBox.content, ui.imageBox)
 
 	for {
 		ui.show()
@@ -34,9 +44,9 @@ func tui() {
 // ui holds all the user interface components and the screen to render them on.
 type ui struct {
 	s        tcell.Screen
-	boxes    []*box
+	elements []drawer
 	infoBox  *box
-	imageBox *box
+	imageBox *imageBox
 	logBox   *box
 }
 
@@ -45,11 +55,11 @@ func newUi() *ui {
 	s, _ := initScreen()
 	y := logoHeight() + 1
 	info := newBox(s, 1, y, 15, 70, "info", boxWidthTypePercent)
-	image := newBox(s, -1, y, 75, 70, "image", boxWidthTypePercent)
+	image := newImageBox(s, -1, y, 75, 70, "image", boxWidthTypePercent)
 	logs := newBox(s, 1, -1, 90, 20, "logs", boxWidthTypePercent)
 	return &ui{
 		s:        s,
-		boxes:    []*box{info, image, logs},
+		elements: []drawer{info, image, logs},
 		infoBox:  info,
 		imageBox: image,
 		logBox:   logs,
@@ -64,7 +74,7 @@ func (u *ui) draw(animate bool) {
 	drawLogo(u.s, x, 0, animate)
 	nextX := -1
 	nextY := 0
-	for _, b := range u.boxes {
+	for _, b := range u.elements {
 		// nextX+1 to have a vertical margin of one char.
 		nextX, nextY = b.draw(animate, nextX+1, nextY)
 	}

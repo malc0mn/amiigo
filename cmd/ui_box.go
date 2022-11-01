@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gdamore/tcell/v2"
 	"io"
+	"strings"
 	"time"
 )
 
@@ -126,6 +127,9 @@ func (b *box) destroy() {
 // When the content reaches the end of the box, all content is shifted up one line.
 func (b *box) update() {
 	for s := range b.content {
+		if !strings.HasSuffix(s, "\n") {
+			s += "\n"
+		}
 		b.buffer.Write([]byte(s))
 
 		b.drawContent()
