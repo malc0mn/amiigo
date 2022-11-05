@@ -18,7 +18,7 @@ authentication.
 The `nfcptl` package handles communications with NFC portal devices over USB.
 It depends on the `gousb` package and provides a Client struct that handles the
 device connection and communications.
-This package can be used fully independently.
+This package can be used fully independently. ([See](#setting-udev-permissions))
 
 ### Supported devices
 - Datel's *PowerSaves for Amiibo*
@@ -51,6 +51,54 @@ non-existent.**
 Ideally hardware access to these devices is needed. Alternatively a full
 wireshark dump of **all** operations would also be helpful.
 **Or just create a pull request yourself!**
+
+## Setting udev permissions
+Since the [nfcptl](#nfcptl) package uses `libusb`, you will need to add udev rules to
+allow non-root execution.
+
+Create a new file under `/etc/udev/rules.d`, maybe name it `99-amiigo.rules` so
+you'll remember where it comes from in a few years time ;-).
+
+Add the correct rules for your device(s).
+
+#### PowerSaves for Amiibo
+```txt
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1c1a", ATTRS{idProduct}=="03d9", MODE="0660", TAG+="uaccess"
+```
+
+#### Maxlander
+```txt
+SUBSYSTEM=="usb", ATTRS{idVendor}=="5c60", ATTRS{idProduct}=="dead", MODE="0660", TAG+="uaccess"
+```
+
+#### N2Elite
+```txt
+SUBSYSTEM=="usb", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE="0660", TAG+="uaccess"
+```
+
+Save the file and reload the rules: `sudo udevadm control --reload`
+
+You could also allow **all** USB device access, which would be done like so:
+```txt
+SUBSYSTEM=="usb", MODE="0660", TAG+="uaccess"
+```
+
+### Debugging udev rules
+If you are having trouble getting the rules to work, try running the udev event
+monitor like this: `sudo udevadm monitor --environment --udev`.
+Your terminal will now show something along the lines of:
+
+```txt
+monitor will print the received events for:
+UDEV - the event which udev sends out after rule processing
+```
+
+Now plug in your NFC portal and take a look at the output. Just like Alice,
+start at the beginning.
+Ensure that you are using the correct vendor and product IDs **in the correct**
+case as they are printed!
+When your rules are matched correctly, you should see that `TAGS` and/or
+`CURRENT_TAGS` contains the `uaccess` tag as set in the rules.
 
 ## Running tests
 Run the tests by calling `make test`. **Do note that for the `amiibo` package
