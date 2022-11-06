@@ -1,0 +1,19 @@
+{
+  "AmiiboSeries": "Animal Crossing",
+  "Character": "Del",
+  "GameSeries": "Animal Crossing",
+  "Games3DS": null,
+  "GamesSwitch": null,
+  "GamesWiiU": null,
+  "Head": "02c70001",
+  "Image": "https://raw.githubusercontent.com/N3evin/AmiiboAPI/master/images/icon_02c70001-01220502.png",
+  "Name": "Del",
+  "Release": {
+    "au": "2016-03-19",
+    "eu": "2016-03-18",
+    "jp": "2016-01-14",
+    "na": "2016-03-18"
+  },
+  "Tail": "01220502",
+  "Type": "Card"
+}

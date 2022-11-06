@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"reflect"
+	"regexp"
 	"strings"
 	"unicode"
 )
@@ -17,11 +18,30 @@ type AmiiboAPI struct {
 	baseUrl string
 }
 
-// GetAmiiboInfo returns an AmiiboList struct enumerated with AmiiboInfo structs depending on the
-// query sent to the API by means of the AmiiboInfoRequest struct.
+// GetAmiiboInfoById returns an *AmiiboInfo struct for the given amiibo ID.
+func (aa *AmiiboAPI) GetAmiiboInfoById(id string) (*AmiiboInfo, error) {
+	r := regexp.MustCompile("^(?i)[0-9a-f]{16}$")
+	if !r.MatchString(id) {
+		return nil, errors.New("invalid id")
+	}
+
+	b, err := aa.doAmiiboInfoCall(&AmiiboInfoRequest{Id: id})
+	if err != nil {
+		return nil, err
+	}
+
+	return NewAmiiboInfo(b)
+}
+
+// GetAmiiboInfo returns an *AmiiboInfo slice depending on the query sent to the API by means of the
+// AmiiboInfoRequest struct.
 // Pass nil if you want to get a full list.
 func (aa *AmiiboAPI) GetAmiiboInfo(ar *AmiiboInfoRequest) ([]*AmiiboInfo, error) {
-	b, err := aa.doGetRequest("/api/amiibo/", ar, addKeyValParams)
+	if ar != nil && ar.Id != "" {
+		return nil, errors.New("use the GetAmiiboInfoById call to query by ID")
+	}
+
+	b, err := aa.doAmiiboInfoCall(ar)
 	if err != nil {
 		return nil, err
 	}
@@ -89,6 +109,15 @@ func (aa *AmiiboAPI) GetLastUpdated() (string, error) {
 	}
 
 	return d.LastUpdated, nil
+}
+
+func (aa *AmiiboAPI) doAmiiboInfoCall(ar *AmiiboInfoRequest) ([]byte, error) {
+	b, err := aa.doGetRequest("/api/amiibo/", ar, addKeyValParams)
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
 }
 
 func (aa *AmiiboAPI) doGetRequest(path string, q interface{}, qh queryHandler) ([]byte, error) {

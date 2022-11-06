@@ -1,0 +1,18 @@
+{
+  "amiibo": {
+    "amiiboSeries": "Animal Crossing",
+    "character": "Del",
+    "gameSeries": "Animal Crossing",
+    "head": "02c70001",
+    "image": "https://raw.githubusercontent.com/N3evin/AmiiboAPI/master/images/icon_02c70001-01220502.png",
+    "name": "Del",
+    "release": {
+      "au": "2016-03-19",
+      "eu": "2016-03-18",
+      "jp": "2016-01-14",
+      "na": "2016-03-18"
+    },
+    "tail": "01220502",
+    "type": "Card"
+  }
+}

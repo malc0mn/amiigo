@@ -36,6 +36,18 @@ type GameInfo struct {
 	GameName string
 }
 
+// NewAmiiboInfo creates a new AmiiboInfo struct given raw JSON data.
+func NewAmiiboInfo(data []byte) (*AmiiboInfo, error) {
+	ai := &struct {
+		Amiibo *AmiiboInfo
+	}{}
+	if err := json.Unmarshal(data, ai); err != nil {
+		return nil, err
+	}
+
+	return ai.Amiibo, nil
+}
+
 // NewAmiiboInfoList creates a new AmiiboInfo slice given raw JSON data.
 func NewAmiiboInfoList(data []byte) ([]*AmiiboInfo, error) {
 	ai := &struct {

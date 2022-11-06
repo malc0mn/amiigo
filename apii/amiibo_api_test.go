@@ -35,6 +35,46 @@ func assertResponse(t *testing.T, file string, res interface{}) {
 		fmt.Println("--------------------------------------------- end want ---------------------------------------------")
 	}
 }
+func TestAmiiboAPI_GetAmiiboInfoByWrongId(t *testing.T) {
+	a := NewAmiiboAPI(&http.Client{}, "http://example.com")
+
+	tests := []string{
+		"",
+		"0",
+		"1010000000e0002",   // too short
+		"a1010000000e00025", // too long
+		"01010000000g0002",  // wrong char lowercase
+		"0G010000000e0002",  // wrong char uppercase
+	}
+
+	for _, id := range tests {
+		_, err := a.GetAmiiboInfoById(id)
+		want := "invalid id"
+		if err.Error() != want {
+			t.Errorf("%s -- got %s, want %s", id, err, want)
+		}
+	}
+}
+
+func TestAmiiboAPI_GetAmiiboInfoById(t *testing.T) {
+	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
+		assertRequest(t, req, "http://example.com/api/amiibo/?id=02c7000101220502", "GET")
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       fromFile(t, "aa_amiibo_single.json"),
+		}
+	}), "http://example.com")
+
+	ai, err := a.GetAmiiboInfoById("02c7000101220502")
+	if err != nil {
+		t.Errorf("got %s, want nil", err)
+	}
+	if ai == nil {
+		t.Errorf("got %v, want AmiiboInfo", ai)
+	}
+
+	assertResponse(t, "aa_amiibo_single_processed.json", ai)
+}
 
 func TestAmiiboAPI_GetAmiiboInfo(t *testing.T) {
 	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
@@ -56,9 +96,19 @@ func TestAmiiboAPI_GetAmiiboInfo(t *testing.T) {
 	assertResponse(t, "aa_amiibo_list_processed.json", ai)
 }
 
-func TestAmiiboAPI_GetAmiiboInfoWitParams(t *testing.T) {
+func TestAmiiboAPI_GetAmiiboInfoWithIdParam(t *testing.T) {
+	a := NewAmiiboAPI(&http.Client{}, "http://example.com")
+
+	_, err := a.GetAmiiboInfo(&AmiiboInfoRequest{Id: "01010000000e0002"})
+	want := "use the GetAmiiboInfoById call to query by ID"
+	if err.Error() != want {
+		t.Errorf("got %s, want %s", err, want)
+	}
+}
+
+func TestAmiiboAPI_GetAmiiboInfoWithParams(t *testing.T) {
 	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
-		assertRequest(t, req, "http://example.com/api/amiibo/?amiiboSeries=BoxBoy%21&character=0x1996&gameseries=Chibi+Robo&head=01010000&id=01010000000e0002&name=zelda&tail=000e0002&type=0x02&showgames&showusage", "GET")
+		assertRequest(t, req, "http://example.com/api/amiibo/?amiiboSeries=BoxBoy%21&character=0x1996&gameseries=Chibi+Robo&head=01010000&name=zelda&tail=000e0002&type=0x02&showgames&showusage", "GET")
 		return &http.Response{
 			StatusCode: http.StatusOK,
 			Body:       emptyBody(),
@@ -67,7 +117,6 @@ func TestAmiiboAPI_GetAmiiboInfoWitParams(t *testing.T) {
 
 	ai, err := a.GetAmiiboInfo(&AmiiboInfoRequest{
 		Name:         "zelda",
-		Id:           "01010000000e0002",
 		Head:         "01010000",
 		Tail:         "000e0002",
 		Type:         "0x02",
@@ -85,7 +134,7 @@ func TestAmiiboAPI_GetAmiiboInfoWitParams(t *testing.T) {
 	}
 }
 
-func TestAmiiboAPI_GetAmiiboInfoWitBoolParams(t *testing.T) {
+func TestAmiiboAPI_GetAmiiboInfoWithBoolParams(t *testing.T) {
 	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
 		assertRequest(t, req, "http://example.com/api/amiibo/?showgames&showusage", "GET")
 		return &http.Response{
