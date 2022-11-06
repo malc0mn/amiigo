@@ -40,13 +40,13 @@ func createCacheDirs() error {
 
 	// TODO: can we do this in a loop?
 	full := path.Join(cacheBase, cacheImgDir)
-	if err := os.Mkdir(full, 0700); err != nil {
+	if err := os.MkdirAll(full, 0700); err != nil {
 		return err
 	}
 	cacheImages = full
 
 	full = path.Join(cacheBase, cacheApiDir)
-	if err := os.Mkdir(full, 0700); err != nil {
+	if err := os.MkdirAll(full, 0700); err != nil {
 		return err
 	}
 	cacheApi = full

@@ -39,7 +39,12 @@ func main() {
 
 	log.SetOutput(logging{log.Writer()})
 
+	if err := createCacheDirs(); err != nil {
+		fmt.Printf("Error creating caching directories: %s\n", err)
+		os.Exit(errGeneral)
+	}
 	tui()
+
 	fmt.Println("Bye bye!")
 	os.Exit(ok)
 }
