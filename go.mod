@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/gdamore/tcell/v2 v2.4.0
+	github.com/go-ini/ini v1.67.0
 	github.com/google/gousb v1.1.1
 	github.com/pkg/term v1.1.0
 	github.com/qeesung/image2ascii v1.0.1

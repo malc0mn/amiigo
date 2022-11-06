@@ -37,6 +37,13 @@ func main() {
 		os.Exit(ok)
 	}
 
+	if cFile != "" {
+		if err := loadConfig(); err != nil {
+			fmt.Fprintf(os.Stderr, "Error opening config file - %s\n", err)
+			os.Exit(errOpenConfig)
+		}
+	}
+
 	log.SetOutput(logging{log.Writer()})
 
 	if err := createCacheDirs(); err != nil {
