@@ -50,7 +50,7 @@ func TestAmiiboAPI_GetAmiiboInfoByWrongId(t *testing.T) {
 	for _, id := range tests {
 		_, err := a.GetAmiiboInfoById(id)
 		want := "invalid id"
-		if err.Error() != want {
+		if err == nil || err.Error() != want {
 			t.Errorf("%s -- got %s, want %s", id, err, want)
 		}
 	}
@@ -101,7 +101,7 @@ func TestAmiiboAPI_GetAmiiboInfoWithIdParam(t *testing.T) {
 
 	_, err := a.GetAmiiboInfo(&AmiiboInfoRequest{Id: "01010000000e0002"})
 	want := "use the GetAmiiboInfoById call to query by ID"
-	if err.Error() != want {
+	if err == nil || err.Error() != want {
 		t.Errorf("got %s, want %s", err, want)
 	}
 }
