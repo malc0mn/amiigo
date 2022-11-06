@@ -41,7 +41,7 @@ func TestPowerSavesAPI_GetSettings(t *testing.T) {
 	a := NewPowerSavesAPI(newTestClient(func(req *http.Request) *http.Response {
 		assertRequest(t, req, "http://settings.powersaves.net/psa/settings.xml", "GET")
 		return &http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       fromFile(t, "ps_settings.xml"),
 		}
 	}))
@@ -59,7 +59,7 @@ func TestPowerSavesAPI_GetCodelist(t *testing.T) {
 	a := NewPowerSavesAPI(newTestClient(func(req *http.Request) *http.Response {
 		assertRequest(t, req, "http://settings.powersaves.net/psa/codelist.xml", "GET")
 		return &http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       fromFile(t, "ps_codelist.xml"),
 		}
 	}))
@@ -77,7 +77,7 @@ func TestPowerSavesAPI_GetAuthorization(t *testing.T) {
 	a := NewPowerSavesAPI(newTestClient(func(req *http.Request) *http.Response {
 		assertRequest(t, req, "https://psaapp.powersaves.net/api/Authorisation", "GET")
 		return &http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       fromFile(t, "ps_authorisation.xml"),
 		}
 	}))
@@ -144,7 +144,7 @@ func TestPowerSavesAPI_PostCheat(t *testing.T) {
 		}
 
 		return &http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       fromFile(t, "ps_authorisation.xml"), // Return body not important in this test
 		}
 	}))

@@ -40,7 +40,7 @@ func TestAmiiboAPI_GetAmiiboInfo(t *testing.T) {
 	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
 		assertRequest(t, req, "http://example.com/api/amiibo/", "GET")
 		return &http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       fromFile(t, "aa_amiibo_list.json"),
 		}
 	}), "http://example.com")
@@ -60,7 +60,7 @@ func TestAmiiboAPI_GetAmiiboInfoWitParams(t *testing.T) {
 	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
 		assertRequest(t, req, "http://example.com/api/amiibo/?amiiboSeries=BoxBoy%21&character=0x1996&gameseries=Chibi+Robo&head=01010000&id=01010000000e0002&name=zelda&tail=000e0002&type=0x02&showgames&showusage", "GET")
 		return &http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       emptyBody(),
 		}
 	}), "http://example.com")
@@ -89,7 +89,7 @@ func TestAmiiboAPI_GetAmiiboInfoWitBoolParams(t *testing.T) {
 	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
 		assertRequest(t, req, "http://example.com/api/amiibo/?showgames&showusage", "GET")
 		return &http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       emptyBody(),
 		}
 	}), "http://example.com")
@@ -110,7 +110,7 @@ func TestAmiiboAPI_GetType(t *testing.T) {
 	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
 		assertRequest(t, req, "http://example.com/api/type", "GET")
 		return &http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       fromFile(t, "aa_type_list.json"),
 		}
 	}), "http://example.com")
@@ -130,7 +130,7 @@ func TestAmiiboAPI_GetTypeWithParams(t *testing.T) {
 	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
 		assertRequest(t, req, "http://example.com/api/type?key=0x01", "GET")
 		return &http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       emptyBody(),
 		}
 	}), "http://example.com")
@@ -148,7 +148,7 @@ func TestAmiiboAPI_GetTypeWithNameParam(t *testing.T) {
 	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
 		assertRequest(t, req, "http://example.com/api/type?name=Card", "GET")
 		return &http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       emptyBody(),
 		}
 	}), "http://example.com")
@@ -166,7 +166,7 @@ func TestAmiiboAPI_GetGameSeries(t *testing.T) {
 	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
 		assertRequest(t, req, "http://example.com/api/gameseries", "GET")
 		return &http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       fromFile(t, "aa_gameseries_list.json"),
 		}
 	}), "http://example.com")
@@ -186,7 +186,7 @@ func TestAmiiboAPI_GetAmiiboSeries(t *testing.T) {
 	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
 		assertRequest(t, req, "http://example.com/api/amiiboseries", "GET")
 		return &http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       fromFile(t, "aa_amiiboseries_list.json"),
 		}
 	}), "http://example.com")
@@ -206,7 +206,7 @@ func TestAmiiboAPI_GetCharacter(t *testing.T) {
 	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
 		assertRequest(t, req, "http://example.com/api/character", "GET")
 		return &http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       fromFile(t, "aa_character_list.json"),
 		}
 	}), "http://example.com")
@@ -226,7 +226,7 @@ func TestAmiiboAPI_GetLastUpdated(t *testing.T) {
 	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
 		assertRequest(t, req, "http://example.com/api/lastupdated", "GET")
 		return &http.Response{
-			StatusCode: 200,
+			StatusCode: http.StatusOK,
 			Body:       stringBody("{\"lastUpdated\": \"2019-03-18T16:34:10.688417\"}"),
 		}
 	}), "http://example.com")
