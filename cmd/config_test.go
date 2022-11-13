@@ -19,6 +19,11 @@ func TestDefaultConfig(t *testing.T) {
 	if conf.cacheDir != want {
 		t.Errorf("conf.cacheDir = %s; want %s", conf.cacheDir, want)
 	}
+
+	want = "https://www.amiiboapi.com"
+	if conf.amiiboApiBaseUrl != want {
+		t.Errorf("conf.amiiboApiBaseUrl = %s; want %s", conf.amiiboApiBaseUrl, want)
+	}
 }
 
 func TestLoadconfigOk(t *testing.T) {
@@ -38,6 +43,11 @@ func TestLoadconfigOk(t *testing.T) {
 	want = "/some/test/dir"
 	if conf.cacheDir != want {
 		t.Errorf("conf.cacheDir = %s; want %s", conf.cacheDir, want)
+	}
+
+	want = "https://example.com/api"
+	if conf.amiiboApiBaseUrl != want {
+		t.Errorf("conf.amiiboApiBaseUrl = %s; want %s", conf.amiiboApiBaseUrl, want)
 	}
 }
 

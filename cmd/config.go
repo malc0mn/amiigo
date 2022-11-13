@@ -15,6 +15,8 @@ type config struct {
 	// with a leading forward slash ("/"), it will be stored in the current users home directory.
 	// It defaults to "~/.cache".
 	cacheDir string
+	// amiamiiboApiBaseUrl
+	amiiboApiBaseUrl string
 }
 
 const (
@@ -22,12 +24,15 @@ const (
 	defaultVendor = nfcptl.VendorDatelElextronicsLtd
 	// defaultDevice is the default device alias to use for vendor ID lookup
 	defaultDevice = nfcptl.ProductPowerSavesForAmiibo
+	// defaultAmiiboApiBaseUrl is the default base url of the open Amiibo HTTP API.
+	defaultAmiiboApiBaseUrl = "https://www.amiiboapi.com"
 )
 
 var conf = &config{
-	vendor:   defaultVendor,
-	device:   defaultDevice,
-	cacheDir: cacheDir,
+	vendor:           defaultVendor,
+	device:           defaultDevice,
+	cacheDir:         cacheDir,
+	amiiboApiBaseUrl: defaultAmiiboApiBaseUrl,
 }
 
 func loadConfig() error {
@@ -45,6 +50,9 @@ func loadConfig() error {
 		}
 		if k, err := i.GetKey("device"); err == nil {
 			conf.device = k.String()
+		}
+		if k, err := i.GetKey("amiibo_api_base_url"); err == nil {
+			conf.amiiboApiBaseUrl = k.String()
 		}
 	}
 
