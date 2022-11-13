@@ -106,6 +106,7 @@ you need additional files for the crypto test to succeed.**
 Since these files contain real amiibo data they are unfit for distribution, so
 you need to supply these yourself. See the comments in
 [crypto_test.go](amiibo/crypto_test.go) for the specifics.
+Executing `make testv` will run the tests in verbose mode.
 
 ## Credits
 - https://github.com/socram8888/amiitool

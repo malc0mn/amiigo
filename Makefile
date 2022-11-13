@@ -17,6 +17,10 @@ amiigo:
 test:
 	go test ./...
 
+.PHONY: testv
+testv:
+	go test -v ./...
+
 .PHONY: install
 install:
 	cd cmd; GOBIN=/usr/local/bin/ go install ${LDFLAGS}
