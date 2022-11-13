@@ -21,6 +21,12 @@ const (
 	boxWidthTypeCharacter = "character"
 )
 
+// cell represents a single ui box content cell having a rune and a tcell.Style
+type cell struct {
+	r rune
+	s tcell.Style
+}
+
 // box represents a ui box element that can display content.
 type box struct {
 	title     string        // The title of the box.
