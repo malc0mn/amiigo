@@ -31,8 +31,8 @@ func (l *logging) Write(p []byte) (int, error) {
 }
 
 func (l *logging) Close() error {
-	if _, isFile := l.w.(io.WriteCloser); isFile {
-		defer l.w.(io.WriteCloser).Close()
+	if _, isCloser := l.w.(io.Closer); isCloser {
+		defer l.w.(io.Closer).Close()
 	}
 	return nil
 }
