@@ -49,9 +49,9 @@ func NewAmiiboInfo(data []byte) (*AmiiboInfo, error) {
 }
 
 // NewAmiiboInfoList creates a new AmiiboInfo slice given raw JSON data.
-func NewAmiiboInfoList(data []byte) ([]*AmiiboInfo, error) {
+func NewAmiiboInfoList(data []byte) ([]AmiiboInfo, error) {
 	ai := &struct {
-		Amiibo []*AmiiboInfo
+		Amiibo []AmiiboInfo
 	}{}
 	if err := json.Unmarshal(data, ai); err != nil {
 		return nil, err

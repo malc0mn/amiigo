@@ -8,9 +8,9 @@ type Character struct {
 }
 
 // NewCharacterList creates a new Character slice given raw JSON data.
-func NewCharacterList(data []byte) ([]*Character, error) {
+func NewCharacterList(data []byte) ([]Character, error) {
 	ai := &struct {
-		Amiibo []*Character
+		Amiibo []Character
 	}{}
 	if err := json.Unmarshal(data, ai); err != nil {
 		return nil, err

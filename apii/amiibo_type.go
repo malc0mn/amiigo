@@ -8,9 +8,9 @@ type Type struct {
 }
 
 // NewTypeList creates a new Type slice given raw JSON data.
-func NewTypeList(data []byte) ([]*Type, error) {
+func NewTypeList(data []byte) ([]Type, error) {
 	ai := &struct {
-		Amiibo []*Type
+		Amiibo []Type
 	}{}
 	if err := json.Unmarshal(data, ai); err != nil {
 		return nil, err

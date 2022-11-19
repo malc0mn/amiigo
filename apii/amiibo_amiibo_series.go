@@ -8,9 +8,9 @@ type AmiiboSeries struct {
 }
 
 // NewAmiiboSeriesList creates a new AmiiboSeries slice given raw JSON data.
-func NewAmiiboSeriesList(data []byte) ([]*AmiiboSeries, error) {
+func NewAmiiboSeriesList(data []byte) ([]AmiiboSeries, error) {
 	ai := &struct {
-		Amiibo []*AmiiboSeries
+		Amiibo []AmiiboSeries
 	}{}
 	if err := json.Unmarshal(data, ai); err != nil {
 		return nil, err

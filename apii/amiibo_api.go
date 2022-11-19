@@ -36,7 +36,7 @@ func (aa *AmiiboAPI) GetAmiiboInfoById(id string) (*AmiiboInfo, error) {
 // GetAmiiboInfo returns an *AmiiboInfo slice depending on the query sent to the API by means of the
 // AmiiboInfoRequest struct.
 // Pass nil if you want to get a full list.
-func (aa *AmiiboAPI) GetAmiiboInfo(ar *AmiiboInfoRequest) ([]*AmiiboInfo, error) {
+func (aa *AmiiboAPI) GetAmiiboInfo(ar *AmiiboInfoRequest) ([]AmiiboInfo, error) {
 	if ar != nil && ar.Id != "" {
 		return nil, errors.New("use the GetAmiiboInfoById call to query by ID")
 	}
@@ -49,7 +49,7 @@ func (aa *AmiiboAPI) GetAmiiboInfo(ar *AmiiboInfoRequest) ([]*AmiiboInfo, error)
 	return NewAmiiboInfoList(b)
 }
 
-func (aa *AmiiboAPI) GetType(kn *KeyNameRequest) ([]*Type, error) {
+func (aa *AmiiboAPI) GetType(kn *KeyNameRequest) ([]Type, error) {
 	b, err := aa.doGetRequest("/api/type", kn, addKeyNameFilter)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func (aa *AmiiboAPI) GetType(kn *KeyNameRequest) ([]*Type, error) {
 	return NewTypeList(b)
 }
 
-func (aa *AmiiboAPI) GetGameSeries(kn *KeyNameRequest) ([]*GameSeries, error) {
+func (aa *AmiiboAPI) GetGameSeries(kn *KeyNameRequest) ([]GameSeries, error) {
 	b, err := aa.doGetRequest("/api/gameseries", kn, addKeyNameFilter)
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func (aa *AmiiboAPI) GetGameSeries(kn *KeyNameRequest) ([]*GameSeries, error) {
 	return NewGameSeriesList(b)
 }
 
-func (aa *AmiiboAPI) GetAmiiboSeries(kn *KeyNameRequest) ([]*AmiiboSeries, error) {
+func (aa *AmiiboAPI) GetAmiiboSeries(kn *KeyNameRequest) ([]AmiiboSeries, error) {
 	b, err := aa.doGetRequest("/api/amiiboseries", kn, addKeyNameFilter)
 	if err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ func (aa *AmiiboAPI) GetAmiiboSeries(kn *KeyNameRequest) ([]*AmiiboSeries, error
 	return NewAmiiboSeriesList(b)
 }
 
-func (aa *AmiiboAPI) GetCharacter(kn *KeyNameRequest) ([]*Character, error) {
+func (aa *AmiiboAPI) GetCharacter(kn *KeyNameRequest) ([]Character, error) {
 	b, err := aa.doGetRequest("/api/character", kn, addKeyNameFilter)
 	if err != nil {
 		return nil, err
