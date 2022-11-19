@@ -3,7 +3,7 @@ package apii
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"reflect"
 	"regexp"
@@ -95,7 +95,7 @@ func (aa *AmiiboAPI) GetLastUpdated() (string, error) {
 		return "", errors.New(resp.Status)
 	}
 
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
@@ -140,7 +140,7 @@ func (aa *AmiiboAPI) doGetRequest(path string, q interface{}, qh queryHandler) (
 		return nil, errors.New(resp.Status)
 	}
 
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}

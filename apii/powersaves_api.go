@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"io"
-	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 )
@@ -26,7 +25,7 @@ func (ps *PowerSavesAPI) GetSettings() (*Settings, error) {
 		return nil, errors.New(resp.Status)
 	}
 
-	s, err := ioutil.ReadAll(resp.Body)
+	s, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +46,7 @@ func (ps *PowerSavesAPI) GetCodelist(s *Settings) (*CheatList, error) {
 		return nil, errors.New(resp.Status)
 	}
 
-	cl, err := ioutil.ReadAll(resp.Body)
+	cl, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +68,7 @@ func (ps *PowerSavesAPI) GetAuthorization(s *Settings) (*VerifyResponse, error) 
 		return nil, errors.New(resp.Status)
 	}
 
-	vr, err := ioutil.ReadAll(resp.Body)
+	vr, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
