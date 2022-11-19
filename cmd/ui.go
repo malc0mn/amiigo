@@ -12,35 +12,6 @@ type drawer interface {
 	draw(animated bool, x, y int) (int, int)
 }
 
-// tui is the main terminal user interface loop. It sets up a tcell.Screen, draws the UI and
-// handles UI related events.
-func tui() {
-	ui := newUi()
-	ui.draw(true)
-
-	// Connect to the portal when the UI is visible, so it can display the client logs etc.
-	go portal(ui.logBox.content, ui.imageBox)
-
-	for {
-		ui.show()
-
-		ev := ui.pollEvent()
-		switch ev := ev.(type) {
-		case *tcell.EventResize:
-			ui.sync()
-		case *tcell.EventKey:
-			switch {
-			case ev.Key() == tcell.KeyEscape || ev.Key() == tcell.KeyCtrlC:
-				ui.destroy()
-				close(quit)
-				return
-			case ev.Key() == tcell.KeyCtrlL:
-				ui.sync()
-			}
-		}
-	}
-}
-
 // ui holds all the user interface components and the screen to render them on.
 type ui struct {
 	s        tcell.Screen
@@ -48,22 +19,6 @@ type ui struct {
 	infoBox  *box
 	imageBox *imageBox
 	logBox   *box
-}
-
-// newUi create a new ui structure.
-func newUi() *ui {
-	s, _ := initScreen()
-	y := logoHeight() + 1
-	info := newBox(s, 1, y, 15, 70, "info", boxWidthTypePercent)
-	image := newImageBox(s, -1, y, 75, 70, "image", boxWidthTypePercent)
-	logs := newBox(s, 1, -1, 90, 20, "logs", boxWidthTypePercent)
-	return &ui{
-		s:        s,
-		elements: []drawer{info, image, logs},
-		infoBox:  info,
-		imageBox: image,
-		logBox:   logs,
-	}
 }
 
 // draw draws the entire user interface.
@@ -100,4 +55,50 @@ func (u *ui) pollEvent() tcell.Event {
 // destroy destroys the UI cleanly.
 func (u *ui) destroy() {
 	u.s.Fini()
+}
+
+// newUi create a new ui structure.
+func newUi() *ui {
+	s, _ := initScreen()
+	y := logoHeight() + 1
+	info := newBox(s, 1, y, 15, 70, "info", boxWidthTypePercent)
+	image := newImageBox(s, -1, y, 75, 70, "image", boxWidthTypePercent)
+	logs := newBox(s, 1, -1, 90, 20, "logs", boxWidthTypePercent)
+	return &ui{
+		s:        s,
+		elements: []drawer{info, image, logs},
+		infoBox:  info,
+		imageBox: image,
+		logBox:   logs,
+	}
+}
+
+// tui is the main terminal user interface loop. It sets up a tcell.Screen, draws the UI and
+// handles UI related events.
+func tui(conf *config) {
+	u := newUi()
+	u.draw(true)
+
+	// Connect to the portal when the UI is visible, so it can display the client logs etc.
+	ptl := newPortal(u.logBox.content, u.imageBox, conf.amiiboApiBaseUrl)
+	go ptl.listen(conf)
+
+	for {
+		u.show()
+
+		ev := u.pollEvent()
+		switch e := ev.(type) {
+		case *tcell.EventResize:
+			u.sync()
+		case *tcell.EventKey:
+			switch {
+			case e.Key() == tcell.KeyEscape || e.Key() == tcell.KeyCtrlC:
+				u.destroy()
+				close(quit)
+				return
+			case e.Key() == tcell.KeyCtrlL:
+				u.sync()
+			}
+		}
+	}
 }

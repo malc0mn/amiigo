@@ -7,15 +7,17 @@ import (
 
 // config holds all the active settings
 type config struct {
-	// vendor is the vendor alias of the USB device to connect to
+	// vendor is the vendor alias of the USB device to connect to.
 	vendor string
-	// device is the product alias of the USB device to connect to
+	// device is the product alias of the USB device to connect to.
 	device string
 	// cacheDir is the path to the directory where data will be cached. If the path does not start
 	// with a leading forward slash ("/"), it will be stored in the current users home directory.
 	// It defaults to "~/.cache".
 	cacheDir string
-	// amiamiiboApiBaseUrl
+	// logFile is file path to write logs to. When set to an empty string, logs will be discarded.
+	logFile string
+	// amiiboApiBaseUrl is the base url for the open amiibo API by n3evin.
 	amiiboApiBaseUrl string
 }
 
@@ -32,6 +34,7 @@ var conf = &config{
 	vendor:           defaultVendor,
 	device:           defaultDevice,
 	cacheDir:         cacheDir,
+	logFile:          defaultLogFile,
 	amiiboApiBaseUrl: defaultAmiiboApiBaseUrl,
 }
 
@@ -44,6 +47,9 @@ func loadConfig() error {
 	if i, err := f.GetSection(""); err == nil {
 		if k, err := i.GetKey("cache_dir"); err == nil {
 			conf.cacheDir = k.String()
+		}
+		if k, err := i.GetKey("log_file"); err == nil {
+			conf.logFile = k.String()
 		}
 		if k, err := i.GetKey("vendor"); err == nil {
 			conf.vendor = k.String()

@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/gdamore/tcell/v2"
 	"io"
-	"strings"
 	"time"
 )
 
@@ -19,6 +18,9 @@ const (
 
 	boxWidthTypePercent   = "percent"
 	boxWidthTypeCharacter = "character"
+
+	cellSize      = 28 // size of a single cell
+	boxBufferSize = 4350 * cellSize
 )
 
 // cell represents a single ui box content cell having a rune and a tcell.Style
@@ -42,7 +44,7 @@ type box struct {
 	heightC   int           // The height in characters of the box.
 	heightP   int           // The height in percent of the box.
 	minHeight int           // The minimal height of the box.
-	content   chan string   // The channel that will receive the box content.
+	content   chan []byte   // The channel that will receive the box content.
 	buffer    io.ReadWriter // The buffer holding the box content
 }
 
@@ -51,6 +53,8 @@ type box struct {
 // Passing -1 as x and/or y value will ensure the box is automatically positioned after the previous
 // box in the set of drawn boxes.
 // Type can be boxWidthTypePercent or boxWidthTypeCharacter
+// If the given with and/or height in combination with boxWidthTypeCharacter is smaller than the
+// minWidth or minHeight, they will be ignored and set to the minimal values.
 func newBox(s tcell.Screen, x, y, width, height int, title, typ string) *box {
 	b := &box{
 		title:     title,
@@ -59,18 +63,26 @@ func newBox(s tcell.Screen, x, y, width, height int, title, typ string) *box {
 		y:         y,
 		autoX:     x == -1,
 		autoY:     y == -1,
-		minWidth:  len([]rune(string(boxTopLeftCorner) + string(boxLineHorizontal) + boxTitleLeft + " " + boxTitleRight + string(boxLineHorizontal) + string(boxTopRightCorner))),
+		minWidth:  len([]rune(string(boxTopLeftCorner) + string(boxLineHorizontal) + boxTitleLeft + title + boxTitleRight + string(boxLineHorizontal) + string(boxTopRightCorner))),
 		minHeight: 5, // nothing to calculate really: top line + margin line + content line + margin line + bottom line
-		content:   make(chan string, 10),
-		buffer:    newRingBuffer(4069),
+		content:   make(chan []byte, 4096),
+		buffer:    newRingBuffer(boxBufferSize),
 	}
 
 	if typ == boxWidthTypePercent {
 		b.widthP = width
 		b.heightP = height
 	} else {
-		b.widthC = width
-		b.heightC = height
+		if width < b.minWidth {
+			b.widthC = b.minWidth
+		} else {
+			b.widthC = width
+		}
+		if height < b.minHeight {
+			b.heightC = b.minHeight
+		} else {
+			b.heightC = height
+		}
 	}
 
 	go b.update()
@@ -132,11 +144,8 @@ func (b *box) destroy() {
 // or box.destroy() is called. It is therefore meant to be executed as a go routine.
 // When the content reaches the end of the box, all content is shifted up one line.
 func (b *box) update() {
-	for s := range b.content {
-		if !strings.HasSuffix(s, "\n") {
-			s += "\n"
-		}
-		b.buffer.Write([]byte(s))
+	for c := range b.content {
+		b.buffer.Write(c)
 
 		b.drawContent()
 	}
@@ -153,30 +162,34 @@ func (b *box) drawContent() {
 	hpos := marginLeft
 	vpos := marginTop
 
-	p := make([]byte, 4069)
+	// We make a buffer big enough to hold the number of characters this box can display. We add overhead to it
+	// since we will be skipping leading spaces and enters.
+	//totalCells := (b.width() - 2*hmargin) * (b.height() - 2*vmargin)
+	p := make([]byte, boxBufferSize)
 	n, err := b.buffer.Read(p)
 	if err != nil {
 		// TODO: log an error to the yet to be defined main logfile, or output the error in this box?
 		return
 	}
 
-	for _, r := range []rune(string(p[:n])) {
+	for i := 0; i < n; i += cellSize {
+		c := decodeCell(p[i:])
 		// Don't render null bytes
-		if r == rune(0) {
+		if c.r == rune(0) {
 			continue
 		}
 
 		// Don't render leading spaces.
-		if hpos == marginLeft && r == ' ' {
+		if hpos == marginLeft && c.r == ' ' {
 			continue
 		}
 		// Handle newlines.
-		if r == '\n' {
+		if c.r == '\n' {
 			vpos++
 			hpos = marginLeft
 			continue
 		}
-		b.s.SetContent(hpos, vpos, r, nil, tcell.StyleDefault)
+		b.s.SetContent(hpos, vpos, c.r, nil, c.s)
 		hpos++
 		if hpos > marginRight {
 			hpos = marginLeft
@@ -186,9 +199,9 @@ func (b *box) drawContent() {
 			for y := marginTop + 1; y <= marginBottom; y++ {
 				// Shift all content up one line.
 				for x := marginLeft; x <= marginRight; x++ {
-					or, _, _, _ := b.s.GetContent(x, y)
+					mainc, combc, style, _ := b.s.GetContent(x, y)
 					// Place this rune one line up.
-					b.s.SetContent(x, y-1, or, nil, tcell.StyleDefault)
+					b.s.SetContent(x, y-1, mainc, combc, style)
 				}
 			}
 			// Clear the last line.

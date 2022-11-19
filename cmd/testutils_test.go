@@ -24,7 +24,7 @@ func newTestScreen(t *testing.T) tcell.SimulationScreen {
 
 func assertScreenContents(t *testing.T, s tcell.SimulationScreen, expected string, x, y int) {
 	v, w, h := s.GetContents()
-	b, err := renderTxtFile(expected, x, y, w, h)
+	b, err := renderTxtFile(t, expected, x, y, w, h)
 	if err != nil {
 		t.Fatalf("Unable to load file %s", expected)
 	}
@@ -33,25 +33,29 @@ func assertScreenContents(t *testing.T, s tcell.SimulationScreen, expected strin
 		t.Fatalf("length mismatch, got %d, want %d", len(v), len(b))
 	}
 
+	e := false
 	for i, c := range v {
 		if c.Style != b[i].Style {
 			t.Errorf("%d - c.Style: got %v, want %v", i, c.Style, b[i].Style)
+			e = true
 		}
 
 		if string(c.Runes) != string(b[i].Runes) {
 			t.Errorf("%d - c.Runes: got '%s', want '%s'", i, string(c.Runes), string(b[i].Runes))
+			e = true
 		}
 
 		if !bytes.Equal(c.Bytes, b[i].Bytes) {
 			t.Errorf("%d - c.Bytes: got %v, want %v", i, c.Bytes, b[i].Bytes)
+			e = true
 		}
+	}
+	if e {
+		printScreen(t, v, w, false)
 	}
 }
 
-// renderTxtFile does NOT use t.Log() as we do NOT want streaming output when tests are run with
-// the -v flag. We want this in one block at the end of the results or the output would not make
-// sense at all!
-func renderTxtFile(name string, x, y, width, height int) ([]tcell.SimCell, error) {
+func renderTxtFile(t *testing.T, name string, x, y, width, height int) ([]tcell.SimCell, error) {
 	data, err := os.ReadFile("testdata/" + name)
 	if err != nil {
 		return nil, err
@@ -62,7 +66,7 @@ func renderTxtFile(name string, x, y, width, height int) ([]tcell.SimCell, error
 		cells[i].Runes = []rune{' '}
 		cells[i].Bytes = []byte{byte(' ')}
 	}
-	fmt.Printf("File '%s' data:\n%s\n", name, string(data))
+	t.Logf("File '%s' data:\n%s\n", name, string(data))
 	i := 0
 	j := 0
 	for _, b := range []rune(string(data)) {
@@ -78,16 +82,28 @@ func renderTxtFile(name string, x, y, width, height int) ([]tcell.SimCell, error
 		i++
 	}
 
-	fmt.Println("Screen:")
-	border := strings.Repeat("*", width+2)
-	fmt.Printf(border + "\n*")
-	for i, c := range cells {
-		if i > 0 && i%width == 0 {
-			fmt.Printf("*\n*")
-		}
-		fmt.Printf("%s", string(c.Runes))
-	}
-	fmt.Printf("*\n" + border + "\n")
+	printScreen(t, cells, width, true)
 
 	return cells, nil
+}
+
+func printScreen(t *testing.T, cells []tcell.SimCell, width int, expected bool) {
+	p := "Got"
+	if expected {
+		p = "Want"
+	}
+
+	b := &bytes.Buffer{}
+	b.Write([]byte(fmt.Sprintf("%s screen:\n", p)))
+	border := strings.Repeat("*", width+2)
+	b.Write([]byte(fmt.Sprintf(border + "\n*")))
+	for i, c := range cells {
+		if i > 0 && i%width == 0 {
+			b.Write([]byte(fmt.Sprintf("*\n*")))
+		}
+		b.Write([]byte(fmt.Sprintf("%s", string(c.Runes))))
+	}
+	b.Write([]byte(fmt.Sprintf("*\n" + border + "\n")))
+
+	t.Logf("%s", b)
 }

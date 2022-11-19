@@ -3,23 +3,31 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/malc0mn/amiigo/amiibo"
+	"github.com/malc0mn/amiigo/apii"
 	"github.com/malc0mn/amiigo/nfcptl"
-	"os"
 )
 
-// portal is the main hardware loop that handles all portal related things from connection over
+// portal holds the parts that need to be controlled by the NFC portal.
+type portal struct {
+	log chan<- []byte
+	img *imageBox
+	api *apii.AmiiboAPI
+}
+
+// listen is the main hardware loop that handles all portal related things from connection over
 // handling its events to cleanly disconnecting on shutdown.
-func portal(log chan<- string, img *imageBox) {
+func (p *portal) listen(conf *config) {
 	client, err := nfcptl.NewClient(conf.vendor, conf.device, verbose)
 	if err != nil {
-		log <- fmt.Sprintf("Error initialising client: %s\n", err)
+		p.log <- encodeStringCell(fmt.Sprintf("Error initialising client: %s\n", err))
 		return
 	}
 
 	err = client.Connect()
 	defer client.Disconnect()
 	if err != nil {
-		log <- fmt.Sprintf("Error connecting to device: %v\n", err)
+		p.log <- encodeStringCell(fmt.Sprintf("Error connecting to device: %s\n", err))
 		return
 	}
 
@@ -30,15 +38,43 @@ func portal(log chan<- string, img *imageBox) {
 	for {
 		select {
 		case e := <-client.Events():
-			log <- fmt.Sprintf("Received event: %s", e.String())
-			fmt.Fprintln(os.Stderr, hex.Dump(e.Data()))
+			p.log <- encodeStringCell(fmt.Sprintf("Received event: %s", e.String()))
 			if e.Name() == nfcptl.TokenTagData {
-				// TODO: somewhere here we need to call img.processImage() to convert image data
-				//  received from the Amiibo HTTP API
-				os.WriteFile("ps_dump.bin", e.Data(), 0666)
+				a, err := amiibo.NewAmiibo(e.Data(), nil)
+				if err != nil {
+					p.log <- encodeStringCell(err.Error())
+					continue
+				}
+
+				id := hex.EncodeToString(a.ModelInfo().ID())
+				p.log <- encodeStringCell("got id: " + id)
+
+				ai, err := p.api.GetAmiiboInfoById(id)
+				if err != nil {
+					p.log <- encodeStringCell(err.Error())
+					continue
+				}
+
+				img, err := getImage(ai.Image)
+				if err != nil {
+					p.log <- encodeStringCell(err.Error())
+					continue
+				}
+
+				p.img.processImage(img)
 			}
 		case <-quit:
+			// TODO: we must somehow wait for a clean driver shutdown before quitting.
 			return
 		}
+	}
+}
+
+// newPortal returns a new portal ready for use.
+func newPortal(log chan<- []byte, img *imageBox, baseUrl string) *portal {
+	return &portal{
+		log: log,
+		img: img,
+		api: apii.NewAmiiboAPI(newCachedHttpClient(), baseUrl),
 	}
 }

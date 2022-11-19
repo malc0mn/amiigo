@@ -12,6 +12,7 @@ const (
 	errGeneral       = 1
 	errInvalidArgs   = 2
 	errOpenConfig    = 102
+	errOpenLogFile   = 103
 	errCreateClient  = 104
 	errPortalConnect = 105
 )
@@ -44,13 +45,19 @@ func main() {
 		}
 	}
 
-	log.SetOutput(logging{log.Writer()})
+	f, err := getLogfile(conf.logFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error opening log file - %s\n", err)
+		os.Exit(errOpenLogFile)
+	}
+	defer f.Close()
+	log.SetOutput(f)
 
-	if err := createCacheDirs(); err != nil {
+	if err := createCacheDirs(conf.cacheDir); err != nil {
 		fmt.Printf("Error creating caching directories: %s\n", err)
 		os.Exit(errGeneral)
 	}
-	tui()
+	tui(conf)
 
 	fmt.Println("Bye bye!")
 	os.Exit(ok)
