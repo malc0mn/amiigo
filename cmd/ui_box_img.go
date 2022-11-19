@@ -27,8 +27,8 @@ func newImageBox(s tcell.Screen, x, y, width, height int, title, typ string) *im
 
 // processImage will convert a given image to a printable ASCII string.
 func (i *imageBox) processImage(b image.Image) {
-	// We calculate the new width according to the aspect ratio of the image, but since we are dealing with rectangular
-	// ASCII chars, we multiply the new width by a factor of two to get a somewhat square 'pixel' again.
+	// We calculate the new width according to the aspect ratio of the image, but since we are dealing with vertically
+	// rectangular ASCII chars, we multiply the new width by a factor of two to get a somewhat square 'pixel' again.
 	i.opts.FixedWidth = 2 * i.height() * b.Bounds().Max.X / b.Bounds().Max.Y
 	i.opts.FixedHeight = i.height()
 	var buf []byte

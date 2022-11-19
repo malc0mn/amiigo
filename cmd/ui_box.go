@@ -162,9 +162,8 @@ func (b *box) drawContent() {
 	hpos := marginLeft
 	vpos := marginTop
 
-	// We make a buffer big enough to hold the number of characters this box can display. We add overhead to it
-	// since we will be skipping leading spaces and enters.
-	//totalCells := (b.width() - 2*hmargin) * (b.height() - 2*vmargin)
+	// We make a buffer big enough to hold the number of characters this box can display. We add overhead to it since we
+	// will be skipping null bytes, leading spaces and enters.
 	p := make([]byte, boxBufferSize)
 	n, err := b.buffer.Read(p)
 	if err != nil {

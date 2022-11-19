@@ -18,6 +18,7 @@ type portal struct {
 // listen is the main hardware loop that handles all portal related things from connection over
 // handling its events to cleanly disconnecting on shutdown.
 func (p *portal) listen(conf *config) {
+	// TODO: add connect loop here so a portal can be connected after startup.
 	client, err := nfcptl.NewClient(conf.vendor, conf.device, verbose)
 	if err != nil {
 		p.log <- encodeStringCell(fmt.Sprintf("Error initialising client: %s\n", err))
