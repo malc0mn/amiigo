@@ -117,7 +117,7 @@ func TestNewBox(t *testing.T) {
 	}
 }
 
-func TestSetStartXY(t *testing.T) {
+func TestBox_SetStartXY(t *testing.T) {
 	s := newTestScreen(t)
 
 	tests := map[int]struct {
@@ -159,7 +159,7 @@ func TestSetStartXY(t *testing.T) {
 	}
 }
 
-func TestWidthHeight(t *testing.T) {
+func TestBox_WidthHeight(t *testing.T) {
 	s := newTestScreen(t)
 
 	tests := map[int]struct {
@@ -195,7 +195,7 @@ func TestWidthHeight(t *testing.T) {
 	}
 }
 
-func TestDestroy(t *testing.T) {
+func TestBox_Destroy(t *testing.T) {
 	s := newTestScreen(t)
 	b := newBox(s, 5, 5, 10, 10, "test", boxWidthTypePercent)
 
@@ -218,7 +218,7 @@ func TestDestroy(t *testing.T) {
 	b = nil
 }
 
-func TestUpdate(t *testing.T) {
+func TestBox_Update(t *testing.T) {
 	s := newTestScreen(t)
 
 	b := newBox(s, -1, -1, 33, 50, "test", boxWidthTypePercent)
@@ -242,7 +242,7 @@ func TestUpdate(t *testing.T) {
 	b = nil
 }
 
-func TestDraw(t *testing.T) {
+func TestBox_Draw(t *testing.T) {
 	s := newTestScreen(t)
 
 	b := newBox(s, -1, -1, 33, 50, "test", boxWidthTypePercent)
