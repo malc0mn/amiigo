@@ -169,24 +169,7 @@ func (b *box) drawContent() {
 	}
 
 	for i := 0; i < n; i += cellSize {
-		c := decodeCell(p[i:])
-		// Don't render null bytes
-		if c.r == rune(0) {
-			continue
-		}
-
-		// Don't render leading spaces.
-		if hpos == marginLeft && c.r == ' ' {
-			continue
-		}
-		// Handle newlines.
-		if c.r == '\n' {
-			vpos++
-			hpos = marginLeft
-			continue
-		}
-		b.s.SetContent(hpos, vpos, c.r, nil, c.s)
-		hpos++
+		// First ensure that we draw within bounds...
 		if hpos > marginRight {
 			hpos = marginLeft
 			vpos++
@@ -207,6 +190,26 @@ func (b *box) drawContent() {
 			// Stay on the last line
 			vpos = marginBottom
 		}
+
+		// ... then start updating content.
+		c := decodeCell(p[i:])
+		// Don't render null bytes
+		if c.r == rune(0) {
+			continue
+		}
+
+		// Don't render leading spaces.
+		if hpos == marginLeft && c.r == ' ' {
+			continue
+		}
+		// Handle newlines.
+		if c.r == '\n' {
+			vpos++
+			hpos = marginLeft
+			continue
+		}
+		b.s.SetContent(hpos, vpos, c.r, nil, c.s)
+		hpos++
 	}
 	b.s.Show()
 }
