@@ -213,12 +213,6 @@ func TestDestroy(t *testing.T) {
 	if b.content != nil {
 		t.Errorf("want nil, got %T", b.content)
 	}
-	if b.buffer != nil {
-		t.Errorf("want nil, got %T", b.buffer)
-	}
-	if b.s != nil {
-		t.Errorf("want nil, got %T", b.s)
-	}
 
 	b = nil
 }

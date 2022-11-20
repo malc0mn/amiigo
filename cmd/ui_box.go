@@ -131,13 +131,10 @@ func (b *box) height() int {
 	return b.heightC
 }
 
-// destroy destroys a box structure. It will close and nullify the content channel and will nullify
-// the buffer and tcell.Screen reference it holds.
+// destroy destroys a box structure. It will close and nullify the content channel.
 func (b *box) destroy() {
 	close(b.content)
 	b.content = nil
-	b.buffer = nil
-	b.s = nil
 }
 
 // update updates the contents of the box. Calling update blocks until the box.content channel is closed
