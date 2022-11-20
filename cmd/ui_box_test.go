@@ -214,8 +214,6 @@ func TestBox_Destroy(t *testing.T) {
 	if b.content != nil {
 		t.Errorf("want nil, got %T", b.content)
 	}
-
-	b = nil
 }
 
 func TestBox_Update(t *testing.T) {
@@ -239,7 +237,6 @@ func TestBox_Update(t *testing.T) {
 	assertScreenContents(t, s, "ui_box_border_26x12_content.txt", x, y)
 
 	b.destroy()
-	b = nil
 }
 
 func TestBox_Draw(t *testing.T) {
@@ -255,13 +252,13 @@ func TestBox_Draw(t *testing.T) {
 	assertScreenContents(t, s, "ui_box_border_26x12.txt", x, y)
 
 	// Multiple content passes should always yield the same result.
+	data := encodeStringCell("Consectetur a erat nam at lectus urna duis convallis convallis. Leo urna molestie at elementum. Diam vel quam elementum pulvinar etiam non quam lacus. Ut tellus elementum sagittis vitae et leo duis. Tortor aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Id diam vel quam elementum. Augue neque gravida in fermentum. Ut pharetra sit amet aliquam id diam maecenas ultricies mi. Quis lectus nulla at volutpat diam. Dui faucibus in ornare quam viverra.")
 	for i := 0; i < 10; i++ {
 		t.Logf("Run %d", i)
-		b.buffer.Write(encodeStringCell("Consectetur a erat nam at lectus urna duis convallis convallis. Leo urna molestie at elementum. Diam vel quam elementum pulvinar etiam non quam lacus. Ut tellus elementum sagittis vitae et leo duis. Tortor aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Id diam vel quam elementum. Augue neque gravida in fermentum. Ut pharetra sit amet aliquam id diam maecenas ultricies mi. Quis lectus nulla at volutpat diam. Dui faucibus in ornare quam viverra."))
+		b.buffer.Write(data)
 		b.draw(false, x, y)
 		assertScreenContents(t, s, "ui_box_border_26x12_content.txt", x, y)
 	}
 
 	b.destroy()
-	b = nil
 }
