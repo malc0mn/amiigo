@@ -23,35 +23,36 @@ func newTestScreen(t *testing.T) tcell.SimulationScreen {
 }
 
 func assertScreenContents(t *testing.T, s tcell.SimulationScreen, expected string, x, y int) {
-	v, w, h := s.GetContents()
-	b, err := renderTxtFile(t, expected, x, y, w, h)
+	got, w, h := s.GetContents()
+	want, err := renderTxtFile(t, expected, x, y, w, h)
 	if err != nil {
 		t.Fatalf("Unable to load file %s", expected)
 	}
 
-	if len(v) != len(b) {
-		t.Fatalf("length mismatch, got %d, want %d", len(v), len(b))
+	if len(got) != len(want) {
+		t.Fatalf("length mismatch, got %d, want %d", len(got), len(want))
 	}
 
 	e := false
-	for i, c := range v {
-		if c.Style != b[i].Style {
-			t.Errorf("%d - c.Style: got %v, want %v", i, c.Style, b[i].Style)
+	for i, c := range got {
+		if c.Style != want[i].Style {
+			t.Errorf("%d - c.Style: got %v, want %v", i, c.Style, want[i].Style)
 			e = true
 		}
 
-		if string(c.Runes) != string(b[i].Runes) {
-			t.Errorf("%d - c.Runes: got '%s', want '%s'", i, string(c.Runes), string(b[i].Runes))
+		if string(c.Runes) != string(want[i].Runes) {
+			t.Errorf("%d - c.Runes: got '%s', want '%s'", i, string(c.Runes), string(want[i].Runes))
 			e = true
 		}
 
-		if !bytes.Equal(c.Bytes, b[i].Bytes) {
-			t.Errorf("%d - c.Bytes: got %v, want %v", i, c.Bytes, b[i].Bytes)
+		if !bytes.Equal(c.Bytes, want[i].Bytes) {
+			t.Errorf("%d - c.Bytes: got %v, want %v", i, c.Bytes, want[i].Bytes)
 			e = true
 		}
 	}
 	if e {
-		printScreen(t, v, w, false)
+		printScreen(t, want, w, true)
+		printScreen(t, got, w, false)
 	}
 }
 
@@ -66,7 +67,7 @@ func renderTxtFile(t *testing.T, name string, x, y, width, height int) ([]tcell.
 		cells[i].Runes = []rune{' '}
 		cells[i].Bytes = []byte{byte(' ')}
 	}
-	t.Logf("File '%s' data:\n%s\n", name, string(data))
+
 	i := 0
 	j := 0
 	for _, b := range []rune(string(data)) {
@@ -81,8 +82,6 @@ func renderTxtFile(t *testing.T, name string, x, y, width, height int) ([]tcell.
 		cells[pos].Bytes = []byte(string(b))
 		i++
 	}
-
-	printScreen(t, cells, width, true)
 
 	return cells, nil
 }
