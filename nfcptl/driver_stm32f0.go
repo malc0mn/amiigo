@@ -94,13 +94,27 @@ const (
 	// Beware: do NOT expect a reply from the device after sending this command!
 	STM32F0_SetLedState DriverCommand = 0x20
 
-	// STM32F0_Unknown2 with a token on the portal always returns:
+	// STM32F0_ReadSignature is used after a token has been detected right after STM32F0_Unknown1
+	// was called. This command is the NTAG213/215/216 equivalent of READ_SIG which returns a 32
+	// byte ECC signature to verify the silicon vendor.
+	// We still need to figure out how to detect we are dealing with a PowerSaves PUC since the
+	// post token detection sequence is a little different for a PUC.
+	// With a puc on the portal it returns:
 	//   00000000  00 00 21 3c 65 44 49 01  60 29 85 e9 f6 b5 0c ac  |..!<eDI.`)......|
 	//   00000010  b9 c8 ca 3c 4b cd 13 14  27 11 ff 57 1c f0 1e 66  |...<K...'..W...f|
 	//   00000020  bd 6f 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |.o..............|
 	//   00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
-	// It is used after a token has been detected after calling STM32F0_Unknown1.
-	STM32F0_Unknown2 DriverCommand = 0x21
+	// With a real amiibo figure, it returns:
+	//   00000000  00 00 d1 8a a5 fb b0 26  93 90 9d f3 d0 6e 8b d4  |.......&.....n..|
+	//   00000010  5e b5 b4 63 e5 1a a4 a0  58 93 5b a3 90 a4 df b7  |^..c....X.[.....|
+	//   00000020  dd 12 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	//   00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	// Another real figure:
+	//   00000000  00 00 92 59 b6 5e 50 9d  4a c2 ea cf 39 32 6d 43  |...Y.^P.J...92mC|
+	//   00000010  e6 69 d3 d2 f2 c2 43 2d  6a 8a 8e 25 c4 d0 c8 e5  |.i....C-j..%....|
+	//   00000020  94 0d 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	//   00000030  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+	STM32F0_ReadSignature DriverCommand = 0x21
 
 	// STM32F0_MakeKey is called after a token has been detected on the portal, after page 16 has
 	// been read. It takes data from two previous commands as arguments:
@@ -509,11 +523,19 @@ func (stm *stm32f0) handleToken(buff []byte) {
 	//  just fine.
 	cmds := []map[DriverCommand][]byte{
 		{STM32F0_Unknown1: {}},
-		{STM32F0_Unknown2: {}},
+		{STM32F0_ReadSignature: {}},
 		{STM32F0_Read: {0x10}},
 		{STM32F0_MakeKey: {}},
 		{STM32F0_Unknown4: {}},
+		// Not sent with real figure, only with PUC but sending it with a real figure makes no difference, so lets keep
+		// it simple and always send it.
 		{STM32F0_Unknown1: {}},
+		// This power cycle is not done when there is a PUC on the portal but is imperative when reading a real amiibo
+		// card or figure. Not power cycling will result in a read failure!
+		// TODO: find a way to detect a PUC because this power cycle will no doubt inhibit writing to the PUC.
+		{STM32F0_RFFieldOff: {}},
+		{STM32F0_RFFieldOn: {}},
+		{STM32F0_GetTokenUid: {}},
 	}
 
 	page16 := make([]byte, 16)
