@@ -16,11 +16,13 @@ const (
 	boxTitleLeft         = "═‡¯´ "
 	boxTitleRight        = " `¯‡═"
 
-	boxWidthTypePercent   = "percent"
-	boxWidthTypeCharacter = "character"
-
 	cellSize      = 28 // size of a single cell
 	boxBufferSize = 4350 * cellSize
+)
+
+const (
+	boxTypePercent = iota
+	boxTypeCharacter
 )
 
 // cell represents a single ui box content cell having a rune and a tcell.Style
@@ -29,13 +31,21 @@ type cell struct {
 	s tcell.Style
 }
 
+type boxOpts struct {
+	title             string // The title of the box.
+	printLeadingSpace bool   // Images can have leading spaces that must not be skipped.
+	xPos              int    // The x position the box should be drawn at. Pass -1 to auto position after the previous box.
+	yPos              int    // The y position the box should be drawn at. Pass -1 to auto position after the previous box.
+	width             int    // The width of the box in cells or percent.
+	height            int    // The height of the box in cells or percent.
+	typ               int    // the type of the box: boxTypePercent or boxTypeCharacter.
+}
+
 // box represents a ui box element that can display content.
 type box struct {
-	title     string        // The title of the box.
+	opts      boxOpts       // The options for the box.
 	r         [][]rune      // The internal render array.
 	s         tcell.Screen  // The screen to display the box on.
-	x         int           // The x position to start drawing on.
-	y         int           // The y position to start drawing on.
 	autoX     bool          // When true will calculate the x pos based on the previously drawn box.
 	autoY     bool          // When true will calculate the y pos based on the previously drawn box.
 	widthC    int           // The with in characters of the box.
@@ -50,38 +60,33 @@ type box struct {
 
 // newBox creates a new box struct ready for display on screen by calling box.draw(). newBox also
 // launches a single go routine to update the box contents as it comes in.
-// Passing -1 as x and/or y value will ensure the box is automatically positioned after the previous
-// box in the set of drawn boxes.
-// Type can be boxWidthTypePercent or boxWidthTypeCharacter
-// If the given with and/or height in combination with boxWidthTypeCharacter is smaller than the
+// If the given with and/or height in combination with boxTypeCharacter is smaller than the
 // minWidth or minHeight, they will be ignored and set to the minimal values.
-func newBox(s tcell.Screen, x, y, width, height int, title, typ string) *box {
+func newBox(s tcell.Screen, opts boxOpts) *box {
 	b := &box{
-		title:     title,
+		opts:      opts,
 		s:         s,
-		x:         x,
-		y:         y,
-		autoX:     x == -1,
-		autoY:     y == -1,
-		minWidth:  len([]rune(string(boxTopLeftCorner) + string(boxLineHorizontal) + boxTitleLeft + title + boxTitleRight + string(boxLineHorizontal) + string(boxTopRightCorner))),
+		autoX:     opts.xPos == -1,
+		autoY:     opts.yPos == -1,
+		minWidth:  len([]rune(string(boxTopLeftCorner) + string(boxLineHorizontal) + boxTitleLeft + opts.title + boxTitleRight + string(boxLineHorizontal) + string(boxTopRightCorner))),
 		minHeight: 5, // nothing to calculate really: top line + margin line + content line + margin line + bottom line
 		content:   make(chan []byte, 4096),
 		buffer:    newRingBuffer(boxBufferSize),
 	}
 
-	if typ == boxWidthTypePercent {
-		b.widthP = width
-		b.heightP = height
+	if b.opts.typ == boxTypePercent {
+		b.widthP = b.opts.width
+		b.heightP = b.opts.height
 	} else {
-		if width < b.minWidth {
+		if b.opts.width < b.minWidth {
 			b.widthC = b.minWidth
 		} else {
-			b.widthC = width
+			b.widthC = b.opts.width
 		}
-		if height < b.minHeight {
+		if b.opts.height < b.minHeight {
 			b.heightC = b.minHeight
 		} else {
-			b.heightC = height
+			b.heightC = b.opts.height
 		}
 	}
 
@@ -94,10 +99,10 @@ func newBox(s tcell.Screen, x, y, width, height int, title, typ string) *box {
 // position are set to -1, the respective values passed in are used as a start position.
 func (b *box) setStartXY(x, y int) {
 	if b.autoX {
-		b.x = x
+		b.opts.xPos = x
 	}
 	if b.autoY {
-		b.y = y
+		b.opts.yPos = y
 	}
 }
 
@@ -152,10 +157,10 @@ func (b *box) update() {
 func (b *box) drawContent() {
 	hmargin := 2
 	vmargin := 1
-	marginLeft := b.x + hmargin
-	marginRight := b.x - 1 + b.width() - hmargin
-	marginTop := b.y + vmargin
-	marginBottom := b.y - 1 + b.height() - vmargin
+	marginLeft := b.opts.xPos + hmargin
+	marginRight := b.opts.xPos - 1 + b.width() - hmargin
+	marginTop := b.opts.yPos + vmargin
+	marginBottom := b.opts.yPos - 1 + b.height() - vmargin
 	hpos := marginLeft
 	vpos := marginTop
 
@@ -199,7 +204,7 @@ func (b *box) drawContent() {
 		}
 
 		// Don't render leading spaces.
-		if hpos == marginLeft && c.r == ' ' {
+		if !b.opts.printLeadingSpace && hpos == marginLeft && c.r == ' ' {
 			continue
 		}
 		// Handle newlines.
@@ -226,7 +231,7 @@ func (b *box) draw(animated bool, x, y int) (int, int) {
 
 	b.drawContent()
 
-	return b.x + len(b.r[0]), b.y + len(b.r)
+	return b.opts.xPos + len(b.r[0]), b.opts.yPos + len(b.r)
 }
 
 // drawBordersAnimated does the same as drawBordersPlain but will add animation. This is used when
@@ -244,7 +249,7 @@ func (b *box) drawBordersAnimated(x, y int) {
 			if r == 0 {
 				continue
 			}
-			b.s.SetContent(b.x+hpos, b.y+vpos, r, nil, tcell.StyleDefault)
+			b.s.SetContent(b.opts.xPos+hpos, b.opts.yPos+vpos, r, nil, tcell.StyleDefault)
 		}
 	}
 }
@@ -261,7 +266,7 @@ func (b *box) drawBordersPlain(x, y int) {
 			if r == 0 {
 				continue
 			}
-			b.s.SetContent(b.x+hpos, b.y+vpos, r, nil, tcell.StyleDefault)
+			b.s.SetContent(b.opts.xPos+hpos, b.opts.yPos+vpos, r, nil, tcell.StyleDefault)
 		}
 	}
 }
@@ -285,16 +290,16 @@ func (b *box) render() {
 // trimmed bluntly.
 // Returns the adjusted width.
 func (b *box) renderTop() {
-	t := boxTitleLeft + b.title + boxTitleRight
+	t := boxTitleLeft + b.opts.title + boxTitleRight
 	tl := len([]rune(t))
 	// The length of the title part with two corners and two horizontal lines.
 	excess := tl + 4 - b.width()
 	if excess > 0 {
-		trim := len(b.title) - excess
+		trim := len(b.opts.title) - excess
 		if trim < 0 {
 			trim = 1
 		}
-		t = boxTitleLeft + b.title[:trim] + boxTitleRight
+		t = boxTitleLeft + b.opts.title[:trim] + boxTitleRight
 		tl = len([]rune(t))
 	}
 	// Calculate the top horizontal line length: width - title length - 2 corners, left and right
@@ -343,7 +348,7 @@ func (b *box) renderBottom() {
 func (b *box) animateLine(line []rune, vpos int) {
 	center := len(line) / 2
 	bc := []rune{'█', '▓', '▒', '░'}
-	y := b.y + vpos
+	y := b.opts.yPos + vpos
 
 	// Extend the amount of passes with the amount of cursor frames to ensure all runes are drawn
 	// in the end.
@@ -356,8 +361,8 @@ func (b *box) animateLine(line []rune, vpos int) {
 				// Protect bounds.
 				continue
 			}
-			xLeft := b.x + posl
-			xRight := b.x + posr
+			xLeft := b.opts.xPos + posl
+			xRight := b.opts.xPos + posr
 			// First get what has already been drawn.
 			curl, _, _, _ := b.s.GetContent(xLeft, y)
 			curr, _, _, _ := b.s.GetContent(xRight, y)

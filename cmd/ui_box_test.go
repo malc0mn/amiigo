@@ -17,31 +17,31 @@ func TestNewBox(t *testing.T) {
 		minWidth int
 		height   int
 		title    string
-		typ      string
+		typ      int
 	}{
-		1: {s, 5, 8, 10, 18, 4, "test", boxWidthTypeCharacter},
-		2: {s, 2, 3, 18, 17, 10, "tst", boxWidthTypeCharacter},
-		3: {s, 3, 6, 15, 16, 8, "ts", boxWidthTypePercent},
-		4: {s, -1, -1, 15, 19, 8, "trace", boxWidthTypePercent},
+		1: {s, 5, 8, 10, 18, 4, "test", boxTypeCharacter},
+		2: {s, 2, 3, 18, 17, 10, "tst", boxTypeCharacter},
+		3: {s, 3, 6, 15, 16, 8, "ts", boxTypePercent},
+		4: {s, -1, -1, 15, 19, 8, "trace", boxTypePercent},
 	}
 
 	for i, test := range tests {
-		b := newBox(test.s, test.x, test.y, test.width, test.height, test.title, test.typ)
+		b := newBox(test.s, boxOpts{test.title, false, test.x, test.y, test.width, test.height, test.typ})
 
-		if b.title != test.title {
-			t.Errorf("test %d: b.title = %s, want %s", i, b.title, test.title)
+		if b.opts.title != test.title {
+			t.Errorf("test %d: b.title = %s, want %s", i, b.opts.title, test.title)
 		}
 
 		if b.s != test.s {
 			t.Errorf("test %d: b.s = %v, want %v", i, b.s, test.s)
 		}
 
-		if b.x != test.x {
-			t.Errorf("test %d: b.x = %d, want %d", i, b.x, test.x)
+		if b.opts.xPos != test.x {
+			t.Errorf("test %d: b.x = %d, want %d", i, b.opts.xPos, test.x)
 		}
 
-		if b.y != test.y {
-			t.Errorf("test %d: b.y = %d, want %d", i, b.y, test.y)
+		if b.opts.yPos != test.y {
+			t.Errorf("test %d: b.y = %d, want %d", i, b.opts.yPos, test.y)
 		}
 
 		wantB := false
@@ -65,7 +65,7 @@ func TestNewBox(t *testing.T) {
 		}
 
 		wantI := test.width
-		if test.typ == boxWidthTypePercent {
+		if test.typ == boxTypePercent {
 			wantI = 0
 		} else if test.width < test.minWidth {
 			wantI = test.minWidth
@@ -79,7 +79,7 @@ func TestNewBox(t *testing.T) {
 			t.Errorf("test %d: b.minHeight = %d, want %d", i, b.minHeight, wantI)
 		}
 
-		if test.typ == boxWidthTypePercent {
+		if test.typ == boxTypePercent {
 			wantI = 0
 		} else if test.height > 5 {
 			wantI = test.height
@@ -97,7 +97,7 @@ func TestNewBox(t *testing.T) {
 		}
 
 		wantI = test.width
-		if test.typ == boxWidthTypeCharacter {
+		if test.typ == boxTypeCharacter {
 			wantI = 0
 		}
 		if b.widthP != wantI {
@@ -105,7 +105,7 @@ func TestNewBox(t *testing.T) {
 		}
 
 		wantI = test.height
-		if test.typ == boxWidthTypeCharacter {
+		if test.typ == boxTypeCharacter {
 			wantI = 0
 		}
 		if b.heightP != wantI {
@@ -127,14 +127,14 @@ func TestBox_SetStartXY(t *testing.T) {
 		width  int
 		height int
 		title  string
-		typ    string
+		typ    int
 	}{
-		1: {s, 5, 8, 10, 4, "test", boxWidthTypeCharacter},
-		4: {s, -1, -1, 15, 8, "trace", boxWidthTypePercent},
+		1: {s, 5, 8, 10, 4, "test", boxTypeCharacter},
+		2: {s, -1, -1, 15, 8, "trace", boxTypePercent},
 	}
 
 	for i, test := range tests {
-		b := newBox(test.s, test.x, test.y, test.width, test.height, test.title, test.typ)
+		b := newBox(test.s, boxOpts{test.title, false, test.x, test.y, test.width, test.height, test.typ})
 
 		b.setStartXY(15, 33)
 
@@ -142,16 +142,16 @@ func TestBox_SetStartXY(t *testing.T) {
 		if test.x > 0 {
 			want = test.x
 		}
-		if b.x != want {
-			t.Errorf("test %d: b.x = %d, want %d", i, b.x, want)
+		if b.opts.xPos != want {
+			t.Errorf("test %d: b.x = %d, want %d", i, b.opts.xPos, want)
 		}
 
 		want = 33
 		if test.y > 0 {
 			want = test.y
 		}
-		if b.y != want {
-			t.Errorf("test %d: b.y = %d, want %d", i, b.y, want)
+		if b.opts.yPos != want {
+			t.Errorf("test %d: b.y = %d, want %d", i, b.opts.yPos, want)
 		}
 
 		b.destroy()
@@ -171,14 +171,14 @@ func TestBox_WidthHeight(t *testing.T) {
 		height int
 		wantH  int
 		title  string
-		typ    string
+		typ    int
 	}{
-		1: {s, 5, 8, 19, 19, 4, 5, "test", boxWidthTypeCharacter},
-		2: {s, -1, -1, 33, 26, 50, 12, "tst", boxWidthTypePercent},
+		1: {s, 5, 8, 19, 19, 4, 5, "test", boxTypeCharacter},
+		2: {s, -1, -1, 33, 26, 50, 12, "tst", boxTypePercent},
 	}
 
 	for i, test := range tests {
-		b := newBox(test.s, test.x, test.y, test.width, test.height, test.title, test.typ)
+		b := newBox(test.s, boxOpts{test.title, false, test.x, test.y, test.width, test.height, test.typ})
 
 		got := b.width()
 		if got != test.wantW {
@@ -197,7 +197,7 @@ func TestBox_WidthHeight(t *testing.T) {
 
 func TestBox_Destroy(t *testing.T) {
 	s := newTestScreen(t)
-	b := newBox(s, 5, 5, 10, 10, "test", boxWidthTypePercent)
+	b := newBox(s, boxOpts{"test", false, 5, 5, 10, 10, boxWidthTypePercent})
 
 	if b.content == nil {
 		t.Errorf("want %T, got nil", b.content)
@@ -219,7 +219,7 @@ func TestBox_Destroy(t *testing.T) {
 func TestBox_Update(t *testing.T) {
 	s := newTestScreen(t)
 
-	b := newBox(s, -1, -1, 33, 50, "test", boxWidthTypePercent)
+	b := newBox(s, boxOpts{"test", false, -1, -1, 33, 50, boxWidthTypePercent})
 	b.setStartXY(1, 1)
 
 	x := 6
@@ -242,7 +242,7 @@ func TestBox_Update(t *testing.T) {
 func TestBox_Draw(t *testing.T) {
 	s := newTestScreen(t)
 
-	b := newBox(s, -1, -1, 33, 50, "test", boxWidthTypePercent)
+	b := newBox(s, boxOpts{"test", false, -1, -1, 33, 50, boxWidthTypePercent})
 	b.setStartXY(1, 1)
 
 	x := 6

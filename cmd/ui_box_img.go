@@ -14,12 +14,11 @@ type imageBox struct {
 
 // newImageBox creates a new imageBox struct ready for display on screen by calling box.draw().
 // newImageBox also launches a single go routine to update the box contents as it comes in.
-// Passing -1 as x and/or y value will ensure the imageBox is automatically positioned after the
-// previous box in the set of drawn boxes.
-// Type can be boxWidthTypePercent or boxWidthTypeCharacter
-func newImageBox(s tcell.Screen, x, y, width, height int, title, typ string) *imageBox {
+// If the given with and/or height in combination with boxTypeCharacter is smaller than the
+// minWidth or minHeight, they will be ignored and set to the minimal values.
+func newImageBox(s tcell.Screen, opts boxOpts) *imageBox {
 	return &imageBox{
-		box:  newBox(s, x, y, width, height, title, typ),
+		box:  newBox(s, opts),
 		img:  convert.NewImageConverter(),
 		opts: convert.DefaultOptions,
 	}

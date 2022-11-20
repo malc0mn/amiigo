@@ -61,9 +61,9 @@ func (u *ui) destroy() {
 func newUi() *ui {
 	s, _ := initScreen()
 	y := logoHeight() + 1
-	info := newBox(s, 1, y, 15, 70, "info", boxWidthTypePercent)
-	image := newImageBox(s, -1, y, 75, 70, "image", boxWidthTypePercent)
-	logs := newBox(s, 1, -1, 90, 20, "logs", boxWidthTypePercent)
+	info := newBox(s, boxOpts{"info", false, 1, y, 15, 70, boxTypePercent})
+	image := newImageBox(s, boxOpts{"image", true, -1, y, 75, 70, boxTypePercent})
+	logs := newBox(s, boxOpts{"logs", false, 1, -1, 90, 20, boxTypePercent})
 	return &ui{
 		s:        s,
 		elements: []drawer{info, image, logs},
