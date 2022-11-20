@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gdamore/tcell/v2"
 	"testing"
+	"time"
 )
 
 func TestNewBox(t *testing.T) {
@@ -230,7 +231,11 @@ func TestUpdate(t *testing.T) {
 
 	// b.update() is launched as a goroutine by newBox() so to test it, we just send data to the content channel.
 	b.content <- encodeStringCell("Consectetur a erat nam at lectus urna duis convallis convallis. Leo urna molestie at elementum. Diam vel quam elementum pulvinar etiam non quam lacus. Ut tellus elementum sagittis vitae et leo duis. Tortor aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Id diam vel quam elementum. Augue neque gravida in fermentum. Ut pharetra sit amet aliquam id diam maecenas ultricies mi. Quis lectus nulla at volutpat diam. Dui faucibus in ornare quam viverra.")
-
+	// This sleep shows that this is not a good test. b.update() is running in a goroutine, so we need to wait a bit
+	// before we can check if it has done its work properly otherwise we might be checking on the result right in the
+	// middle of the goroutines processing time causing this test to fail (which it still might if the goroutine takes
+	// longer than expected).
+	time.Sleep(time.Microsecond * 50)
 	assertScreenContents(t, s, "ui_box_border_26x12_content.txt", x, y)
 
 	b.destroy()
