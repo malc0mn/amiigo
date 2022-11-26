@@ -47,7 +47,11 @@ func (p *portal) listen(conf *config) {
 					continue
 				}
 
-				id := hex.EncodeToString(a.ModelInfo().ID())
+				rawId := a.ModelInfo().ID()
+				if zeroed(rawId) {
+					continue
+				}
+				id := hex.EncodeToString(rawId)
 				p.log <- encodeStringCell("got id: " + id)
 
 				ai, err := p.api.GetAmiiboInfoById(id)
