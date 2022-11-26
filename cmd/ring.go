@@ -132,3 +132,11 @@ func (r *ringBuffer) Read(p []byte) (int, error) {
 
 	return int(readLength), nil
 }
+
+func (r *ringBuffer) Reset() {
+	for i := range r.buffer {
+		r.buffer[i] = 0
+	}
+	r.writePos = 0
+	r.headPos = 0
+}

@@ -185,3 +185,21 @@ func TestRingBuffer_WriteWithWritePosLowerThanHeadPosNoWrap(t *testing.T) {
 		t.Errorf("\nwant\n '%s'\ngot\n '%s'", want, got)
 	}
 }
+
+func TestRingBuffer_Reset(t *testing.T) {
+	d := getTestData()[3]
+
+	// A buffer holding some data
+	rb := newRingBuffer(int64(len(d)))
+	rb.Write(d)
+
+	if !bytes.Equal(d, rb.buffer) {
+		t.Fatalf("buffer does not hold expected data!")
+	}
+
+	want := make([]byte, len(d))
+	rb.Reset()
+	if !bytes.Equal(rb.buffer, want) {
+		t.Errorf("\ngot %v\nwant %v", rb.buffer, want)
+	}
+}
