@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"github.com/qeesung/image2ascii/ascii"
 	"github.com/qeesung/image2ascii/convert"
 	"image"
 )
@@ -30,8 +31,14 @@ func (i *imageBox) processImage(b image.Image) {
 	// rectangular ASCII chars, we multiply the new width by a factor of two to get a somewhat square 'pixel' again.
 	i.opts.FixedWidth = 2 * i.height() * b.Bounds().Max.X / b.Bounds().Max.Y
 	i.opts.FixedHeight = i.height()
+
 	var buf []byte
 	for _, l := range i.img.Image2CharPixelMatrix(b, &i.opts) {
+		// Add padding to center image (-2 for the borders).
+		for j := 0; j < (i.width()-2-len(l))/2; j++ {
+			buf = append(buf, encodeImageCell(ascii.CharPixel{Char: ' '})...)
+		}
+		// Render image line.
 		for _, p := range l {
 			buf = append(buf, encodeImageCell(p)...)
 		}
