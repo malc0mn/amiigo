@@ -29,14 +29,16 @@
           "0004000000183600",
           "0004000000189800"
         ],
-        "GameName": "Kirby: Planet Robobot"
+        "GameName": "Kirby: Planet Robobot",
+        "AmiiboUsage": null
       },
       {
         "GameID": [
           "00040000000EE000",
           "00040000000EDF00"
         ],
-        "GameName": "Super Smash Bros. for Nintendo 3DS"
+        "GameName": "Super Smash Bros. for Nintendo 3DS",
+        "AmiiboUsage": null
       }
     ],
     "GamesSwitch": [
@@ -44,7 +46,8 @@
         "GameID": [
           "01006A800016E000"
         ],
-        "GameName": "Super Smash Bros. Ultimate"
+        "GameName": "Super Smash Bros. Ultimate",
+        "AmiiboUsage": null
       }
     ],
     "GamesWiiU": [
@@ -54,7 +57,8 @@
           "000500001018DC00",
           "000500001018DB00"
         ],
-        "GameName": "Super Mario Maker"
+        "GameName": "Super Mario Maker",
+        "AmiiboUsage": null
       },
       {
         "GameID": [
@@ -62,7 +66,8 @@
           "0005000010144F00",
           "0005000010110E00"
         ],
-        "GameName": "Super Smash Bros. for Wii U"
+        "GameName": "Super Smash Bros. for Wii U",
+        "AmiiboUsage": null
       }
     ],
     "Head": "19960000",

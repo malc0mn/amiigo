@@ -1,0 +1,146 @@
+{
+  "amiibo": [
+    {
+      "amiiboSeries": "Animal Crossing",
+      "character": "Del",
+      "gameSeries": "Animal Crossing",
+      "games3DS": [
+        {
+          "amiiboUsage": [
+            {
+              "Usage": "Call on amiibo phone to design the character's home on demand / Store house design and furniture for sharing",
+              "write": true
+            }
+          ],
+          "gameID": [
+            "000400000014F100",
+            "000400000014F200"
+          ],
+          "gameName": "Animal Crossing: Happy Home Designer"
+        },
+        {
+          "amiiboUsage": [
+            {
+              "Usage": "Invite the character to give you an item or move to your town",
+              "write": false
+            }
+          ],
+          "gameID": [
+            "0004000000086400",
+            "0004000000086300",
+            "0004000000198F00",
+            "0004000000198E00"
+          ],
+          "gameName": "Animal Crossing: New Leaf"
+        },
+        {
+          "amiiboUsage": [
+            {
+              "Usage": "Give Kirby a Copy ability based on the character's abilities and a health item",
+              "write": false
+            }
+          ],
+          "gameID": [
+            "0004000000189600",
+            "0004000000183600",
+            "0004000000189800"
+          ],
+          "gameName": "Kirby: Planet Robobot"
+        },
+        {
+          "amiiboUsage": [
+            {
+              "Usage": "Unlock an Animal Crossing pattern",
+              "write": false
+            }
+          ],
+          "gameID": [
+            "00040000001C2500"
+          ],
+          "gameName": "Style Savvy: Styling Star"
+        }
+      ],
+      "gamesSwitch": [
+        {
+          "amiiboUsage": [
+            {
+              "Usage": "Invite the character to your campsite and, eventually, to move to your island / Invite the character for photo shoots at Photopia / Unlock a special poster of the character / Invite the character to the Roost for a cup of coffee / Invite the character to Happy Home Paradise to design their vacation home",
+              "write": false
+            }
+          ],
+          "gameID": [
+            "01006F8002326000"
+          ],
+          "gameName": "Animal Crossing: New Horizons"
+        },
+        {
+          "amiiboUsage": [
+            {
+              "Usage": "Unlock a special costume",
+              "write": false
+            }
+          ],
+          "gameID": [
+            "01007EF00399C000"
+          ],
+          "gameName": "Conga Master Party!"
+        },
+        {
+          "amiiboUsage": [
+            {
+              "Usage": "Unlock an Animal Crossing-themed Mii racing suit",
+              "write": false
+            }
+          ],
+          "gameID": [
+            "0100152000022000"
+          ],
+          "gameName": "Mario Kart 8 Deluxe"
+        }
+      ],
+      "gamesWiiU": [
+        {
+          "amiiboUsage": [
+            {
+              "Usage": "Use the character in mini-games",
+              "write": false
+            },
+            {
+              "Usage": "Place the character's house on the game board",
+              "write": false
+            }
+          ],
+          "gameID": [
+            "00050000101C6500",
+            "0005000010190100",
+            "00050000101C6400"
+          ],
+          "gameName": "Animal Crossing: amiibo Festival"
+        },
+        {
+          "amiiboUsage": [
+            {
+              "Usage": "Unlock music, frames, and figures",
+              "write": false
+            }
+          ],
+          "gameID": [
+            "00050000101D3000"
+          ],
+          "gameName": "Taiko Drum Master: Atsumete Tomodachi Daisakusen"
+        }
+      ],
+      "head": "02c70001",
+      "image": "https://raw.githubusercontent.com/N3evin/AmiiboAPI/master/images/icon_02c70001-01220502.png",
+      "name": "Del",
+      "release": {
+        "au": "2016-03-19",
+        "eu": "2016-03-18",
+        "jp": "2016-01-14",
+        "na": "2016-03-18"
+      },
+      "tail": "01220502",
+      "type": "Card"
+    }
+  ]
+}

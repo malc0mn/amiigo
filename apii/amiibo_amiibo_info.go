@@ -32,8 +32,14 @@ type AmiiboInfo struct {
 }
 
 type GameInfo struct {
-	GameID   []string
-	GameName string
+	GameID      []string
+	GameName    string
+	AmiiboUsage []Usage
+}
+
+type Usage struct {
+	Usage string
+	Write bool
 }
 
 // NewAmiiboInfo creates a new AmiiboInfo struct given raw JSON data.

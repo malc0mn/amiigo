@@ -1,0 +1,144 @@
+[
+  {
+    "AmiiboSeries": "Animal Crossing",
+    "Character": "Del",
+    "GameSeries": "Animal Crossing",
+    "Games3DS": [
+      {
+        "GameID": [
+          "000400000014F100",
+          "000400000014F200"
+        ],
+        "GameName": "Animal Crossing: Happy Home Designer",
+        "AmiiboUsage": [
+          {
+            "Usage": "Call on amiibo phone to design the character's home on demand / Store house design and furniture for sharing",
+            "Write": true
+          }
+        ]
+      },
+      {
+        "GameID": [
+          "0004000000086400",
+          "0004000000086300",
+          "0004000000198F00",
+          "0004000000198E00"
+        ],
+        "GameName": "Animal Crossing: New Leaf",
+        "AmiiboUsage": [
+          {
+            "Usage": "Invite the character to give you an item or move to your town",
+            "Write": false
+          }
+        ]
+      },
+      {
+        "GameID": [
+          "0004000000189600",
+          "0004000000183600",
+          "0004000000189800"
+        ],
+        "GameName": "Kirby: Planet Robobot",
+        "AmiiboUsage": [
+          {
+            "Usage": "Give Kirby a Copy ability based on the character's abilities and a health item",
+            "Write": false
+          }
+        ]
+      },
+      {
+        "GameID": [
+          "00040000001C2500"
+        ],
+        "GameName": "Style Savvy: Styling Star",
+        "AmiiboUsage": [
+          {
+            "Usage": "Unlock an Animal Crossing pattern",
+            "Write": false
+          }
+        ]
+      }
+    ],
+    "GamesSwitch": [
+      {
+        "GameID": [
+          "01006F8002326000"
+        ],
+        "GameName": "Animal Crossing: New Horizons",
+        "AmiiboUsage": [
+          {
+            "Usage": "Invite the character to your campsite and, eventually, to move to your island / Invite the character for photo shoots at Photopia / Unlock a special poster of the character / Invite the character to the Roost for a cup of coffee / Invite the character to Happy Home Paradise to design their vacation home",
+            "Write": false
+          }
+        ]
+      },
+      {
+        "GameID": [
+          "01007EF00399C000"
+        ],
+        "GameName": "Conga Master Party!",
+        "AmiiboUsage": [
+          {
+            "Usage": "Unlock a special costume",
+            "Write": false
+          }
+        ]
+      },
+      {
+        "GameID": [
+          "0100152000022000"
+        ],
+        "GameName": "Mario Kart 8 Deluxe",
+        "AmiiboUsage": [
+          {
+            "Usage": "Unlock an Animal Crossing-themed Mii racing suit",
+            "Write": false
+          }
+        ]
+      }
+    ],
+    "GamesWiiU": [
+      {
+        "GameID": [
+          "00050000101C6500",
+          "0005000010190100",
+          "00050000101C6400"
+        ],
+        "GameName": "Animal Crossing: amiibo Festival",
+        "AmiiboUsage": [
+          {
+            "Usage": "Use the character in mini-games",
+            "Write": false
+          },
+          {
+            "Usage": "Place the character's house on the game board",
+            "Write": false
+          }
+        ]
+      },
+      {
+        "GameID": [
+          "00050000101D3000"
+        ],
+        "GameName": "Taiko Drum Master: Atsumete Tomodachi Daisakusen",
+        "AmiiboUsage": [
+          {
+            "Usage": "Unlock music, frames, and figures",
+            "Write": false
+          }
+        ]
+      }
+    ],
+    "Head": "02c70001",
+    "Image": "https://raw.githubusercontent.com/N3evin/AmiiboAPI/master/images/icon_02c70001-01220502.png",
+    "Name": "Del",
+    "Release": {
+      "au": "2016-03-19",
+      "eu": "2016-03-18",
+      "jp": "2016-01-14",
+      "na": "2016-03-18"
+    },
+    "Tail": "01220502",
+    "Type": "Card"
+  }
+]

@@ -3,7 +3,6 @@ package apii
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -26,13 +25,13 @@ func assertResponse(t *testing.T, file string, res interface{}) {
 	}
 	if !bytes.Equal(got, want) {
 		t.Errorf("incorrect tree structure")
-		fmt.Println("---------------------------------------------   got    ---------------------------------------------")
-		fmt.Println(string(got))
-		fmt.Println("--------------------------------------------- end got  ---------------------------------------------")
-		fmt.Println("")
-		fmt.Println("---------------------------------------------   want   ---------------------------------------------")
-		fmt.Println(string(want))
-		fmt.Println("--------------------------------------------- end want ---------------------------------------------")
+		t.Log("---------------------------------------------   got    ---------------------------------------------")
+		t.Log(string(got))
+		t.Log("--------------------------------------------- end got  ---------------------------------------------")
+		t.Log("")
+		t.Log("---------------------------------------------   want   ---------------------------------------------")
+		t.Log(string(want))
+		t.Log("--------------------------------------------- end want ---------------------------------------------")
 	}
 }
 func TestAmiiboAPI_GetAmiiboInfoByWrongId(t *testing.T) {
@@ -74,6 +73,26 @@ func TestAmiiboAPI_GetAmiiboInfoById(t *testing.T) {
 	}
 
 	assertResponse(t, "aa_amiibo_single_processed.json", ai)
+}
+
+func TestAmiiboAPI_GetCharacterUsage(t *testing.T) {
+	a := NewAmiiboAPI(newTestClient(func(req *http.Request) *http.Response {
+		assertRequest(t, req, "http://example.com/api/amiibo/?character=del&showusage", "GET")
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       fromFile(t, "aa_amiibo_showusage.json"),
+		}
+	}), "http://example.com")
+
+	ai, err := a.GetCharacterUsage("del")
+	if err != nil {
+		t.Errorf("got %s, want nil", err)
+	}
+	if ai == nil {
+		t.Errorf("got %v, want AmiiboInfo", ai)
+	}
+
+	assertResponse(t, "aa_amiibo_showusage_processed.json", ai)
 }
 
 func TestAmiiboAPI_GetAmiiboInfo(t *testing.T) {

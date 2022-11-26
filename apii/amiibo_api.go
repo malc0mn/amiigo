@@ -33,6 +33,18 @@ func (aa *AmiiboAPI) GetAmiiboInfoById(id string) (*AmiiboInfo, error) {
 	return NewAmiiboInfo(b)
 }
 
+// GetCharacterUsage returns an AmiiboInfo slice for the given character. The returned slice
+// will have the same data as returned by GetAmiiboInfoById extended with game info data.
+// The AmiiboAPI does not return game info when querying by ID.
+func (aa *AmiiboAPI) GetCharacterUsage(character string) ([]AmiiboInfo, error) {
+	b, err := aa.doAmiiboInfoCall(&AmiiboInfoRequest{Character: character, Showusage: true})
+	if err != nil {
+		return nil, err
+	}
+
+	return NewAmiiboInfoList(b)
+}
+
 // GetAmiiboInfo returns an *AmiiboInfo slice depending on the query sent to the API by means of the
 // AmiiboInfoRequest struct.
 // Pass nil if you want to get a full list.
