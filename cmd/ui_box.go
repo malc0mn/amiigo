@@ -209,6 +209,11 @@ func (b *box) drawContent() {
 		}
 		// Handle newlines.
 		if c.r == '\n' {
+			// First clear the rest of the line.
+			for x := hpos; x <= marginRight; x++ {
+				b.s.SetContent(x, marginBottom, 0, nil, tcell.StyleDefault)
+			}
+			// Then go to the next line.
 			vpos++
 			hpos = marginLeft
 			continue
