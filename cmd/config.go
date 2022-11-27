@@ -19,6 +19,14 @@ type config struct {
 	logFile string
 	// amiiboApiBaseUrl is the base url for the open amiibo API by n3evin.
 	amiiboApiBaseUrl string
+
+	// ui holds UI related config.
+	ui *uiConf
+}
+
+type uiConf struct {
+	// invertImage will render images inverted as if they were selected by the cursor.
+	invertImage bool
 }
 
 const (
@@ -36,9 +44,10 @@ var conf = &config{
 	cacheDir:         cacheDir,
 	logFile:          defaultLogFile,
 	amiiboApiBaseUrl: defaultAmiiboApiBaseUrl,
+	ui:               &uiConf{},
 }
 
-func loadConfig() error {
+func loadConfig(cFile string, conf *config) error {
 	f, err := ini.Load(cFile)
 	if err != nil {
 		return err
@@ -59,6 +68,14 @@ func loadConfig() error {
 		}
 		if k, err := i.GetKey("amiibo_api_base_url"); err == nil {
 			conf.amiiboApiBaseUrl = k.String()
+		}
+	}
+
+	if i, err := f.GetSection("ui"); err == nil {
+		if k, err := i.GetKey("solid_images"); err == nil {
+			if v, err := k.Bool(); err == nil {
+				conf.ui.invertImage = v
+			}
 		}
 	}
 

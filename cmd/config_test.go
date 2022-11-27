@@ -32,8 +32,7 @@ func TestDefaultConfig(t *testing.T) {
 }
 
 func TestLoadconfigOk(t *testing.T) {
-	cFile = "testdata/test_ok.conf"
-	loadConfig()
+	loadConfig("testdata/test_ok.conf", conf)
 
 	want := "testvendor"
 	if conf.vendor != want {
@@ -59,11 +58,15 @@ func TestLoadconfigOk(t *testing.T) {
 	if conf.amiiboApiBaseUrl != want {
 		t.Errorf("conf.amiiboApiBaseUrl = %s; want %s", conf.amiiboApiBaseUrl, want)
 	}
+
+	wantB := true
+	if conf.ui.invertImage != wantB {
+		t.Errorf("conf.ui.invertImage = %v; want %v", conf.ui.invertImage, wantB)
+	}
 }
 
 func TestLoadConfigWrongPath(t *testing.T) {
-	cFile = "does-not-exist.conf"
-	err := loadConfig()
+	err := loadConfig("does-not-exist.conf", conf)
 
 	want := "open " + cFile + ": no such file or directory"
 	if err == nil || err.Error() != want {

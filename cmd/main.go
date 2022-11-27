@@ -39,7 +39,7 @@ func main() {
 	}
 
 	if cFile != "" {
-		if err := loadConfig(); err != nil {
+		if err := loadConfig(cFile, conf); err != nil {
 			fmt.Fprintf(os.Stderr, "Error opening config file - %s\n", err)
 			os.Exit(errOpenConfig)
 		}
