@@ -56,16 +56,17 @@ func (p *portal) listen(conf *config) {
 
 				ai, err := p.api.GetAmiiboInfoById(id)
 				if err != nil {
-					p.log <- encodeStringCell(err.Error())
+					p.log <- encodeStringCell("api get amiibo info: " + err.Error())
 					continue
 				}
 
+				// Fill image box.
+				p.log <- encodeStringCell("fetching image")
 				img, err := getImage(ai.Image)
 				if err != nil {
-					p.log <- encodeStringCell(err.Error())
+					p.log <- encodeStringCell("api get image: " + err.Error())
 					continue
 				}
-
 				p.img.processImage(img)
 			}
 		case <-quit:
