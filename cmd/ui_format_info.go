@@ -18,15 +18,16 @@ func formatAmiiboInfo(ai *apii.AmiiboInfo) []byte {
 	}
 	sort.Strings(releases)
 
+	pref := "\n  "
 	// Maps are unordered, hence this approach.
 	info := []string{
-		"ID:            ", "0x" + ai.Head + ai.Tail,
-		"Character:     ", ai.Character,
-		"Name:          ", ai.Name,
-		"Type:          ", ai.Type,
-		"Amiibo Series: ", ai.AmiiboSeries,
-		"Game series:   ", ai.GameSeries,
-		"Release dates:\n", strings.Join(releases, "\n"),
+		"ID:", pref + "0x" + ai.Head + ai.Tail,
+		"Character:", pref + ai.Character,
+		"Name:", pref + ai.Name,
+		"Type:", pref + ai.Type,
+		"Amiibo Series:", pref + ai.AmiiboSeries,
+		"Game series:", pref + ai.GameSeries,
+		"Release dates:", "\n" + strings.Join(releases, "\n"),
 	}
 
 	return encodeWithLabelToBytes(info)
