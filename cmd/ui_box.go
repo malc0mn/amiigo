@@ -112,7 +112,8 @@ func (b *box) setStartXY(x, y int) {
 func (b *box) width() int {
 	if b.widthP != 0 {
 		w, _ := b.s.Size()
-		width := w * b.widthP / 100
+		// -1 here to account for the additional between boxes margin.
+		width := (w - 1) * b.widthP / 100
 		if width < b.minWidth {
 			return b.minWidth
 		}
@@ -240,7 +241,16 @@ func (b *box) draw(animated bool, x, y int) (int, int) {
 
 	b.drawContent()
 
-	return b.opts.xPos + len(b.r[0]), b.opts.yPos + len(b.r)
+	nextX := b.opts.xPos + len(b.r[0])
+	nextY := b.opts.yPos
+	sw, _ := b.s.Size()
+	// -5 since this is the absolute possible minimum of a box.
+	if nextX >= sw-5 {
+		nextX = 0
+		nextY += len(b.r)
+	}
+
+	return nextX, nextY
 }
 
 // drawBordersAnimated does the same as drawBordersPlain but will add animation. This is used when
@@ -285,6 +295,10 @@ func (b *box) drawBordersPlain(x, y int) {
 // render renders a box into a two-dimensional rune slice. This intermediary step will allow us
 // to easily add animations when displaying the box.
 func (b *box) render() {
+	if b.r != nil {
+		return
+	}
+
 	b.r = make([][]rune, b.height())
 	for i := range b.r {
 		if i > 0 {

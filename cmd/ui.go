@@ -61,11 +61,11 @@ func (u *ui) destroy() {
 // newUi create a new ui structure.
 func newUi(invertImage bool) *ui {
 	s, _ := initScreen()
-	y := logoHeight() + 1
-	info := newBox(s, boxOpts{title: "info", xPos: 1, yPos: y, width: 16, height: 70})
-	image := newImageBox(s, boxOpts{title: "image", xPos: -1, yPos: y, width: 36, height: 70, bgColor: tcell.ColorBlack}, invertImage)
-	usage := newBox(s, boxOpts{title: "usage", xPos: -1, yPos: y, width: 46, height: 70})
-	logs := newBox(s, boxOpts{title: "logs", stripLeadingSpace: true, xPos: 1, yPos: -1, width: 99, height: 20, history: true})
+	info := newBox(s, boxOpts{title: "info", xPos: 1, yPos: logoHeight() + 1, width: 16, height: 70})
+	image := newImageBox(s, boxOpts{title: "image", xPos: -1, yPos: -1, width: 36, height: 70, bgColor: tcell.ColorBlack}, invertImage)
+	usage := newBox(s, boxOpts{title: "usage", xPos: -1, yPos: -1, width: 46, height: 70})
+	logs := newBox(s, boxOpts{title: "logs", stripLeadingSpace: true, xPos: -1, yPos: -1, width: 52, height: 20, history: true})
+
 	return &ui{
 		s:        s,
 		elements: []drawer{info, image, usage, logs},
