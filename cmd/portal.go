@@ -95,7 +95,7 @@ func (p *portal) listen(conf *config) {
 					p.log <- encodeStringCell("API get image: " + err.Error())
 					continue
 				}
-				p.img.processImage(img)
+				p.img.setImage(img)
 
 				// Fill usage box.
 				p.log <- encodeStringCell("Fetching character usage")

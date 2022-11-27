@@ -110,6 +110,8 @@ func tui(conf *config) {
 				return
 			case e.Key() == tcell.KeyCtrlL:
 				u.sync()
+			case e.Rune() == 'I' || e.Rune() == 'i':
+				u.imageBox.invertImage()
 			}
 		}
 	}
