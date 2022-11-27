@@ -66,7 +66,8 @@ func TestLoadconfigOk(t *testing.T) {
 }
 
 func TestLoadConfigWrongPath(t *testing.T) {
-	err := loadConfig("does-not-exist.conf", conf)
+	cFile := "does-not-exist.conf"
+	err := loadConfig(cFile, conf)
 
 	want := "open " + cFile + ": no such file or directory"
 	if err == nil || err.Error() != want {
