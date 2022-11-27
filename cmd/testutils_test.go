@@ -19,12 +19,14 @@ func newTestScreen(t *testing.T) tcell.SimulationScreen {
 		t.Fatalf("Failed to init SimulationScreen: %v", e)
 	}
 
+	s.SetStyle(tcell.StyleDefault.Background(backColour).Foreground(fontColour))
+
 	return s
 }
 
 func assertScreenContents(t *testing.T, s tcell.SimulationScreen, expected string, x, y int) {
 	got, w, h := s.GetContents()
-	want, err := renderTxtFile(t, expected, x, y, w, h)
+	want, err := renderTxtFile(expected, x, y, w, h)
 	if err != nil {
 		t.Fatalf("Unable to load file %s", expected)
 	}
@@ -56,7 +58,7 @@ func assertScreenContents(t *testing.T, s tcell.SimulationScreen, expected strin
 	}
 }
 
-func renderTxtFile(t *testing.T, name string, x, y, width, height int) ([]tcell.SimCell, error) {
+func renderTxtFile(name string, x, y, width, height int) ([]tcell.SimCell, error) {
 	data, err := os.ReadFile("testdata/" + name)
 	if err != nil {
 		return nil, err
@@ -66,6 +68,7 @@ func renderTxtFile(t *testing.T, name string, x, y, width, height int) ([]tcell.
 	for i := range cells {
 		cells[i].Runes = []rune{' '}
 		cells[i].Bytes = []byte{byte(' ')}
+		cells[i].Style = tcell.StyleDefault.Background(backColour).Foreground(fontColour)
 	}
 
 	i := 0
@@ -77,7 +80,7 @@ func renderTxtFile(t *testing.T, name string, x, y, width, height int) ([]tcell.
 			continue
 		}
 		pos := (x + i) + width*(y+j)
-		cells[pos].Style = tcell.StyleDefault
+		cells[pos].Style = tcell.StyleDefault.Background(backColour).Foreground(fontColour)
 		cells[pos].Runes = []rune{b}
 		cells[pos].Bytes = []byte(string(b))
 		i++

@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
-	"io"
 	"time"
 )
 
@@ -32,30 +31,32 @@ type cell struct {
 }
 
 type boxOpts struct {
-	title             string // The title of the box.
-	printLeadingSpace bool   // Images can have leading spaces that must not be skipped.
-	xPos              int    // The x position the box should be drawn at. Pass -1 to auto position after the previous box.
-	yPos              int    // The y position the box should be drawn at. Pass -1 to auto position after the previous box.
-	width             int    // The width of the box in cells or percent.
-	height            int    // The height of the box in cells or percent.
-	typ               int    // the type of the box: boxTypePercent or boxTypeCharacter.
+	title             string      // The title of the box.
+	printLeadingSpace bool        // Images can have leading spaces that must not be skipped.
+	xPos              int         // The x position the box should be drawn at. Pass -1 to auto position after the previous box.
+	yPos              int         // The y position the box should be drawn at. Pass -1 to auto position after the previous box.
+	width             int         // The width of the box in cells or percent.
+	height            int         // The height of the box in cells or percent.
+	typ               int         // The type of the box: boxTypePercent or boxTypeCharacter. Percent is the default.
+	history           bool        // Set to true to preserve history, otherwise the buffer will always be replaced completely.
+	bgColor           tcell.Color // The background colour.
 }
 
 // box represents a ui box element that can display content.
 type box struct {
-	opts      boxOpts       // The options for the box.
-	r         [][]rune      // The internal render array.
-	s         tcell.Screen  // The screen to display the box on.
-	autoX     bool          // When true will calculate the x pos based on the previously drawn box.
-	autoY     bool          // When true will calculate the y pos based on the previously drawn box.
-	widthC    int           // The with in characters of the box.
-	widthP    int           // The with in percent of the box.
-	minWidth  int           // The minimal with of the box.
-	heightC   int           // The height in characters of the box.
-	heightP   int           // The height in percent of the box.
-	minHeight int           // The minimal height of the box.
-	content   chan []byte   // The channel that will receive the box content.
-	buffer    io.ReadWriter // The buffer holding the box content
+	opts      boxOpts      // The options for the box.
+	r         [][]rune     // The internal render array.
+	s         tcell.Screen // The screen to display the box on.
+	autoX     bool         // When true will calculate the x pos based on the previously drawn box.
+	autoY     bool         // When true will calculate the y pos based on the previously drawn box.
+	widthC    int          // The with in characters of the box.
+	widthP    int          // The with in percent of the box.
+	minWidth  int          // The minimal with of the box.
+	heightC   int          // The height in characters of the box.
+	heightP   int          // The height in percent of the box.
+	minHeight int          // The minimal height of the box.
+	content   chan []byte  // The channel that will receive the box content.
+	buffer    *ringBuffer  // The buffer holding the box content
 }
 
 // newBox creates a new box struct ready for display on screen by calling box.draw(). newBox also
@@ -147,6 +148,9 @@ func (b *box) destroy() {
 // When the content reaches the end of the box, all content is shifted up one line.
 func (b *box) update() {
 	for c := range b.content {
+		if !b.opts.history {
+			b.buffer.Reset()
+		}
 		b.buffer.Write(c)
 
 		b.drawContent()
@@ -190,7 +194,7 @@ func (b *box) drawContent() {
 			}
 			// Clear the last line.
 			for x := marginLeft; x <= marginRight; x++ {
-				b.s.SetContent(x, marginBottom, 0, nil, tcell.StyleDefault)
+				b.s.SetContent(x, marginBottom, 0, nil, tcell.StyleDefault.Background(b.opts.bgColor))
 			}
 			// Stay on the last line
 			vpos = marginBottom
@@ -211,7 +215,7 @@ func (b *box) drawContent() {
 		if c.r == '\n' {
 			// First clear the rest of the line.
 			for x := hpos; x <= marginRight; x++ {
-				b.s.SetContent(x, marginBottom, 0, nil, tcell.StyleDefault)
+				b.s.SetContent(x, vpos, 0, nil, tcell.StyleDefault.Background(b.opts.bgColor))
 			}
 			// Then go to the next line.
 			vpos++
@@ -252,6 +256,7 @@ func (b *box) drawBordersAnimated(x, y int) {
 		}
 		for hpos, r := range l {
 			if r == 0 {
+				b.s.SetContent(b.opts.xPos+hpos, b.opts.yPos+vpos, r, nil, tcell.StyleDefault.Background(b.opts.bgColor))
 				continue
 			}
 			b.s.SetContent(b.opts.xPos+hpos, b.opts.yPos+vpos, r, nil, tcell.StyleDefault)
@@ -269,6 +274,7 @@ func (b *box) drawBordersPlain(x, y int) {
 	for vpos, l := range b.r {
 		for hpos, r := range l {
 			if r == 0 {
+				b.s.SetContent(b.opts.xPos+hpos, b.opts.yPos+vpos, r, nil, tcell.StyleDefault.Background(b.opts.bgColor))
 				continue
 			}
 			b.s.SetContent(b.opts.xPos+hpos, b.opts.yPos+vpos, r, nil, tcell.StyleDefault)

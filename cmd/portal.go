@@ -11,6 +11,8 @@ import (
 // portal holds the parts that need to be controlled by the NFC portal.
 type portal struct {
 	log chan<- []byte
+	ifo chan<- []byte
+	usg chan<- []byte
 	img *imageBox
 	api *apii.AmiiboAPI
 }
@@ -52,22 +54,34 @@ func (p *portal) listen(conf *config) {
 					continue
 				}
 				id := hex.EncodeToString(rawId)
-				p.log <- encodeStringCell("got id: " + id)
+				p.log <- encodeStringCell("Got id: " + id)
 
+				// Fill info box.
+				p.log <- encodeStringCell("Fetching amiibo info")
 				ai, err := p.api.GetAmiiboInfoById(id)
 				if err != nil {
-					p.log <- encodeStringCell("api get amiibo info: " + err.Error())
+					p.log <- encodeStringCell("API get amiibo info: " + err.Error())
 					continue
 				}
+				p.ifo <- formatAmiiboInfo(ai)
 
 				// Fill image box.
-				p.log <- encodeStringCell("fetching image")
+				p.log <- encodeStringCell("Fetching image")
 				img, err := getImage(ai.Image)
 				if err != nil {
-					p.log <- encodeStringCell("api get image: " + err.Error())
+					p.log <- encodeStringCell("API get image: " + err.Error())
 					continue
 				}
 				p.img.processImage(img)
+
+				// Fill usage box.
+				p.log <- encodeStringCell("Fetching character usage")
+				cu, err := p.api.GetCharacterUsage(ai.Character)
+				if err != nil {
+					p.log <- encodeStringCell("Api get character usage: " + err.Error())
+					continue
+				}
+				p.usg <- formatAmiiboUsage(cu)
 			}
 		case <-quit:
 			// TODO: we must somehow wait for a clean driver shutdown before quitting.
@@ -77,9 +91,11 @@ func (p *portal) listen(conf *config) {
 }
 
 // newPortal returns a new portal ready for use.
-func newPortal(log chan<- []byte, img *imageBox, baseUrl string) *portal {
+func newPortal(log, ifo, usg chan<- []byte, img *imageBox, baseUrl string) *portal {
 	return &portal{
 		log: log,
+		ifo: ifo,
+		usg: usg,
 		img: img,
 		api: apii.NewAmiiboAPI(newCachedHttpClient(), baseUrl),
 	}

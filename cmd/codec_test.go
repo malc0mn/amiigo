@@ -11,7 +11,15 @@ func TestEncodeStringCell(t *testing.T) {
 	got := encodeStringCell("s")
 	want := make([]byte, 56)
 	want[0] = 115 // = 's'
+	want[4] = 51  // tcell.Color51 = backColour
+	want[8] = 1   // tcell.ColorValid
+	want[12] = 17 // tcell.Color17 = fontColour
+	want[16] = 1  // tcell.ColorValid
 	want[28] = 10 // = '\n'
+	want[32] = 51 // tcell.Color51 = backColour
+	want[36] = 1  // tcell.ColorValid
+	want[40] = 17 // tcell.Color17 = fontColour
+	want[44] = 1  // tcell.ColorValid
 
 	if !bytes.Equal(got, want) {
 		t.Errorf("got %v, want %v", got, want)
@@ -27,13 +35,14 @@ func TestEncodeImageCell(t *testing.T) {
 		A:    0,
 	}
 
-	got := encodeImageCell(p)
+	got := encodeImageCell(p, tcell.AttrReverse)
 	want := make([]byte, 28)
-	want[0] = 64
+	want[0] = 64 // is '@'
 	want[4] = 180
 	want[5] = 105
 	want[6] = 255
-	want[8] = 3 // is tcell.ColorIsRGB | tcell.ColorValid, see tcell.NewHexColor()
+	want[8] = 3  // is tcell.ColorIsRGB | tcell.ColorValid, see tcell.NewHexColor()
+	want[20] = 4 // is tcell.AttrReverse
 
 	if !bytes.Equal(got, want) {
 		t.Errorf("got %v, want %v", got, want)
@@ -48,7 +57,7 @@ func TestDecodeCellString(t *testing.T) {
 		t.Errorf("cell.r = %v, want %v", c.r, want)
 	}
 
-	if c.s != tcell.StyleDefault {
+	if c.s != tcell.StyleDefault.Foreground(fontColour).Background(backColour) {
 		t.Errorf("cell.s = %v, want %v", c.s, tcell.StyleDefault)
 	}
 }
@@ -62,7 +71,7 @@ func TestDecodeCellImage(t *testing.T) {
 		A:    0,
 	}
 
-	c := decodeCell(encodeImageCell(p))
+	c := decodeCell(encodeImageCell(p, tcell.AttrNone))
 	want := '@'
 
 	if c.r != want {

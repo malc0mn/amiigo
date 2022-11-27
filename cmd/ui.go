@@ -18,6 +18,7 @@ type ui struct {
 	elements []drawer
 	infoBox  *box
 	imageBox *imageBox
+	usageBox *box
 	logBox   *box
 }
 
@@ -58,17 +59,19 @@ func (u *ui) destroy() {
 }
 
 // newUi create a new ui structure.
-func newUi() *ui {
+func newUi(invertImage bool) *ui {
 	s, _ := initScreen()
 	y := logoHeight() + 1
-	info := newBox(s, boxOpts{"info", false, 1, y, 15, 70, boxTypePercent})
-	image := newImageBox(s, boxOpts{"image", true, -1, y, 75, 70, boxTypePercent})
-	logs := newBox(s, boxOpts{"logs", false, 1, -1, 90, 20, boxTypePercent})
+	info := newBox(s, boxOpts{title: "info", printLeadingSpace: true, xPos: 1, yPos: y, width: 16, height: 70})
+	image := newImageBox(s, boxOpts{title: "image", printLeadingSpace: true, xPos: -1, yPos: y, width: 36, height: 70, bgColor: tcell.ColorBlack}, invertImage)
+	usage := newBox(s, boxOpts{title: "usage", printLeadingSpace: true, xPos: -1, yPos: y, width: 46, height: 70})
+	logs := newBox(s, boxOpts{title: "logs", xPos: 1, yPos: -1, width: 99, height: 20, history: true})
 	return &ui{
 		s:        s,
-		elements: []drawer{info, image, logs},
+		elements: []drawer{info, image, usage, logs},
 		infoBox:  info,
 		imageBox: image,
+		usageBox: usage,
 		logBox:   logs,
 	}
 }
@@ -76,11 +79,11 @@ func newUi() *ui {
 // tui is the main terminal user interface loop. It sets up a tcell.Screen, draws the UI and
 // handles UI related events.
 func tui(conf *config) {
-	u := newUi()
+	u := newUi(conf.ui.invertImage)
 	u.draw(true)
 
 	// Connect to the portal when the UI is visible, so it can display the client logs etc.
-	ptl := newPortal(u.logBox.content, u.imageBox, conf.amiiboApiBaseUrl)
+	ptl := newPortal(u.logBox.content, u.infoBox.content, u.usageBox.content, u.imageBox, conf.amiiboApiBaseUrl)
 	go ptl.listen(conf)
 
 	for {
