@@ -6,33 +6,56 @@ import (
 	"github.com/malc0mn/amiigo/amiibo"
 	"github.com/malc0mn/amiigo/apii"
 	"github.com/malc0mn/amiigo/nfcptl"
+	"time"
 )
 
 // portal holds the parts that need to be controlled by the NFC portal.
 type portal struct {
-	log chan<- []byte
-	ifo chan<- []byte
-	usg chan<- []byte
-	img *imageBox
-	api *apii.AmiiboAPI
+	client *nfcptl.Client
+	log    chan<- []byte
+	ifo    chan<- []byte
+	usg    chan<- []byte
+	img    *imageBox
+	api    *apii.AmiiboAPI
+}
+
+// connect will block until a successful connection is established to the USB NFC portal.
+func (p *portal) connect() {
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+	output := false
+
+	for {
+		select {
+		case <-quit:
+			return
+
+		case <-ticker.C:
+			err := p.client.Connect()
+			if err == nil {
+				p.log <- encodeStringCell("Successfully connected to NFC portal.")
+				return
+			}
+			if !output {
+				p.log <- encodeStringCell("Please connect your amiibo NFC portal to a USB port.")
+				output = true
+			}
+		}
+	}
 }
 
 // listen is the main hardware loop that handles all portal related things from connection over
 // handling its events to cleanly disconnecting on shutdown.
 func (p *portal) listen(conf *config) {
-	// TODO: add connect loop here so a portal can be connected after startup.
-	client, err := nfcptl.NewClient(conf.vendor, conf.device, verbose)
+	var err error
+	p.client, err = nfcptl.NewClient(conf.vendor, conf.device, verbose)
 	if err != nil {
 		p.log <- encodeStringCell(fmt.Sprintf("Error initialising client: %s\n", err))
 		return
 	}
 
-	err = client.Connect()
-	defer client.Disconnect()
-	if err != nil {
-		p.log <- encodeStringCell(fmt.Sprintf("Error connecting to device: %s\n", err))
-		return
-	}
+	p.connect()
+	defer p.client.Disconnect()
 
 	// TODO: Send this output to the UI, maybe close to the logo somewhere?
 	//client.SendCommand(nfcptl.GetDeviceName)
@@ -40,7 +63,7 @@ func (p *portal) listen(conf *config) {
 
 	for {
 		select {
-		case e := <-client.Events():
+		case e := <-p.client.Events():
 			p.log <- encodeStringCell(fmt.Sprintf("Received event: %s", e.String()))
 			if e.Name() == nfcptl.TokenTagData {
 				a, err := amiibo.NewAmiibo(e.Data(), nil)
