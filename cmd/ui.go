@@ -60,15 +60,24 @@ func (u *ui) destroy() {
 
 // newUi create a new ui structure.
 func newUi(invertImage bool) *ui {
+	actionsContent := []string{
+		"d: ", "decrypt amiibo dump",
+		"h: ", "hex view of (decrypted) amiibo dump",
+		"i: ", "invert image",
+		"l: ", "load dump from disk",
+		"w: ", "write dump to disk",
+	}
+
 	s, _ := initScreen()
 	info := newBox(s, boxOpts{title: "info", xPos: 1, yPos: logoHeight() + 1, width: 16, height: 70})
 	image := newImageBox(s, boxOpts{title: "image", xPos: -1, yPos: -1, width: 36, height: 70, bgColor: tcell.ColorBlack}, invertImage)
 	usage := newBox(s, boxOpts{title: "usage", xPos: -1, yPos: -1, width: 46, height: 70})
 	logs := newBox(s, boxOpts{title: "logs", stripLeadingSpace: true, xPos: -1, yPos: -1, width: 52, height: 20, history: true})
+	actions := newBox(s, boxOpts{title: "actions", xPos: -1, yPos: -1, width: 46, height: 20, fixedContent: actionsContent})
 
 	return &ui{
 		s:        s,
-		elements: []drawer{info, image, usage, logs},
+		elements: []drawer{info, image, usage, logs, actions},
 		infoBox:  info,
 		imageBox: image,
 		usageBox: usage,

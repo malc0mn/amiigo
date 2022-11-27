@@ -40,6 +40,7 @@ type boxOpts struct {
 	typ               int         // The type of the box: boxTypePercent or boxTypeCharacter. Percent is the default.
 	history           bool        // Set to true to preserve history, otherwise the buffer will always be replaced completely.
 	bgColor           tcell.Color // The background colour.
+	fixedContent      []string    // Display fixed content. No goroutine that listens for content will be running when set.
 }
 
 // box represents a ui box element that can display content.
@@ -91,7 +92,11 @@ func newBox(s tcell.Screen, opts boxOpts) *box {
 		}
 	}
 
-	go b.update()
+	if b.opts.fixedContent != nil {
+		b.buffer.Write(encodeWithLabelToBytes(b.opts.fixedContent))
+	} else {
+		go b.update()
+	}
 
 	return b
 }
