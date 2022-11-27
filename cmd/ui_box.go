@@ -32,7 +32,7 @@ type cell struct {
 
 type boxOpts struct {
 	title             string      // The title of the box.
-	printLeadingSpace bool        // Images can have leading spaces that must not be skipped.
+	stripLeadingSpace bool        // Set to true to strip leading spaces.
 	xPos              int         // The x position the box should be drawn at. Pass -1 to auto position after the previous box.
 	yPos              int         // The y position the box should be drawn at. Pass -1 to auto position after the previous box.
 	width             int         // The width of the box in cells or percent.
@@ -208,7 +208,7 @@ func (b *box) drawContent() {
 		}
 
 		// Don't render leading spaces.
-		if !b.opts.printLeadingSpace && hpos == marginLeft && c.r == ' ' {
+		if b.opts.stripLeadingSpace && hpos == marginLeft && c.r == ' ' {
 			continue
 		}
 		// Handle newlines.

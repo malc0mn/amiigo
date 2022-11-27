@@ -26,7 +26,7 @@ func TestNewBox(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		b := newBox(test.s, boxOpts{title: test.title, xPos: test.x, yPos: test.y, width: test.width, height: test.height, typ: test.typ})
+		b := newBox(test.s, boxOpts{title: test.title, stripLeadingSpace: true, xPos: test.x, yPos: test.y, width: test.width, height: test.height, typ: test.typ})
 
 		if b.opts.title != test.title {
 			t.Errorf("test %d: b.title = %s, want %s", i, b.opts.title, test.title)
@@ -134,7 +134,7 @@ func TestBox_SetStartXY(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		b := newBox(test.s, boxOpts{title: test.title, xPos: test.x, yPos: test.y, width: test.width, height: test.height, typ: test.typ})
+		b := newBox(test.s, boxOpts{title: test.title, stripLeadingSpace: true, xPos: test.x, yPos: test.y, width: test.width, height: test.height, typ: test.typ})
 
 		b.setStartXY(15, 33)
 
@@ -178,7 +178,7 @@ func TestBox_WidthHeight(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		b := newBox(test.s, boxOpts{title: test.title, xPos: test.x, yPos: test.y, width: test.width, height: test.height, typ: test.typ})
+		b := newBox(test.s, boxOpts{title: test.title, stripLeadingSpace: true, xPos: test.x, yPos: test.y, width: test.width, height: test.height, typ: test.typ})
 
 		got := b.width()
 		if got != test.wantW {
@@ -197,7 +197,7 @@ func TestBox_WidthHeight(t *testing.T) {
 
 func TestBox_Destroy(t *testing.T) {
 	s := newTestScreen(t)
-	b := newBox(s, boxOpts{title: "test", xPos: 5, yPos: 5, width: 10, height: 10})
+	b := newBox(s, boxOpts{title: "test", stripLeadingSpace: true, xPos: 5, yPos: 5, width: 10, height: 10})
 
 	if b.content == nil {
 		t.Errorf("want %T, got nil", b.content)
@@ -219,7 +219,7 @@ func TestBox_Destroy(t *testing.T) {
 func TestBox_Update(t *testing.T) {
 	s := newTestScreen(t)
 
-	b := newBox(s, boxOpts{title: "test", xPos: -1, yPos: -1, width: 33, height: 50})
+	b := newBox(s, boxOpts{title: "test", stripLeadingSpace: true, xPos: -1, yPos: -1, width: 33, height: 50})
 	b.setStartXY(1, 1)
 
 	x := 6
@@ -242,7 +242,7 @@ func TestBox_Update(t *testing.T) {
 func TestBox_Draw(t *testing.T) {
 	s := newTestScreen(t)
 
-	b := newBox(s, boxOpts{title: "test", xPos: -1, yPos: -1, width: 33, height: 50})
+	b := newBox(s, boxOpts{title: "test", stripLeadingSpace: true, xPos: -1, yPos: -1, width: 33, height: 50})
 	b.setStartXY(1, 1)
 
 	x := 6
