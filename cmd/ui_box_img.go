@@ -42,6 +42,9 @@ func (i *imageBox) setImage(b image.Image) {
 // drawImage will convert the active image to a printable ASCII string and send it to the content
 // channel for display.
 func (i *imageBox) drawImage() {
+	if i.img == nil {
+		return
+	}
 
 	// We calculate the new width according to the aspect ratio of the image, but since we are dealing with vertically
 	// rectangular ASCII chars, we multiply the new width by a factor of two to get a somewhat square 'pixel' again.
