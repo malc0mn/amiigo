@@ -43,10 +43,10 @@ func (usb *USB) Connect(c *Client) error {
 
 	usb.dev, err = usb.ctx.OpenDeviceWithVIDPID(gousb.ID(c.VendorId()), gousb.ID(c.ProductId()))
 	if err != nil {
-		return fmt.Errorf("could not open device: %v", err)
+		return fmt.Errorf("usb: could not open device: %v", err)
 	}
 	if usb.dev == nil {
-		return fmt.Errorf("no device found for vid=%#04x,pid=%#04x", c.VendorId(), c.ProductId())
+		return fmt.Errorf("usb: no device found for vid=%#04x,pid=%#04x", c.VendorId(), c.ProductId())
 	}
 
 	// AutoDetach is mandatory: it will detach the kernel driver before attempting to claim the
@@ -54,10 +54,10 @@ func (usb *USB) Connect(c *Client) error {
 	usb.dev.SetAutoDetach(true)
 
 	if c.Debug() {
-		log.Printf("device: %s", usb.dev.String())
-		log.Printf("devicedesc: %s", usb.dev.Desc.String())
+		log.Printf("usb: device: %s", usb.dev.String())
+		log.Printf("usb: devicedesc: %s", usb.dev.Desc.String())
 		cdesc, _ := usb.dev.ConfigDescription(1)
-		log.Printf("config: %v", cdesc)
+		log.Printf("usb: config: %v", cdesc)
 	}
 
 	setup, ok := c.Setup().(DeviceSetup)
@@ -67,25 +67,25 @@ func (usb *USB) Connect(c *Client) error {
 
 	usb.cfg, err = usb.dev.Config(setup.Config)
 	if err != nil {
-		return fmt.Errorf("failed to claim config %d of device %s: %v", setup.Config, usb.dev, err)
+		return fmt.Errorf("usb: failed to claim config %d of device %s: %v", setup.Config, usb.dev, err)
 	}
 	usb.iface, err = usb.cfg.Interface(setup.Interface, setup.AlternateSetting)
 	if err != nil {
-		return fmt.Errorf("failed to select interface #%d alternate setting %d of config %d of device %s: %v", setup.Interface, setup.AlternateSetting, setup.Config, usb.dev, err)
+		return fmt.Errorf("usb: failed to select interface #%d alternate setting %d of config %d of device %s: %v", setup.Interface, setup.AlternateSetting, setup.Config, usb.dev, err)
 	}
 
 	if usb.in, err = usb.iface.InEndpoint(setup.InEndpoint); err != nil {
-		return fmt.Errorf("%s.InEndpoint(%d): %v", usb.iface, setup.InEndpoint, err)
+		return fmt.Errorf("usb: %s.InEndpoint(%d): %v", usb.iface, setup.InEndpoint, err)
 	}
 
 	if usb.out, err = usb.iface.OutEndpoint(setup.OutEndpoint); err != nil {
-		return fmt.Errorf("%s.OutEndpoint(%d): %v", usb.iface, setup.OutEndpoint, err)
+		return fmt.Errorf("usb: %s.OutEndpoint(%d): %v", usb.iface, setup.OutEndpoint, err)
 	}
 
+	log.Println("usb: successfully connected!")
 	if c.Debug() {
-		log.Println("Successfully connected!")
-		log.Printf("Poll interval %d", usb.in.Desc.PollInterval)
-		log.Printf("Max packet size %d", usb.in.Desc.MaxPacketSize)
+		log.Printf("usb: poll interval %d", usb.in.Desc.PollInterval)
+		log.Printf("usb: max packet size %d", usb.in.Desc.MaxPacketSize)
 	}
 
 	return nil

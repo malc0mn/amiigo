@@ -41,7 +41,7 @@ func NewClient(vendor, device string, debug bool) (*Client, error) {
 	}
 
 	if c.Debug() {
-		log.Printf("Using vendor ID %#04x and product ID %#04x", c.VendorId(), c.ProductId())
+		log.Printf("nfcptl: using vendor ID %#04x and product ID %#04x", c.VendorId(), c.ProductId())
 	}
 
 	return c, nil
