@@ -69,6 +69,8 @@ func newUi(invertImage bool) *ui {
 		"i: ", "invert image view",
 		"l: ", "load dump from disk",
 		"w: ", "write dump to disk",
+		"", "",
+		"ESC: ", "double press to quit",
 	}
 
 	s, _ := initScreen()
