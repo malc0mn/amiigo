@@ -63,7 +63,7 @@ func newUi(invertImage bool) *ui {
 	actionsContent := []string{
 		"d: ", "decrypt amiibo dump",
 		"h: ", "hex view of (decrypted) amiibo dump",
-		"i: ", "invert image",
+		"i: ", "invert image view",
 		"l: ", "load dump from disk",
 		"w: ", "write dump to disk",
 	}
