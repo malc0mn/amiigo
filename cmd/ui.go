@@ -94,6 +94,8 @@ func tui(conf *config) {
 	u := newUi(conf.ui.invertImage)
 	u.draw(true)
 
+	var esc time.Time
+
 	t := time.Now()
 
 	// Connect to the portal when the UI is visible, so it can display the client logs etc.
@@ -127,9 +129,13 @@ func tui(conf *config) {
 		case *tcell.EventKey:
 			switch {
 			case e.Key() == tcell.KeyEscape || e.Key() == tcell.KeyCtrlC:
-				u.destroy()
-				close(conf.quit)
-				return
+				if e.Key() == tcell.KeyCtrlC || !esc.IsZero() && time.Since(esc) <= 500*time.Millisecond {
+					u.destroy()
+					close(conf.quit)
+					return
+				}
+				esc = time.Now()
+				u.logBox.content <- encodeStringCell("Double press ESC to quit!")
 			case e.Key() == tcell.KeyCtrlL:
 				u.sync()
 			case e.Rune() == 'I' || e.Rune() == 'i':
