@@ -58,6 +58,7 @@ type box struct {
 	minHeight int          // The minimal height of the box.
 	content   chan []byte  // The channel that will receive the box content.
 	buffer    *ringBuffer  // The buffer holding the box content
+	redraw    func()       // This is a callback to allow the box to do preparations BEFORE the UI completely redraws the box. This happens on initial drawing or screen resize, not on regular content updates.
 }
 
 // newBox creates a new box struct ready for display on screen by calling box.draw(). newBox also
@@ -238,6 +239,10 @@ func (b *box) drawContent() {
 // The return values will be the first x column to the right side of the box and the first y column
 // below the box.
 func (b *box) draw(animated bool, x, y int) (int, int) {
+	if b.redraw != nil {
+		b.redraw()
+	}
+
 	if animated {
 		b.drawBordersAnimated(x, y)
 	} else {

@@ -25,12 +25,19 @@ func newImageBox(s tcell.Screen, opts boxOpts, invert bool) *imageBox {
 		attrs = tcell.AttrReverse
 	}
 
-	return &imageBox{
+	i := &imageBox{
 		box:   newBox(s, opts),
 		conv:  convert.NewImageConverter(),
 		iOpts: convert.DefaultOptions,
 		attrs: attrs,
 	}
+
+	// Make sure the image is re-rendered on screen resize.
+	i.redraw = func() {
+		i.drawImage()
+	}
+
+	return i
 }
 
 // setImage will set the image on the box and update the box.
