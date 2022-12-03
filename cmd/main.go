@@ -10,18 +10,14 @@ import (
 const (
 	ok               = 0
 	errGeneral       = 1
-	errInvalidArgs   = 2
 	errOpenConfig    = 102
 	errOpenLogFile   = 103
-	errCreateClient  = 104
-	errPortalConnect = 105
 )
 
 var (
 	version   = "0.0.0"
 	buildTime = "unknown"
 	exe       string
-	quit      = make(chan struct{})
 )
 
 func main() {
@@ -57,7 +53,9 @@ func main() {
 		fmt.Printf("Error creating caching directories: %s\n", err)
 		os.Exit(errGeneral)
 	}
+
 	tui(conf)
+	conf.wg.Wait()
 
 	fmt.Println("Bye bye!")
 	os.Exit(ok)

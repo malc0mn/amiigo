@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/go-ini/ini"
 	"github.com/malc0mn/amiigo/nfcptl"
+	"sync"
 )
 
 // config holds all the active settings
@@ -22,6 +23,11 @@ type config struct {
 
 	// ui holds UI related config.
 	ui *uiConf
+
+	// quit is closed on command shutdown.
+	quit chan struct{}
+	// wg is used for a clean shutdown.
+	wg sync.WaitGroup
 }
 
 type uiConf struct {
@@ -45,6 +51,7 @@ var conf = &config{
 	logFile:          defaultLogFile,
 	amiiboApiBaseUrl: defaultAmiiboApiBaseUrl,
 	ui:               &uiConf{},
+	quit:             make(chan struct{}),
 }
 
 func loadConfig(cFile string, conf *config) error {

@@ -102,7 +102,7 @@ func tui(conf *config) {
 			case <-ptl.evt:
 				ptl.log <- encodeStringCell("Reinitializing NFC portal")
 				go ptl.listen(conf)
-			case <-quit:
+			case <-conf.quit:
 				return
 			}
 		}
@@ -119,7 +119,7 @@ func tui(conf *config) {
 			switch {
 			case e.Key() == tcell.KeyEscape || e.Key() == tcell.KeyCtrlC:
 				u.destroy()
-				close(quit)
+				close(conf.quit)
 				return
 			case e.Key() == tcell.KeyCtrlL:
 				u.sync()

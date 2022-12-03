@@ -21,7 +21,7 @@ type portal struct {
 }
 
 // connect will block until a successful connection is established to the USB NFC portal.
-func (p *portal) connect() {
+func (p *portal) connect(quit <-chan struct{}) {
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
 	output := false
@@ -48,6 +48,9 @@ func (p *portal) connect() {
 // listen is the main hardware loop that handles all portal related things from connection over
 // handling its events to cleanly disconnecting on shutdown.
 func (p *portal) listen(conf *config) {
+	conf.wg.Add(1)
+	defer conf.wg.Done()
+
 	var err error
 	p.client, err = nfcptl.NewClient(conf.vendor, conf.device, verbose)
 	if err != nil {
@@ -55,7 +58,7 @@ func (p *portal) listen(conf *config) {
 		return
 	}
 
-	p.connect()
+	p.connect(conf.quit)
 
 	// TODO: Send this output to the UI, maybe close to the logo somewhere?
 	//client.SendCommand(nfcptl.GetDeviceName)
@@ -110,9 +113,8 @@ func (p *portal) listen(conf *config) {
 				p.reInit()
 				return
 			}
-		case <-quit:
+		case <-conf.quit:
 			p.client.Disconnect()
-			// TODO: we must somehow wait for a clean driver shutdown before quitting.
 			return
 		}
 	}
