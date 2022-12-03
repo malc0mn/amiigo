@@ -300,10 +300,6 @@ func (b *box) drawBordersPlain(x, y int) {
 // render renders a box into a two-dimensional rune slice. This intermediary step will allow us
 // to easily add animations when displaying the box.
 func (b *box) render() {
-	if b.r != nil {
-		return
-	}
-
 	b.r = make([][]rune, b.height())
 	for i := range b.r {
 		if i > 0 {
