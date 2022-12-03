@@ -17,7 +17,7 @@ func stringBody(s string) io.ReadCloser {
 	return io.NopCloser(strings.NewReader(s))
 }
 
-func assertResponse(t *testing.T, file string, res interface{}) {
+func assertResponse(t *testing.T, file string, res any) {
 	want := readFile(t, file)
 	got, err := json.MarshalIndent(res, "", "  ")
 	if err != nil {

@@ -43,7 +43,7 @@ const (
 )
 
 // EventContext represents the context to be passed to state machine action implementations.
-type EventContext interface{}
+type EventContext any
 
 // StateType represents a state type in the state machine. E.g. 'off'.
 type StateType string

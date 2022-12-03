@@ -29,7 +29,7 @@ type Driver interface {
 	// Setup returns the parameters needed to initialise the device, so it's ready for use. We're
 	// forcing the driver to hardcode it since it will give the most flexibility in writing other
 	// drivers where auto-detection might be harder or simply incorrect.
-	Setup() interface{}
+	Setup() any
 	// Drive is where the main driver logic sits. The client starts this function as a goroutine
 	// after the USB connection is established and the driver must take over to control the device.
 	Drive(c *Client)

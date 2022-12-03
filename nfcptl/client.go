@@ -49,7 +49,7 @@ func NewClient(vendor, device string, debug bool) (*Client, error) {
 
 // Setup returns the driver's setup struct. This will be protocol dependant: the protocol will
 // verify the setup struct and panic when it is not what it expects.
-func (c *Client) Setup() interface{} {
+func (c *Client) Setup() any {
 	return c.driver.Setup()
 }
 

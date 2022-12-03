@@ -288,7 +288,7 @@ func (stm *stm32f0) ProductId(alias string) (uint16, error) {
 	return 0, fmt.Errorf("stm32f0: unknown product %s", alias)
 }
 
-func (stm *stm32f0) Setup() interface{} {
+func (stm *stm32f0) Setup() any {
 	return DeviceSetup{
 		Config:           1,
 		Interface:        0,

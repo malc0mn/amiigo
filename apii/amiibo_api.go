@@ -11,7 +11,7 @@ import (
 	"unicode"
 )
 
-type queryHandler func(interface{}, *http.Request)
+type queryHandler func(any, *http.Request)
 
 type AmiiboAPI struct {
 	client  *http.Client
@@ -132,7 +132,7 @@ func (aa *AmiiboAPI) doAmiiboInfoCall(ar *AmiiboInfoRequest) ([]byte, error) {
 	return b, nil
 }
 
-func (aa *AmiiboAPI) doGetRequest(path string, q interface{}, qh queryHandler) ([]byte, error) {
+func (aa *AmiiboAPI) doGetRequest(path string, q any, qh queryHandler) ([]byte, error) {
 	req, err := http.NewRequest("GET", aa.baseUrl+path, nil)
 	if err != nil {
 		return nil, err
@@ -173,7 +173,7 @@ func lcFirst(s string) string {
 }
 
 // addKeyNameFilter adds key OR name to query string. Key will take precedence!
-func addKeyNameFilter(query interface{}, req *http.Request) {
+func addKeyNameFilter(query any, req *http.Request) {
 	kn := query.(*KeyNameRequest)
 	if kn == nil {
 		return
@@ -191,7 +191,7 @@ func addKeyNameFilter(query interface{}, req *http.Request) {
 }
 
 // addKeyValParams adds key value query parameters to the request.
-func addKeyValParams(query interface{}, req *http.Request) {
+func addKeyValParams(query any, req *http.Request) {
 	ar := query.(*AmiiboInfoRequest)
 	if ar == nil {
 		return

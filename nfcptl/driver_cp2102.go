@@ -157,7 +157,7 @@ func (cp *cp2102) ProductId(alias string) (uint16, error) {
 	return 0, fmt.Errorf("cp2102: unknown product %s", alias)
 }
 
-func (cp *cp2102) Setup() interface{} {
+func (cp *cp2102) Setup() any {
 	// TODO: how to get the port name here?
 	return Serial{
 		Port: "",
