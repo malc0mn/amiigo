@@ -1,6 +1,9 @@
 package main
 
-import "github.com/gdamore/tcell/v2"
+import (
+	"github.com/gdamore/tcell/v2"
+	"time"
+)
 
 // drawer defines the draw method which any ui element should implement.
 // When the 'animated' parameter is set to true, the box must be drawn with animation. When the
@@ -91,6 +94,8 @@ func tui(conf *config) {
 	u := newUi(conf.ui.invertImage)
 	u.draw(true)
 
+	t := time.Now()
+
 	// Connect to the portal when the UI is visible, so it can display the client logs etc.
 	ptl := newPortal(u.logBox.content, u.infoBox.content, u.usageBox.content, u.imageBox, conf.amiiboApiBaseUrl)
 	go ptl.listen(conf)
@@ -114,7 +119,11 @@ func tui(conf *config) {
 		ev := u.pollEvent()
 		switch e := ev.(type) {
 		case *tcell.EventResize:
-			u.sync()
+			// This is a workaround for a screen flicker that happens immediately after the first screen draw. It seems
+			// the resize event is always triggered after initial rendering?
+			if time.Since(t) > 500*time.Millisecond {
+				u.sync()
+			}
 		case *tcell.EventKey:
 			switch {
 			case e.Key() == tcell.KeyEscape || e.Key() == tcell.KeyCtrlC:
