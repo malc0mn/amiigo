@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 	"time"
 )
@@ -480,9 +481,19 @@ func (stm *stm32f0) getNextPollCommand(pos int) (int, DriverCommand) {
 
 // handleToken processes the token placed on the NFC portal.
 func (stm *stm32f0) handleToken(buff []byte) {
-	l := int(buff[4])    // Byte 4 in the sequence is the NUID length which can be 4 or 7 bytes long.
-	s := 5               // The NUID starts at byte 5.
-	uid := buff[s : s+l] // Read the full NUID starting on byte 5 with length l.
+	if buff == nil {
+		log.Println("stm32f0: handleToken: nil bytes received")
+		return
+	}
+
+	l := int(buff[4]) // Byte 4 in the sequence is the NUID length which can be 4 or 7 bytes long.
+	s := 5            // The NUID starts at byte 5.
+	end := s + l
+	if len(buff) < end {
+		log.Printf("stm32f0: handleToken: too few bytes: %d bytes received, at least %d expected", len(buff), end)
+		return
+	}
+	uid := buff[s:end] // Read the full NUID starting on byte 5 with length l.
 
 	log.Printf("stm32f0: token detected with id %#0"+fmt.Sprintf("%d", l)+"x", uid)
 
@@ -677,7 +688,14 @@ func (stm *stm32f0) sendCommand(cmd DriverCommand, args []byte) ([]byte, bool) {
 		log.Println("stm32f0: sending command:")
 		log.Println(hex.Dump(usbCmd.Marshal())) // No Println here since hex.Dump() prints a newline.
 	}
-	n, _ := stm.Write(usbCmd.Marshal()) // TODO: error handling
+	n, err := stm.Write(usbCmd.Marshal())
+	if err != nil {
+		log.Printf("stm32f0: %s", err)
+		if strings.Contains(err.Error(), "no device") {
+			stm.c.Disconnect()
+			return nil, false
+		}
+	}
 	if stm.c.Debug() {
 		log.Printf("stm32f0: written %d bytes", n)
 	}

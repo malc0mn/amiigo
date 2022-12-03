@@ -72,8 +72,11 @@ func (c *Client) Done() {
 	c.wg.Done()
 }
 
-// Disconnect cleanly disconnects the client and frees up all resources.
+// Disconnect cleanly disconnects the client and frees up all resources. It also sends the
+// Disconnect event.
 func (c *Client) Disconnect() error {
+	c.PublishEvent(NewEvent(Disconnect, []byte{}))
+
 	close(c.terminate)
 
 	// Wait for a clean shutdown of the driver's goroutines.

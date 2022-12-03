@@ -38,6 +38,8 @@ const (
 	TokenTagDataError EventType = "TokenTagDataError"
 	// UnknownCommand is sent when the driver has received an unknown command.
 	UnknownCommand EventType = "UnknownCommand"
+	// Disconnect is sent when the Client.Disconnect method is called.
+	Disconnect EventType = "Disconnect"
 )
 
 type Event struct {
