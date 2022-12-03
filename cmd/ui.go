@@ -95,6 +95,19 @@ func tui(conf *config) {
 	ptl := newPortal(u.logBox.content, u.infoBox.content, u.usageBox.content, u.imageBox, conf.amiiboApiBaseUrl)
 	go ptl.listen(conf)
 
+	// Re-init loop for disconnect.
+	go func() {
+		for {
+			select {
+			case <-ptl.evt:
+				ptl.log <- encodeStringCell("Reinitializing NFC portal")
+				go ptl.listen(conf)
+			case <-quit:
+				return
+			}
+		}
+	}()
+
 	for {
 		u.show()
 

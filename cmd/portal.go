@@ -12,11 +12,12 @@ import (
 // portal holds the parts that need to be controlled by the NFC portal.
 type portal struct {
 	client *nfcptl.Client
-	log    chan<- []byte
-	ifo    chan<- []byte
-	usg    chan<- []byte
-	img    *imageBox
-	api    *apii.AmiiboAPI
+	evt    chan struct{}   // Event channel used to re-init the portal.
+	log    chan<- []byte   // Logger channel.
+	ifo    chan<- []byte   // Info channel.
+	usg    chan<- []byte   // Usage channel.
+	img    *imageBox       // The image box.
+	api    *apii.AmiiboAPI // An amiibo HTTP API instance.
 }
 
 // connect will block until a successful connection is established to the USB NFC portal.
@@ -55,7 +56,6 @@ func (p *portal) listen(conf *config) {
 	}
 
 	p.connect()
-	defer p.client.Disconnect()
 
 	// TODO: Send this output to the UI, maybe close to the logo somewhere?
 	//client.SendCommand(nfcptl.GetDeviceName)
@@ -105,17 +105,31 @@ func (p *portal) listen(conf *config) {
 					continue
 				}
 				p.usg <- formatAmiiboUsage(cu)
+			} else if e.Name() == nfcptl.Disconnect {
+				p.log <- encodeStringCell("NFC portal disconnected!")
+				p.reInit()
+				return
 			}
 		case <-quit:
+			p.client.Disconnect()
 			// TODO: we must somehow wait for a clean driver shutdown before quitting.
 			return
 		}
 	}
 }
 
+// reInit signals the receiver that the portal needs to be re-initialized due to a disconnect. The
+// signal is sent from the listen function which should be running as a go routine. When this
+// signal is sent, the listen go routine is stopped so that the receiver can simply start a new
+// listen go routine to re-initialize the portal.
+func (p *portal) reInit() {
+	p.evt <- struct{}{}
+}
+
 // newPortal returns a new portal ready for use.
 func newPortal(log, ifo, usg chan<- []byte, img *imageBox, baseUrl string) *portal {
 	return &portal{
+		evt: make(chan struct{}),
 		log: log,
 		ifo: ifo,
 		usg: usg,
