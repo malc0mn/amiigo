@@ -13,6 +13,7 @@ import (
 
 type queryHandler func(any, *http.Request)
 
+// AmiiboAPI is the base struct needed to do API calls.
 type AmiiboAPI struct {
 	client  *http.Client
 	baseUrl string
