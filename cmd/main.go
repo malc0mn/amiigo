@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	ok               = 0
-	errGeneral       = 1
-	errOpenConfig    = 102
-	errOpenLogFile   = 103
+	ok             = 0
+	errGeneral     = 1
+	errOpenConfig  = 102
+	errOpenLogFile = 103
 )
 
 var (
