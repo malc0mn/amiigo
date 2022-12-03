@@ -38,6 +38,7 @@ func (usb *USB) Connect(c *Client) error {
 
 	usb.ctx = gousb.NewContext()
 	if c.Debug() {
+		// TODO: libusb logs to stderr, find a way to redirect it.
 		//usb.ctx.Debug(4)
 	}
 

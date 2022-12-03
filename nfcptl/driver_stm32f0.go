@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"log"
-	"os"
 	"sync"
 	"time"
 )
@@ -579,7 +578,7 @@ func (stm *stm32f0) handleToken(buff []byte) {
 	}
 	if stm.c.Debug() {
 		log.Println("stm32f0: full token data:")
-		fmt.Fprintln(os.Stderr, hex.Dump(token))
+		log.Println(hex.Dump(token))
 	}
 	stm.c.PublishEvent(NewEvent(TokenTagData, token))
 }
@@ -676,7 +675,7 @@ func (stm *stm32f0) sendCommand(cmd DriverCommand, args []byte) ([]byte, bool) {
 	)
 	if stm.c.Debug() {
 		log.Println("stm32f0: sending command:")
-		fmt.Fprint(os.Stderr, hex.Dump(usbCmd.Marshal())) // No Println here since hex.Dump() prints a newline.
+		log.Println(hex.Dump(usbCmd.Marshal())) // No Println here since hex.Dump() prints a newline.
 	}
 	n, _ := stm.Write(usbCmd.Marshal()) // TODO: error handling
 	if stm.c.Debug() {
@@ -687,10 +686,10 @@ func (stm *stm32f0) sendCommand(cmd DriverCommand, args []byte) ([]byte, bool) {
 	b := make([]byte, maxSize)
 	// STM32F0_SetLedState does not get a response!
 	if cmd != STM32F0_SetLedState {
-		stm.Read(b) // TODO: error handling
+		stm.Read(b) // TODO: error handling?
 		if stm.c.Debug() {
 			log.Println("stm32f0: command reply:")
-			fmt.Fprintln(os.Stderr, hex.Dump(b))
+			log.Println(hex.Dump(b))
 		}
 	}
 	if event := stm.getEventForDriverCommand(cmd, args); event != NoEvent {
