@@ -393,6 +393,10 @@ func (stm *stm32f0) commandListener() {
 		stm.sendCommand(STM32F0_RFFieldOn, []byte{})
 	}
 
+	// It would be nice to reset the LED here which can remain on after a non-clean shutdown. However, sending the
+	// STM32F0_LedOff here will make the device completely unresponsive.
+	// Also tried combinations with turning the RF field on/off and the LED on/off, nothing works. Maybe later ;-)
+
 	for {
 		select {
 		case <-ticker.C:
