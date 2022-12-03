@@ -243,11 +243,7 @@ func (b *box) draw(animated bool, x, y int) (int, int) {
 		b.redraw()
 	}
 
-	if animated {
-		b.drawBordersAnimated(x, y)
-	} else {
-		b.drawBordersPlain(x, y)
-	}
+	b.drawBorders(x, y, animated)
 
 	b.drawContent()
 
@@ -263,35 +259,17 @@ func (b *box) draw(animated bool, x, y int) (int, int) {
 	return nextX, nextY
 }
 
-// drawBordersAnimated does the same as drawBordersPlain but will add animation. This is used when
-// drawing the UI for the first time.
+// drawBorders draws a full box with title. When redrawing the UI on tcell.EventResize, animate
+// will be set to false. When drawing the box for the first time, animated will be true.
 // x and y should be the x and y position after the horizontal and vertical end of the last box
 // drawn. Will only be used when the box has been set to auto calculate x and/or y.
-func (b *box) drawBordersAnimated(x, y int) {
+func (b *box) drawBorders(x, y int, animate bool) {
 	b.render()
 	b.setStartXY(x, y)
 	for vpos, l := range b.r {
-		if vpos == 0 {
+		if animate && vpos == 0 {
 			b.animateLine(l, vpos)
 		}
-		for hpos, r := range l {
-			if r == 0 {
-				b.s.SetContent(b.opts.xPos+hpos, b.opts.yPos+vpos, r, nil, tcell.StyleDefault.Background(b.opts.bgColor))
-				continue
-			}
-			b.s.SetContent(b.opts.xPos+hpos, b.opts.yPos+vpos, r, nil, tcell.StyleDefault)
-		}
-	}
-}
-
-// drawBordersPlain draws a full box with title. This is used when redrawing the UI on
-// tcell.EventResize.
-// x and y should be the x and y position after the horizontal and vertical end of the last box
-// drawn. Will only be used when the box has been set to auto calculate x and/or y.
-func (b *box) drawBordersPlain(x, y int) {
-	b.render()
-	b.setStartXY(x, y)
-	for vpos, l := range b.r {
 		for hpos, r := range l {
 			if r == 0 {
 				b.s.SetContent(b.opts.xPos+hpos, b.opts.yPos+vpos, r, nil, tcell.StyleDefault.Background(b.opts.bgColor))
