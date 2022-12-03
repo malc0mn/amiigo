@@ -108,6 +108,8 @@ func (p *portal) listen(conf *config) {
 					continue
 				}
 				p.usg <- formatAmiiboUsage(cu)
+
+				p.log <- encodeStringCell("Ready")
 			} else if e.Name() == nfcptl.Disconnect {
 				p.log <- encodeStringCell("NFC portal disconnected!")
 				p.reInit()
