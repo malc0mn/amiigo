@@ -133,6 +133,7 @@ func (r *ringBuffer) Read(p []byte) (int, error) {
 	return int(readLength), nil
 }
 
+// Reset resets the buffer to all zero values and sets the read and write position to zero.
 func (r *ringBuffer) Reset() {
 	for i := range r.buffer {
 		r.buffer[i] = 0
