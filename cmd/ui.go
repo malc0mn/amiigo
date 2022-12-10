@@ -5,20 +5,29 @@ import (
 	"time"
 )
 
-// drawer defines the draw method which any ui element should implement.
-// When the 'animated' parameter is set to true, the box must be drawn with animation. When the
-// tcell.Screen is refreshed or resized, 'animated' will be false so that the ui is instantly
-// displayed.
-// The return values must be the first x column to the right side of the element and the first y
-// column below the element.
-type drawer interface {
+// element defines the basic methods which any ui element should implement.
+type element interface {
+	// activate marks the element as active, so it will process events.
+	activate()
+	// deactivate deactivates the element, so it will no longer process events.
+	deactivate()
+	// draw draws the element. When the 'animated' parameter is set to true, the element must be drawn with animation.
+	// When the tcell.Screen is refreshed or resized, 'animated' will be false so that the ui is instantly displayed.
+	// The return values must be the first x column to the right side of the element and the first y column below the
+	// element.
 	draw(animated bool, x, y int) (int, int)
+	// hasKey must return true if the element is bound to the given rune.
+	hasKey(r rune) bool
+	// handleKey must act on the given tcell.EventKey.
+	handleKey(k *tcell.EventKey)
+	// name returns the name of the element.
+	name() string
 }
 
 // ui holds all the user interface components and the screen to render them on.
 type ui struct {
 	s        tcell.Screen
-	elements []drawer
+	elements []element
 	infoBox  *box
 	imageBox *imageBox
 	usageBox *box
@@ -33,9 +42,9 @@ func (u *ui) draw(animate bool) {
 	drawLogo(u.s, x, 0, animate)
 	nextX := -1
 	nextY := 0
-	for _, b := range u.elements {
+	for _, e := range u.elements {
 		// nextX+1 to have a vertical margin of one char.
-		nextX, nextY = b.draw(animate, nextX+1, nextY)
+		nextX, nextY = e.draw(animate, nextX+1, nextY)
 	}
 }
 
@@ -61,6 +70,31 @@ func (u *ui) destroy() {
 	u.s.Fini()
 }
 
+// handleElementKey will block waiting for input for the active box.
+func (u *ui) handleElementKey(r rune) {
+	for _, b := range u.elements {
+		if b.hasKey(r) {
+			u.logBox.content <- encodeStringCell("Activating '" + b.name() + "' box; ESC to deactivate")
+			b.activate()
+			for {
+				ev := u.pollEvent()
+				switch e := ev.(type) {
+				case *tcell.EventKey:
+					switch {
+					// TODO: do we deal with CTRL+C here, or just leave that be?
+					case e.Key() == tcell.KeyEscape:
+						u.logBox.content <- encodeStringCell("Deactivating '" + b.name() + "' box")
+						b.deactivate()
+						return
+					default:
+						b.handleKey(e)
+					}
+				}
+			}
+		}
+	}
+}
+
 // newUi create a new ui structure.
 func newUi(invertImage bool) *ui {
 	actionsContent := []string{
@@ -76,13 +110,13 @@ func newUi(invertImage bool) *ui {
 	s, _ := initScreen()
 	info := newBox(s, boxOpts{title: "info", xPos: 1, yPos: logoHeight() + 1, width: 16, height: 70})
 	image := newImageBox(s, boxOpts{title: "image", xPos: -1, yPos: -1, width: 36, height: 70, bgColor: tcell.ColorBlack}, invertImage)
-	usage := newBox(s, boxOpts{title: "usage", xPos: -1, yPos: -1, width: 46, height: 70})
+	usage := newBox(s, boxOpts{title: "usage", key: 'u', xPos: -1, yPos: -1, width: 46, height: 70, scroll: true})
 	logs := newBox(s, boxOpts{title: "logs", stripLeadingSpace: true, xPos: -1, yPos: -1, width: 52, height: 20, history: true})
 	actions := newBox(s, boxOpts{title: "actions", xPos: -1, yPos: -1, width: 46, height: 20, fixedContent: actionsContent})
 
 	return &ui{
 		s:        s,
-		elements: []drawer{info, image, usage, logs, actions},
+		elements: []element{info, image, usage, logs, actions},
 		infoBox:  info,
 		imageBox: image,
 		usageBox: usage,
@@ -117,9 +151,9 @@ func tui(conf *config) {
 		}
 	}()
 
-	for {
-		u.show()
+	u.show()
 
+	for {
 		ev := u.pollEvent()
 		switch e := ev.(type) {
 		case *tcell.EventResize:
@@ -141,7 +175,10 @@ func tui(conf *config) {
 			case e.Key() == tcell.KeyCtrlL:
 				u.sync()
 			case e.Rune() == 'I' || e.Rune() == 'i':
+				u.logBox.content <- encodeStringCell("Toggle image invert")
 				u.imageBox.invertImage()
+			default:
+				u.handleElementKey(e.Rune())
 			}
 		}
 	}

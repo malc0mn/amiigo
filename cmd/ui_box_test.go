@@ -262,3 +262,28 @@ func TestBox_Draw(t *testing.T) {
 
 	b.destroy()
 }
+
+func TestBox_DrawScroll(t *testing.T) {
+	s := newTestScreen(t)
+
+	b := newBox(s, boxOpts{title: "test", stripLeadingSpace: true, xPos: -1, yPos: -1, width: 33, height: 50, scroll: true, history: false})
+	b.setStartXY(1, 1)
+
+	x := 6
+	y := 5
+	b.draw(false, x, y)
+
+	assertScreenContents(t, s, "ui_box_border_26x12.txt", x, y)
+
+	// Multiple content passes should always yield the same result.
+	data := encodeStringCell("Consectetur a erat nam at lectus urna duis convallis convallis. Leo urna molestie at elementum. Diam vel quam elementum pulvinar etiam non quam lacus. Ut tellus elementum sagittis vitae et leo duis. Tortor aliquam nulla facilisi cras fermentum odio eu feugiat pretium. Id diam vel quam elementum. Augue neque gravida in fermentum. Ut pharetra sit amet aliquam id diam maecenas ultricies mi. Quis lectus nulla at volutpat diam. Dui faucibus in ornare quam viverra.")
+	for i := 0; i < 10; i++ {
+		t.Logf("Run %d", i)
+		b.buffer.Reset() // Simulate the 'history: false' option.
+		b.buffer.Write(data)
+		b.draw(false, x, y)
+		assertScreenContents(t, s, "ui_box_border_26x12_content_scroll.txt", x, y)
+	}
+
+	b.destroy()
+}

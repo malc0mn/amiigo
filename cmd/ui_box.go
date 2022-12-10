@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gdamore/tcell/v2"
 	"time"
+	"unicode"
 )
 
 const (
@@ -32,6 +33,7 @@ type cell struct {
 
 type boxOpts struct {
 	title             string      // The title of the box.
+	key               rune        // The keyboard key that will activate this box to allow interaction with it.
 	stripLeadingSpace bool        // Set to true to strip leading spaces.
 	xPos              int         // The x position the box should be drawn at. Pass -1 to auto position after the previous box.
 	yPos              int         // The y position the box should be drawn at. Pass -1 to auto position after the previous box.
@@ -39,6 +41,7 @@ type boxOpts struct {
 	height            int         // The height of the box in cells or percent.
 	typ               int         // The type of the box: boxTypePercent or boxTypeCharacter. Percent is the default.
 	history           bool        // Set to true to preserve history, otherwise the buffer will always be replaced completely.
+	scroll            bool        // Allow scrolling using arrow keys.
 	bgColor           tcell.Color // The background colour.
 	fixedContent      []string    // Display fixed content. No goroutine that listens for content will be running when set.
 }
@@ -48,6 +51,8 @@ type box struct {
 	opts      boxOpts      // The options for the box.
 	r         [][]rune     // The internal render array.
 	s         tcell.Screen // The screen to display the box on.
+	sbb       [][]byte     // The internal scrollback buffer of the box.
+	sbbStart  int          // The line to start displaying content from.
 	autoX     bool         // When true will calculate the x pos based on the previously drawn box.
 	autoY     bool         // When true will calculate the y pos based on the previously drawn box.
 	widthC    int          // The with in characters of the box.
@@ -59,6 +64,7 @@ type box struct {
 	content   chan []byte  // The channel that will receive the box content.
 	buffer    *ringBuffer  // The buffer holding the box content
 	redraw    func()       // This is a callback to allow the box to do preparations BEFORE the UI completely redraws the box. This happens on initial drawing or screen resize, not on regular content updates.
+	active    bool         // Indicates if this box is activated for user interaction or not.
 }
 
 // newBox creates a new box struct ready for display on screen by calling box.draw(). newBox also
@@ -144,15 +150,30 @@ func (b *box) height() int {
 	return b.heightC
 }
 
+// bounds returns the content bounds of the box. Content may not be rendered outside of the
+// returned margins.
+func (b *box) bounds() (int, int, int, int) {
+	hmargin := 2
+	// TODO: account for scrollbar here?
+	vmargin := 1
+	marginLeft := b.opts.xPos + hmargin
+	marginRight := b.opts.xPos - 1 + b.width() - hmargin
+	marginTop := b.opts.yPos + vmargin
+	marginBottom := b.opts.yPos - 1 + b.height() - vmargin
+
+	return marginLeft, marginRight, marginTop, marginBottom
+}
+
 // destroy destroys a box structure. It will close and nullify the content channel.
 func (b *box) destroy() {
 	close(b.content)
 	b.content = nil
 }
 
-// update updates the contents of the box. Calling update blocks until the box.content channel is closed
-// or box.destroy() is called. It is therefore meant to be executed as a go routine.
-// When the content reaches the end of the box, all content is shifted up one line.
+// update updates the contents of the box. Calling update blocks until the box.content channel is
+// closed or box.destroy() is called. It is therefore meant to be executed as a go routine.
+// When the content reaches the end of the box, all content is shifted up one line unless the
+// scroll option is set.
 func (b *box) update() {
 	for c := range b.content {
 		if !b.opts.history {
@@ -160,20 +181,17 @@ func (b *box) update() {
 		}
 		b.buffer.Write(c)
 
+		b.renderContent()
 		b.drawContent()
 	}
 }
 
-// drawContent draws the contents from the buffer inside borders of the box.
-func (b *box) drawContent() {
-	hmargin := 2
-	vmargin := 1
-	marginLeft := b.opts.xPos + hmargin
-	marginRight := b.opts.xPos - 1 + b.width() - hmargin
-	marginTop := b.opts.yPos + vmargin
-	marginBottom := b.opts.yPos - 1 + b.height() - vmargin
-	hpos := marginLeft
-	vpos := marginTop
+// renderContent renders the ringbuffer into separate lines to be displayed. This will allow easy
+// scrolling later on.
+// This should only be done when new content is coming in, or when redrawing on screen resize!
+func (b *box) renderContent() {
+	marginLeft, marginRight, _, _ := b.bounds()
+	lineWidth := marginRight - marginLeft
 
 	// We make a buffer big enough to hold the number of characters this box can display. We add overhead to it since we
 	// will be skipping null bytes, leading spaces and enters.
@@ -184,55 +202,89 @@ func (b *box) drawContent() {
 		return
 	}
 
+	b.sbb = nil // Always reset the scrollback buffer.
+	hpos := 0
+	var line []byte
 	for i := 0; i < n; i += cellSize {
-		// First ensure that we draw within bounds...
-		if hpos > marginRight {
-			hpos = marginLeft
-			vpos++
-		}
-		if vpos > marginBottom {
-			for y := marginTop + 1; y <= marginBottom; y++ {
-				// Shift all content up one line.
-				for x := marginLeft; x <= marginRight; x++ {
-					mainc, combc, style, _ := b.s.GetContent(x, y)
-					// Place this rune one line up.
-					b.s.SetContent(x, y-1, mainc, combc, style)
-				}
-			}
-			// Clear the last line.
-			for x := marginLeft; x <= marginRight; x++ {
-				b.s.SetContent(x, marginBottom, 0, nil, tcell.StyleDefault.Background(b.opts.bgColor))
-			}
-			// Stay on the last line
-			vpos = marginBottom
+		if hpos > lineWidth {
+
+			// End of line, start a new one.
+			b.sbb = append(b.sbb, line)
+			line = nil
+			hpos = 0
 		}
 
-		// ... then start updating content.
 		c := decodeCell(p[i:])
-		// Don't render null bytes
+
+		// Don't render null bytes.
 		if c.r == rune(0) {
 			continue
 		}
 
 		// Don't render leading spaces.
-		if b.opts.stripLeadingSpace && hpos == marginLeft && c.r == ' ' {
+		if b.opts.stripLeadingSpace && hpos == 0 && c.r == ' ' {
 			continue
 		}
+
 		// Handle newlines.
 		if c.r == '\n' {
-			// First clear the rest of the line.
-			for x := hpos; x <= marginRight; x++ {
-				b.s.SetContent(x, vpos, 0, nil, tcell.StyleDefault.Background(b.opts.bgColor))
-			}
-			// Then go to the next line.
-			vpos++
-			hpos = marginLeft
+			hpos = lineWidth + 1 // This will trigger a newline.
 			continue
 		}
-		b.s.SetContent(hpos, vpos, c.r, nil, c.s)
+
+		line = append(line, p[i:i+tcellSize]...)
 		hpos++
 	}
-	b.s.Show()
+	b.sbb = append(b.sbb, line)
+}
+
+// drawContent draws the contents from the srollback buffer inside borders of the box.
+func (b *box) drawContent() {
+	defer b.s.Show() // Deferred since we have two exit points in this function!
+
+	marginLeft, marginRight, marginTop, marginBottom := b.bounds()
+	hpos := marginLeft
+	vpos := marginTop
+
+	for line := b.sbbStart; line < len(b.sbb); line++ {
+		for i := 0; i < len(b.sbb[line]); i += cellSize {
+			if vpos > marginBottom {
+				if b.opts.scroll {
+					// When dealing with a scrollable box, we'll stop drawing when the box is full. The user will have
+					// to scroll using the arrow keys or pgup/down home/end.
+					return
+				}
+
+				for y := marginTop + 1; y <= marginBottom; y++ {
+					// Shift all content up one line.
+					for x := marginLeft; x <= marginRight; x++ {
+						mainc, combc, style, _ := b.s.GetContent(x, y)
+						// Place this rune one line up.
+						b.s.SetContent(x, y-1, mainc, combc, style)
+					}
+				}
+				// Clear the last line.
+				for x := marginLeft; x <= marginRight; x++ {
+					b.s.SetContent(x, marginBottom, 0, nil, tcell.StyleDefault.Background(b.opts.bgColor))
+				}
+				// Stay on the last line
+				vpos = marginBottom
+			}
+
+			// ... then start updating content.
+			c := decodeCell(b.sbb[line][i:])
+
+			b.s.SetContent(hpos, vpos, c.r, nil, c.s)
+			hpos++
+		}
+		// First clear the rest of the line.
+		for x := hpos; x <= marginRight; x++ {
+			b.s.SetContent(x, vpos, 0, nil, tcell.StyleDefault.Background(b.opts.bgColor))
+		}
+		// Then go to the next line.
+		hpos = marginLeft
+		vpos++
+	}
 }
 
 // draw draws a box with title where the 'animated' parameter defines how the box will be drawn.
@@ -245,6 +297,7 @@ func (b *box) draw(animated bool, x, y int) (int, int) {
 
 	b.drawBorders(x, y, animated)
 
+	b.renderContent()
 	b.drawContent()
 
 	nextX := b.opts.xPos + len(b.r[0])
@@ -260,7 +313,7 @@ func (b *box) draw(animated bool, x, y int) (int, int) {
 }
 
 // drawBorders draws a full box with title. When redrawing the UI on tcell.EventResize, animate
-// will be set to false. When drawing the box for the first time, animated will be true.
+// will be set to false. When drawing the box for the first time, animate will be true.
 // x and y should be the x and y position after the horizontal and vertical end of the last box
 // drawn. Will only be used when the box has been set to auto calculate x and/or y.
 func (b *box) drawBorders(x, y int, animate bool) {
@@ -275,7 +328,7 @@ func (b *box) drawBorders(x, y int, animate bool) {
 				b.s.SetContent(b.opts.xPos+hpos, b.opts.yPos+vpos, r, nil, tcell.StyleDefault.Background(b.opts.bgColor))
 				continue
 			}
-			b.s.SetContent(b.opts.xPos+hpos, b.opts.yPos+vpos, r, nil, tcell.StyleDefault)
+			b.s.SetContent(b.opts.xPos+hpos, b.opts.yPos+vpos, r, nil, b.getStyleForRune(r))
 		}
 	}
 }
@@ -391,8 +444,8 @@ func (b *box) animateLine(line []rune, vpos int) {
 						b.s.SetContent(xRight, y, bc[next], nil, tcell.StyleDefault)
 					} else {
 						// No cursor frames left, draw the correct rune.
-						b.s.SetContent(xLeft, y, line[posl], nil, tcell.StyleDefault)
-						b.s.SetContent(xRight, y, line[posr], nil, tcell.StyleDefault)
+						b.s.SetContent(xLeft, y, line[posl], nil, b.getStyleForRune(line[posl]))
+						b.s.SetContent(xRight, y, line[posr], nil, b.getStyleForRune(line[posr]))
 					}
 					first = false
 					break
@@ -407,4 +460,97 @@ func (b *box) animateLine(line []rune, vpos int) {
 		b.s.Show()
 		time.Sleep(time.Millisecond * 5)
 	}
+}
+
+// getStyleForRune returns the style for a given rune. This is used to underline the shortcut key
+// for this box and to render the title as being active or not.
+func (b *box) getStyleForRune(r rune) tcell.Style {
+	style := tcell.StyleDefault
+
+	// TODO: find a check that also works on non-latin chars.
+	if r != ' ' && !unicode.IsLetter(r) {
+		return style
+	}
+
+	attrs := tcell.AttrNone
+	if b.active {
+		attrs = attrs | tcell.AttrReverse
+	}
+
+	if r == b.opts.key {
+		attrs = attrs | tcell.AttrUnderline | tcell.AttrBold
+	}
+
+	// If we do not set background and foreground when setting attributes, we'll get a rendering flaw.
+	// It's a shame we cannot get the default style from the screen. There is a tcell.Screen.SetStyle() but no getter :(
+	return style.Background(backColour).Foreground(fontColour).Attributes(attrs)
+}
+
+// lastPage returns offset for the last page of the scrollback buffer.
+func (b *box) lastPage() int {
+	_, _, marginTop, marginBottom := b.bounds()
+	return len(b.sbb) - marginBottom - marginTop
+}
+
+// pageSize returns the number of lines a single page can display.
+func (b *box) pageSize() int {
+	_, _, marginTop, marginBottom := b.bounds()
+	return marginBottom - marginTop
+}
+
+// updateStartLine will increment or decrement the scrollback buffer start line and keep it within
+// bounds.
+func (b *box) updateStartLine(i int) {
+	last := b.lastPage()
+
+	b.sbbStart += i
+	if b.sbbStart > last {
+		b.sbbStart = last
+	}
+
+	if b.sbbStart < 0 {
+		b.sbbStart = 0
+	}
+}
+
+// hasKey returns true if the given rune matches the box's shortcut key.
+func (b *box) hasKey(r rune) bool {
+	return b.opts.key != 0 && b.opts.key == r
+}
+
+// handleKey will
+func (b *box) handleKey(e *tcell.EventKey) {
+	switch {
+	case b.opts.scroll && e.Key() == tcell.KeyDown:
+		b.updateStartLine(1)
+	case b.opts.scroll && e.Key() == tcell.KeyEnd:
+		b.sbbStart = b.lastPage()
+	case b.opts.scroll && e.Key() == tcell.KeyHome:
+		b.sbbStart = 0
+	case b.opts.scroll && e.Key() == tcell.KeyPgDn:
+		b.updateStartLine(b.pageSize())
+	case b.opts.scroll && e.Key() == tcell.KeyPgUp:
+		b.updateStartLine(-b.pageSize())
+	case b.opts.scroll && e.Key() == tcell.KeyUp:
+		b.updateStartLine(-1)
+	}
+
+	b.drawContent()
+}
+
+// deactivate sets the active flag to true and redraws the box.
+func (b *box) activate() {
+	b.active = true
+	b.draw(false, b.opts.xPos, b.opts.yPos)
+}
+
+// deactivate sets the active flag to false and redraws the box.
+func (b *box) deactivate() {
+	b.active = false
+	b.draw(false, b.opts.xPos, b.opts.yPos)
+}
+
+// returns the name, or title, of the box.
+func (b *box) name() string {
+	return b.opts.title
 }
