@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"sync"
 	"time"
 	"unicode"
 )
@@ -48,23 +49,24 @@ type boxOpts struct {
 
 // box represents a ui box element that can display content.
 type box struct {
-	opts      boxOpts      // The options for the box.
-	r         [][]rune     // The internal render array.
-	s         tcell.Screen // The screen to display the box on.
-	sbb       [][]byte     // The internal scrollback buffer of the box.
-	sbbStart  int          // The line to start displaying content from.
-	autoX     bool         // When true will calculate the x pos based on the previously drawn box.
-	autoY     bool         // When true will calculate the y pos based on the previously drawn box.
-	widthC    int          // The with in characters of the box.
-	widthP    int          // The with in percent of the box.
-	minWidth  int          // The minimal with of the box.
-	heightC   int          // The height in characters of the box.
-	heightP   int          // The height in percent of the box.
-	minHeight int          // The minimal height of the box.
-	content   chan []byte  // The channel that will receive the box content.
-	buffer    *ringBuffer  // The buffer holding the box content
-	redraw    func()       // This is a callback to allow the box to do preparations BEFORE the UI completely redraws the box. This happens on initial drawing or screen resize, not on regular content updates.
-	active    bool         // Indicates if this box is activated for user interaction or not.
+	opts       boxOpts      // The options for the box.
+	r          [][]rune     // The internal render array.
+	s          tcell.Screen // The screen to display the box on.
+	sbb        [][]byte     // The internal scrollback buffer of the box.
+	sbbStartMu sync.Mutex   // Mutex for ssbStart.
+	sbbStart   int          // The line to start displaying content from.
+	autoX      bool         // When true will calculate the x pos based on the previously drawn box.
+	autoY      bool         // When true will calculate the y pos based on the previously drawn box.
+	widthC     int          // The with in characters of the box.
+	widthP     int          // The with in percent of the box.
+	minWidth   int          // The minimal with of the box.
+	heightC    int          // The height in characters of the box.
+	heightP    int          // The height in percent of the box.
+	minHeight  int          // The minimal height of the box.
+	content    chan []byte  // The channel that will receive the box content.
+	buffer     *ringBuffer  // The buffer holding the box content
+	redraw     func()       // This is a callback to allow the box to do preparations BEFORE the UI completely redraws the box. This happens on initial drawing or screen resize, not on regular content updates.
+	active     bool         // Indicates if this box is activated for user interaction or not.
 }
 
 // newBox creates a new box struct ready for display on screen by calling box.draw(). newBox also
@@ -207,7 +209,6 @@ func (b *box) renderContent() {
 	var line []byte
 	for i := 0; i < n; i += cellSize {
 		if hpos > lineWidth {
-
 			// End of line, start a new one.
 			b.sbb = append(b.sbb, line)
 			line = nil
@@ -278,8 +279,10 @@ func (b *box) drawContent() {
 			hpos++
 		}
 		// First clear the rest of the line.
-		for x := hpos; x <= marginRight; x++ {
-			b.s.SetContent(x, vpos, 0, nil, tcell.StyleDefault.Background(b.opts.bgColor))
+		if vpos <= marginBottom {
+			for x := hpos; x <= marginRight; x++ {
+				b.s.SetContent(x, vpos, 0, nil, tcell.StyleDefault.Background(b.opts.bgColor))
+			}
 		}
 		// Then go to the next line.
 		hpos = marginLeft
@@ -488,22 +491,24 @@ func (b *box) getStyleForRune(r rune) tcell.Style {
 
 // lastPage returns offset for the last page of the scrollback buffer.
 func (b *box) lastPage() int {
-	_, _, marginTop, marginBottom := b.bounds()
-	return len(b.sbb) - marginBottom - marginTop
+	return len(b.sbb) - b.pageSize()
 }
 
 // pageSize returns the number of lines a single page can display.
 func (b *box) pageSize() int {
 	_, _, marginTop, marginBottom := b.bounds()
-	return marginBottom - marginTop
+	return marginBottom - marginTop + 1
 }
 
-// updateStartLine will increment or decrement the scrollback buffer start line and keep it within
-// bounds.
-func (b *box) updateStartLine(i int) {
-	last := b.lastPage()
+// goTo will set the scrollback buffer to start at the given line, keeping it within bounds, and
+// redraw the content.
+func (b *box) goTo(i int) {
+	b.sbbStartMu.Lock()
+	defer b.sbbStartMu.Unlock()
 
-	b.sbbStart += i
+	b.sbbStart = i
+
+	last := b.lastPage()
 	if b.sbbStart > last {
 		b.sbbStart = last
 	}
@@ -511,6 +516,24 @@ func (b *box) updateStartLine(i int) {
 	if b.sbbStart < 0 {
 		b.sbbStart = 0
 	}
+	b.drawContent()
+}
+
+// scrollTo will increment or decrement the scrollback buffer start line keeping it within bounds
+// and will redraw the box content.
+// A positive value will scroll down, a negative value will scroll up.
+func (b *box) scrollTo(i int) {
+	b.goTo(b.sbbStart + i)
+}
+
+// scrollHome will reset the scrollback buffer start line to zero and redraw the content.
+func (b *box) scrollHome() {
+	b.goTo(0)
+}
+
+// scrollEnd will set the scrollback buffer start line to the last page and redraw the content.
+func (b *box) scrollEnd() {
+	b.goTo(b.lastPage())
 }
 
 // hasKey returns true if the given rune matches the box's shortcut key.
@@ -520,22 +543,24 @@ func (b *box) hasKey(r rune) bool {
 
 // handleKey will
 func (b *box) handleKey(e *tcell.EventKey) {
-	switch {
-	case b.opts.scroll && e.Key() == tcell.KeyDown:
-		b.updateStartLine(1)
-	case b.opts.scroll && e.Key() == tcell.KeyEnd:
-		b.sbbStart = b.lastPage()
-	case b.opts.scroll && e.Key() == tcell.KeyHome:
-		b.sbbStart = 0
-	case b.opts.scroll && e.Key() == tcell.KeyPgDn:
-		b.updateStartLine(b.pageSize())
-	case b.opts.scroll && e.Key() == tcell.KeyPgUp:
-		b.updateStartLine(-b.pageSize())
-	case b.opts.scroll && e.Key() == tcell.KeyUp:
-		b.updateStartLine(-1)
+	if !b.opts.scroll {
+		return
 	}
 
-	b.drawContent()
+	switch {
+	case e.Key() == tcell.KeyDown:
+		b.scrollTo(1)
+	case e.Key() == tcell.KeyEnd:
+		b.scrollEnd()
+	case e.Key() == tcell.KeyHome:
+		b.scrollHome()
+	case e.Key() == tcell.KeyPgDn:
+		b.scrollTo(b.pageSize())
+	case e.Key() == tcell.KeyPgUp:
+		b.scrollTo(-b.pageSize())
+	case e.Key() == tcell.KeyUp:
+		b.scrollTo(-1)
+	}
 }
 
 // deactivate sets the active flag to true and redraws the box.
