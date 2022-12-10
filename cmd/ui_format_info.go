@@ -33,11 +33,14 @@ func formatAmiiboInfo(ai *apii.AmiiboInfo) []byte {
 	return encodeWithLabelToBytes(info)
 }
 
-// formatAmiiboUsage formats the usage info of all games from an apii.AmiiboInfo struct for display
-// in a box.
-func formatAmiiboUsage(ai []apii.AmiiboInfo) []byte {
+// formatAmiiboUsage formats the usage info of all games for the given character ID from an
+// apii.AmiiboInfo struct for display in a box.
+func formatAmiiboUsage(ai []apii.AmiiboInfo, id string) []byte {
 	var usage []string
 	for _, cu := range ai {
+		if cu.Head+cu.Tail != id {
+			continue
+		}
 		if cu.GamesSwitch != nil {
 			usage = append(usage, "Switch:", "\n")
 			for _, i := range cu.GamesSwitch {

@@ -107,7 +107,7 @@ func (p *portal) listen(conf *config) {
 					p.log <- encodeStringCell("Api get character usage: " + err.Error())
 					continue
 				}
-				p.usg <- formatAmiiboUsage(cu)
+				p.usg <- formatAmiiboUsage(cu, id)
 
 				p.log <- encodeStringCell("Ready")
 			} else if e.Name() == nfcptl.Disconnect {
