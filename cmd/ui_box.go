@@ -42,7 +42,8 @@ type boxOpts struct {
 	height            int         // The height of the box in cells or percent.
 	typ               int         // The type of the box: boxTypePercent or boxTypeCharacter. Percent is the default.
 	history           bool        // Set to true to preserve history, otherwise the buffer will always be replaced completely.
-	scroll            bool        // Allow scrolling using arrow keys.
+	scroll            bool        // Allow scrolling using arrow keys. Will also display a scrollbar.
+	tail              bool        // The incoming content will be tailed when set to true.
 	bgColor           tcell.Color // The background colour.
 	fixedContent      []string    // Display fixed content. No goroutine that listens for content will be running when set.
 }
@@ -163,6 +164,10 @@ func (b *box) bounds() (int, int, int, int) {
 	marginTop := b.opts.yPos + vmargin
 	marginBottom := b.opts.yPos - 1 + b.height() - vmargin
 
+	if b.opts.scroll {
+		marginRight-- // Allow space to render the scrollbar.
+	}
+
 	return marginLeft, marginRight, marginTop, marginBottom
 }
 
@@ -241,7 +246,11 @@ func (b *box) renderContent() {
 
 // drawContent draws the contents from the srollback buffer inside borders of the box.
 func (b *box) drawContent() {
-	defer b.s.Show() // Deferred since we have two exit points in this function!
+	// Deferred since we have two exit points in this function!
+	defer func() {
+		b.drawScrollBar()
+		b.s.Show()
+	}()
 
 	marginLeft, marginRight, marginTop, marginBottom := b.bounds()
 	hpos := marginLeft
@@ -250,9 +259,8 @@ func (b *box) drawContent() {
 	for line := b.sbbStart; line < len(b.sbb); line++ {
 		for i := 0; i < len(b.sbb[line]); i += cellSize {
 			if vpos > marginBottom {
-				if b.opts.scroll {
-					// When dealing with a scrollable box, we'll stop drawing when the box is full. The user will have
-					// to scroll using the arrow keys or pgup/down home/end.
+				if !b.opts.tail {
+					// When dealing with a non-tail box, we'll stop drawing when the box is full.
 					return
 				}
 
@@ -498,6 +506,41 @@ func (b *box) lastPage() int {
 func (b *box) pageSize() int {
 	_, _, marginTop, marginBottom := b.bounds()
 	return marginBottom - marginTop + 1
+}
+
+func (b *box) drawScrollBar() {
+	if !b.opts.scroll {
+		return
+	}
+
+	_, marginRight, marginTop, _ := b.bounds()
+
+	ln := float64(len(b.sbb))
+	pSize := float64(b.pageSize())
+	percent := pSize / ln
+	if percent >= 1 {
+		percent = 0
+	}
+	height := percent * pSize
+	if height > 0 && height < 1 {
+		height = 1
+	}
+
+	if height == 0 {
+		return
+	}
+
+	x := marginRight + 2
+	y := int(float64(b.sbbStart) * (pSize - height) / (ln - pSize)) // Basic linear interpolation.
+
+	// We always draw the whole scrollbar area so that we clear the previously rendered scrollbar parts.
+	for i := 0; i < int(pSize); i++ {
+		r := rune(0)
+		if i >= y && i <= int(height)+y {
+			r = '░'
+		}
+		b.s.SetContent(x, marginTop+i, r, nil, tcell.StyleDefault.Background(b.opts.bgColor))
+	}
 }
 
 // goTo will set the scrollback buffer to start at the given line, keeping it within bounds, and

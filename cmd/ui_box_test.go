@@ -219,7 +219,7 @@ func TestBox_Destroy(t *testing.T) {
 func TestBox_Update(t *testing.T) {
 	s := newTestScreen(t)
 
-	b := newBox(s, boxOpts{title: "test", stripLeadingSpace: true, xPos: -1, yPos: -1, width: 33, height: 50})
+	b := newBox(s, boxOpts{title: "test", stripLeadingSpace: true, xPos: -1, yPos: -1, width: 33, height: 50, tail: true})
 	b.setStartXY(1, 1)
 
 	x := 6
@@ -242,7 +242,7 @@ func TestBox_Update(t *testing.T) {
 func TestBox_Draw(t *testing.T) {
 	s := newTestScreen(t)
 
-	b := newBox(s, boxOpts{title: "test", stripLeadingSpace: true, xPos: -1, yPos: -1, width: 33, height: 50})
+	b := newBox(s, boxOpts{title: "test", stripLeadingSpace: true, xPos: -1, yPos: -1, width: 33, height: 50, tail: true})
 	b.setStartXY(1, 1)
 
 	x := 6
@@ -289,8 +289,8 @@ func TestBox_Scroll(t *testing.T) {
 	b.scrollEnd()
 	assertScreenContents(t, s, "ui_box_border_26x12_content_scrollEnd.txt", x, y)
 
-	b.scrollTo(-6)
-	assertScreenContents(t, s, "ui_box_border_26x12_content_scroll6.txt", x, y)
+	b.scrollTo(-4)
+	assertScreenContents(t, s, "ui_box_border_26x12_content_scroll4.txt", x, y)
 
 	b.destroy()
 }
