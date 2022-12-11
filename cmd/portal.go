@@ -34,7 +34,7 @@ func (p *portal) connect(quit <-chan struct{}) {
 		case <-ticker.C:
 			err := p.client.Connect()
 			if err == nil {
-				p.log <- encodeStringCell("Successfully connected to NFC portal.")
+				p.log <- encodeStringCell(fmt.Sprintf("Successfully connected to NFC portal %04x:%04x.", p.client.VendorId(), p.client.ProductId()))
 				return
 			}
 			if !output {
