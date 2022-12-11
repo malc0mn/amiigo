@@ -247,22 +247,17 @@ func (b *box) renderContent() {
 
 // drawContent draws the contents from the srollback buffer inside borders of the box.
 func (b *box) drawContent() {
-	// Deferred since we have two exit points in this function!
-	defer func() {
-		b.drawScrollBar()
-		b.s.Show()
-	}()
-
 	marginLeft, marginRight, marginTop, marginBottom := b.bounds()
 	hpos := marginLeft
 	vpos := marginTop
 
+draw:
 	for line := b.sbbStart; line < len(b.sbb); line++ {
 		for i := 0; i < len(b.sbb[line]); i += cellSize {
 			if vpos > marginBottom {
 				if !b.opts.tail {
 					// When dealing with a non-tail box, we'll stop drawing when the box is full.
-					return
+					break draw
 				}
 
 				for y := marginTop + 1; y <= marginBottom; y++ {
@@ -297,6 +292,9 @@ func (b *box) drawContent() {
 		hpos = marginLeft
 		vpos++
 	}
+
+	b.drawScrollBar()
+	b.s.Show()
 }
 
 // draw draws a box with title where the 'animated' parameter defines how the box will be drawn.
