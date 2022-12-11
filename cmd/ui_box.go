@@ -184,6 +184,7 @@ func (b *box) destroy() {
 func (b *box) update() {
 	for c := range b.content {
 		if !b.opts.history {
+			b.sbbStart = 0
 			b.buffer.Reset()
 		}
 		b.buffer.Write(c)
