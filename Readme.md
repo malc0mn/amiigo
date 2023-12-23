@@ -18,7 +18,7 @@ authentication.
 The `nfcptl` package handles communications with NFC portal devices over USB.
 It depends on the `gousb` package and provides a Client struct that handles the
 device connection and communications.
-This package can be used fully independently. ([See](#setting-udev-permissions))
+This package can be used fully independently. (See '[Setting up udev prmissions](#setting-udev-permissions)')
 
 ### Supported devices
 - Datel's *PowerSaves for Amiibo*
@@ -56,8 +56,14 @@ wireshark dump of **all** operations would also be helpful.
 Since the [nfcptl](#nfcptl) package uses `libusb`, you will need to add udev rules to
 allow non-root execution.
 
-Create a new file under `/etc/udev/rules.d`, maybe name it `99-amiigo.rules` so
+Create a new file under `/etc/udev/rules.d`, maybe name it `70-amiigo.rules` so
 you'll remember where it comes from in a few years time ;-).
+
+**Note:** beware of the number at the beginning of the file! It used to say
+`99` in this readme file, but some years later this ceased to function.
+Changing it to a value **lower than** `74` solved the issue then, even though
+the tags were applied correctly! I never looked into the root cause for this,
+but obviously something changed in systemd or the kernel causing this behavior.
 
 Add the correct rules for your device(s).
 
@@ -99,6 +105,11 @@ Ensure that you are using the correct vendor and product IDs **in the correct**
 case as they are printed!
 When your rules are matched correctly, you should see that `TAGS` and/or
 `CURRENT_TAGS` contains the `uaccess` tag as set in the rules.
+
+If you see the tags being applied correctly, but the device is still not
+accessible by the current user without _sudo-ing_, unplug the device and try
+lowering the number at the beginning of the file until you get it to function.
+Try starting in the lower seventies.
 
 ## Running tests
 Run the tests by calling `make test`. **Do note that for the `amiibo` package
