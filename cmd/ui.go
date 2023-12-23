@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"github.com/malc0mn/amiigo/amiibo"
 	"time"
 )
 
@@ -18,8 +19,8 @@ type element interface {
 	draw(animated bool, x, y int) (int, int)
 	// hasKey must return true if the element is bound to the given rune.
 	hasKey(r rune) bool
-	// handleKey must act on the given tcell.EventKey.
-	handleKey(k *tcell.EventKey)
+	// handleKey must act on the given tcell.EventKey and amiibo data
+	handleKey(k *tcell.EventKey, a *amiibo.Amiibo)
 	// name returns the name of the element.
 	name() string
 }
@@ -32,6 +33,7 @@ type ui struct {
 	imageBox *imageBox
 	usageBox *box
 	logBox   *box
+	amiibo   *amiibo.Amiibo
 }
 
 // draw draws the entire user interface.
@@ -74,6 +76,8 @@ func (u *ui) destroy() {
 func (u *ui) handleElementKey(r rune) {
 	for _, b := range u.elements {
 		if b.hasKey(r) {
+			// TODO: add a 'canActivate' check? Or pass 'hasAmiibo bool' to the activate function to prevent
+			//  useless modals (such as the dump modal without an amiibo in memory)
 			u.logBox.content <- encodeStringCell("Activating '" + b.name() + "' box; ESC to deactivate")
 			b.activate()
 			for {
@@ -87,7 +91,7 @@ func (u *ui) handleElementKey(r rune) {
 						b.deactivate()
 						return
 					default:
-						b.handleKey(e)
+						b.handleKey(e, u.amiibo)
 					}
 				}
 			}
@@ -114,16 +118,21 @@ func newUi(invertImage bool) *ui {
 	// TODO: fix scrolling for boxes with the tail option!
 	logs := newBox(s, boxOpts{title: "logs", stripLeadingSpace: true, xPos: -1, yPos: -1, width: 52, height: 20, tail: true, history: true})
 	actions := newBox(s, boxOpts{title: "actions", xPos: -1, yPos: -1, width: 46, height: 20, fixedContent: actionsContent})
-	dump := newFilenameModal(s, boxOpts{title: "write dump", key: 'w', xPos: -1, yPos: -1, width: 30, height: 10})
 
-	return &ui{
+	u := &ui{
 		s:        s,
-		elements: []element{info, image, usage, logs, actions, dump},
 		infoBox:  info,
 		imageBox: image,
 		usageBox: usage,
 		logBox:   logs,
 	}
+
+	// TODO: prevent overwriting modals when they're active (like reading a new amiibo while the dump modal is open)
+	dump := newFilenameModal(s, boxOpts{title: "write dump", key: 'w', xPos: -1, yPos: -1, width: 30, height: 10}, logs.content)
+
+	u.elements = []element{info, image, usage, logs, actions, dump}
+
+	return u
 }
 
 // tui is the main terminal user interface loop. It sets up a tcell.Screen, draws the UI and
@@ -136,8 +145,10 @@ func tui(conf *config) {
 
 	t := time.Now()
 
+	amiibo := make(chan amiibo.Amiibo)
+
 	// Connect to the portal when the UI is visible, so it can display the client logs etc.
-	ptl := newPortal(u.logBox.content, u.infoBox.content, u.usageBox.content, u.imageBox, conf.amiiboApiBaseUrl)
+	ptl := newPortal(u.logBox.content, u.infoBox.content, u.usageBox.content, u.imageBox, amiibo, conf.amiiboApiBaseUrl)
 	go ptl.listen(conf)
 
 	// Re-init loop for disconnect.
@@ -147,6 +158,18 @@ func tui(conf *config) {
 			case <-ptl.evt:
 				ptl.log <- encodeStringCell("Reinitializing NFC portal")
 				go ptl.listen(conf)
+			case <-conf.quit:
+				return
+			}
+		}
+	}()
+
+	// Listen for amiibo dumps.
+	go func() {
+		for {
+			select {
+			case a := <-amiibo:
+				u.amiibo = &a
 			case <-conf.quit:
 				return
 			}

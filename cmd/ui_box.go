@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"github.com/malc0mn/amiigo/amiibo"
 	"sync"
 	"time"
 	"unicode"
@@ -583,7 +584,7 @@ func (b *box) hasKey(r rune) bool {
 }
 
 // handleKey will take over the event listening routine so the user can controll the box.
-func (b *box) handleKey(e *tcell.EventKey) {
+func (b *box) handleKey(e *tcell.EventKey, _ *amiibo.Amiibo) {
 	if !b.opts.scroll {
 		return
 	}

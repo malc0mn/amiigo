@@ -2,33 +2,35 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
-	"log"
+	"github.com/malc0mn/amiigo/amiibo"
 )
 
 type drawModalContent func(x, y int)
 
-type modalInputHandler func(e *tcell.EventKey)
+type modalInputHandler func(e *tcell.EventKey, a *amiibo.Amiibo)
 
 type modal struct {
 	*box
 	d              drawModalContent
 	h              modalInputHandler
 	coveredContent []coveredCell
+	log            chan<- []byte
 }
 
 type coveredCell struct {
-	x int
-	y int
-	primary rune
+	x         int
+	y         int
+	primary   rune
 	combining []rune
-	style tcell.Style
+	style     tcell.Style
 }
 
-func newModal(s tcell.Screen, opts boxOpts, handler modalInputHandler, drawer drawModalContent) *modal {
+func newModal(s tcell.Screen, opts boxOpts, handler modalInputHandler, drawer drawModalContent, log chan<- []byte) *modal {
 	return &modal{
 		box: newBox(s, opts),
 		d:   drawer,
 		h:   handler,
+		log: log,
 	}
 }
 
@@ -63,7 +65,6 @@ func (m *modal) activate() {
 		for i := 0; i <= m.width(); i++ {
 			for j := 0; j <= m.height(); j++ {
 				primary, combining, style, _ := m.s.GetContent(x+i, y+j)
-				log.Printf("p: %v, c: %v, s: %v", primary, combining, style)
 				m.coveredContent = append(m.coveredContent, coveredCell{x + i, y + j, primary, combining, style})
 			}
 		}
@@ -86,8 +87,8 @@ func (m *modal) deactivate() {
 }
 
 // handleKey will take over the event listening routine so the user can control the box.
-func (m *modal) handleKey(e *tcell.EventKey) {
-	m.h(e)
+func (m *modal) handleKey(k *tcell.EventKey, a *amiibo.Amiibo) {
+	m.h(k, a)
 }
 
 // getXY returns the x and y coordinates to start drawing from.

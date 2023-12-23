@@ -12,12 +12,13 @@ import (
 // portal holds the parts that need to be controlled by the NFC portal.
 type portal struct {
 	client *nfcptl.Client
-	evt    chan struct{}   // Event channel used to re-init the portal.
-	log    chan<- []byte   // Logger channel.
-	ifo    chan<- []byte   // Info channel.
-	usg    chan<- []byte   // Usage channel.
-	img    *imageBox       // The image box.
-	api    *apii.AmiiboAPI // An amiibo HTTP API instance.
+	evt    chan struct{}        // Event channel used to re-init the portal.
+	log    chan<- []byte        // Logger channel.
+	ifo    chan<- []byte        // Info channel.
+	usg    chan<- []byte        // Usage channel.
+	img    *imageBox            // The image box.
+	a      chan<- amiibo.Amiibo // Channel to send last read amiibo to.
+	api    *apii.AmiiboAPI      // An amiibo HTTP API instance.
 }
 
 // connect will block until a successful connection is established to the USB NFC portal.
@@ -109,6 +110,9 @@ func (p *portal) listen(conf *config) {
 				}
 				p.usg <- formatAmiiboUsage(cu, id)
 
+				// Send amiibo to receiver
+				p.a <- *a
+
 				p.log <- encodeStringCell("Ready")
 			} else if e.Name() == nfcptl.Disconnect {
 				p.log <- encodeStringCell("NFC portal disconnected!")
@@ -131,13 +135,14 @@ func (p *portal) reInit() {
 }
 
 // newPortal returns a new portal ready for use.
-func newPortal(log, ifo, usg chan<- []byte, img *imageBox, baseUrl string) *portal {
+func newPortal(log, ifo, usg chan<- []byte, img *imageBox, amiibo chan<- amiibo.Amiibo, baseUrl string) *portal {
 	return &portal{
 		evt: make(chan struct{}),
 		log: log,
 		ifo: ifo,
 		usg: usg,
 		img: img,
+		a:   amiibo,
 		api: apii.NewAmiiboAPI(newCachedHttpClient(), baseUrl),
 	}
 }
