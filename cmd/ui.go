@@ -114,10 +114,11 @@ func newUi(invertImage bool) *ui {
 	// TODO: fix scrolling for boxes with the tail option!
 	logs := newBox(s, boxOpts{title: "logs", stripLeadingSpace: true, xPos: -1, yPos: -1, width: 52, height: 20, tail: true, history: true})
 	actions := newBox(s, boxOpts{title: "actions", xPos: -1, yPos: -1, width: 46, height: 20, fixedContent: actionsContent})
+	dump := newFilenameModal(s, boxOpts{title: "write dump", key: 'w', xPos: -1, yPos: -1, width: 30, height: 10})
 
 	return &ui{
 		s:        s,
-		elements: []element{info, image, usage, logs, actions},
+		elements: []element{info, image, usage, logs, actions, dump},
 		infoBox:  info,
 		imageBox: image,
 		usageBox: usage,

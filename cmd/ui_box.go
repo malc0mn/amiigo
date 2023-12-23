@@ -171,10 +171,9 @@ func (b *box) bounds() (int, int, int, int) {
 	return marginLeft, marginRight, marginTop, marginBottom
 }
 
-// destroy destroys a box structure. It will close and nullify the content channel.
+// destroy destroys a box structure. It will close the content channel.
 func (b *box) destroy() {
 	close(b.content)
-	b.content = nil
 }
 
 // update updates the contents of the box. Calling update blocks until the box.content channel is
@@ -583,7 +582,7 @@ func (b *box) hasKey(r rune) bool {
 	return b.opts.key != 0 && b.opts.key == r
 }
 
-// handleKey will
+// handleKey will take over the event listening routine so the user can controll the box.
 func (b *box) handleKey(e *tcell.EventKey) {
 	if !b.opts.scroll {
 		return
@@ -605,7 +604,7 @@ func (b *box) handleKey(e *tcell.EventKey) {
 	}
 }
 
-// deactivate sets the active flag to true and redraws the box.
+// activate sets the active flag to true and redraws the box.
 func (b *box) activate() {
 	b.active = true
 	b.draw(false, b.opts.xPos, b.opts.yPos)

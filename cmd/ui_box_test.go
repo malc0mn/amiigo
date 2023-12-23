@@ -211,8 +211,9 @@ func TestBox_Destroy(t *testing.T) {
 
 	b.destroy()
 
-	if b.content != nil {
-		t.Errorf("want nil, got %T", b.content)
+	// TODO: Dangerous test, how to do properly?
+	if _, open := <-b.content; open {
+		t.Errorf("want closed, got %T", b.content)
 	}
 }
 
