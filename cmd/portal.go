@@ -1,10 +1,8 @@
 package main
 
 import (
-	"encoding/hex"
 	"fmt"
 	"github.com/malc0mn/amiigo/amiibo"
-	"github.com/malc0mn/amiigo/apii"
 	"github.com/malc0mn/amiigo/nfcptl"
 	"time"
 )
@@ -14,11 +12,7 @@ type portal struct {
 	client *nfcptl.Client
 	evt    chan struct{}        // Event channel used to re-init the portal.
 	log    chan<- []byte        // Logger channel.
-	ifo    chan<- []byte        // Info channel.
-	usg    chan<- []byte        // Usage channel.
-	img    *imageBox            // The image box.
-	a      chan<- amiibo.Amiibo // Channel to send last read amiibo to.
-	api    *apii.AmiiboAPI      // An amiibo HTTP API instance.
+	amb    chan<- amiibo.Amiibo // Channel to send last read amiibo to.
 }
 
 // connect will block until a successful connection is established to the USB NFC portal.
@@ -76,44 +70,10 @@ func (p *portal) listen(conf *config) {
 					continue
 				}
 
-				rawId := a.ModelInfo().ID()
-				if zeroed(rawId) {
-					continue
-				}
-				id := hex.EncodeToString(rawId)
-				p.log <- encodeStringCell("Got id: " + id)
-
-				// Fill info box.
-				p.log <- encodeStringCell("Fetching amiibo info")
-				ai, err := p.api.GetAmiiboInfoById(id)
-				if err != nil {
-					p.log <- encodeStringCell("API get amiibo info: " + err.Error())
-					continue
-				}
-				p.ifo <- formatAmiiboInfo(ai)
-
-				// Fill image box.
-				p.log <- encodeStringCell("Fetching image")
-				img, err := getImage(ai.Image)
-				if err != nil {
-					p.log <- encodeStringCell("API get image: " + err.Error())
-					continue
-				}
-				p.img.setImage(img)
-
-				// Fill usage box.
-				p.log <- encodeStringCell("Fetching character usage")
-				cu, err := p.api.GetCharacterUsage(ai.Character)
-				if err != nil {
-					p.log <- encodeStringCell("Api get character usage: " + err.Error())
-					continue
-				}
-				p.usg <- formatAmiiboUsage(cu, id)
-
 				// Send amiibo to receiver
-				p.a <- *a
+				p.amb <- *a
 
-				p.log <- encodeStringCell("Ready")
+				p.log <- encodeStringCell("NFC portal ready")
 			} else if e.Name() == nfcptl.Disconnect {
 				p.log <- encodeStringCell("NFC portal disconnected!")
 				p.reInit()
@@ -135,14 +95,10 @@ func (p *portal) reInit() {
 }
 
 // newPortal returns a new portal ready for use.
-func newPortal(log, ifo, usg chan<- []byte, img *imageBox, amiibo chan<- amiibo.Amiibo, baseUrl string) *portal {
+func newPortal(log chan<- []byte, amiiboChan chan<- amiibo.Amiibo) *portal {
 	return &portal{
 		evt: make(chan struct{}),
 		log: log,
-		ifo: ifo,
-		usg: usg,
-		img: img,
-		a:   amiibo,
-		api: apii.NewAmiiboAPI(newCachedHttpClient(), baseUrl),
+		amb: amiiboChan,
 	}
 }

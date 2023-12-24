@@ -1,23 +1,23 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gdamore/tcell/v2"
 	"github.com/malc0mn/amiigo/amiibo"
-	"os"
-	"path/filepath"
 	"unicode"
 )
+
+type submitHandler func(f string, a *amiibo.Amiibo, log chan<- []byte)
 
 type filenameModal struct {
 	*modal
 	filename  string
 	inputXPos int
 	inputYPos int
+	submit    submitHandler
 }
 
-func newFilenameModal(s tcell.Screen, opts boxOpts, log chan<- []byte) *filenameModal {
-	fn := &filenameModal{}
+func newFilenameModal(s tcell.Screen, opts boxOpts, log chan<- []byte, submit submitHandler) *filenameModal {
+	fn := &filenameModal{submit: submit}
 	fn.modal = newModal(s, opts, fn.handleInput, fn.drawModalContent, log)
 
 	return fn
@@ -33,33 +33,7 @@ func (fn *filenameModal) handleInput(e *tcell.EventKey, a *amiibo.Amiibo) {
 			fn.s.Show()
 		}
 	case e.Key() == tcell.KeyEnter || e.Rune() == '\n':
-		if a == nil {
-			fn.log <- encodeStringCell("No amiibo data to write!")
-			return
-		}
-		if fn.filename == "" {
-			fn.log <- encodeStringCell("Please provide a filename!")
-			return
-		}
-
-		if ext := filepath.Ext(fn.filename); ext != ".bin" {
-			fn.filename += ".bin"
-		}
-
-		dest := fn.filename
-		dir := filepath.Dir(fn.filename)
-		if dir == "." {
-			dir, _ = os.Getwd()
-			dest = filepath.Join(dir, fn.filename)
-		}
-
-		fn.log <- encodeStringCell(fmt.Sprintf("Writing amiibo to file '%s'", dest))
-		if err := os.WriteFile(fn.filename, a.Raw(), 0644); err != nil {
-			fn.log <- encodeStringCell(fmt.Sprintf("Error writing file: %s", err))
-			return
-		}
-
-		fn.log <- encodeStringCell("Amiibo dump successful!")
+		fn.submit(fn.filename, a, fn.log)
 		// TODO: properly deactivate modal, will prolly need channels for this
 	default:
 		if !unicode.IsPrint(e.Rune()) || len(fn.filename) == fn.width()-6 {

@@ -6,6 +6,9 @@ import (
 	"time"
 )
 
+// TODO: is there a way to get rid of this global var?
+var amiiboChan chan amiibo.Amiibo // amiiboChan is the main channel to pass amiboo structs around.
+
 // element defines the basic methods which any ui element should implement.
 type element interface {
 	// activate marks the element as active, so it will process events.
@@ -33,7 +36,7 @@ type ui struct {
 	imageBox *imageBox
 	usageBox *box
 	logBox   *box
-	amiibo   *amiibo.Amiibo
+	amb      *amiibo.Amiibo
 }
 
 // draw draws the entire user interface.
@@ -91,7 +94,7 @@ func (u *ui) handleElementKey(r rune) {
 						b.deactivate()
 						return
 					default:
-						b.handleKey(e, u.amiibo)
+						b.handleKey(e, u.amb)
 					}
 				}
 			}
@@ -128,9 +131,10 @@ func newUi(invertImage bool) *ui {
 	}
 
 	// TODO: prevent overwriting modals when they're active (like reading a new amiibo while the dump modal is open)
-	dump := newFilenameModal(s, boxOpts{title: "write dump", key: 'w', xPos: -1, yPos: -1, width: 30, height: 10}, logs.content)
+	dump := newFilenameModal(s, boxOpts{title: "write dump", key: 'w', xPos: -1, yPos: -1, width: 30, height: 10}, logs.content, writeDump)
+	load := newFilenameModal(s, boxOpts{title: "load dump", key: 'l', xPos: -1, yPos: -1, width: 30, height: 10}, logs.content, loadDump)
 
-	u.elements = []element{info, image, usage, logs, actions, dump}
+	u.elements = []element{info, image, usage, logs, actions, dump, load}
 
 	return u
 }
@@ -145,10 +149,10 @@ func tui(conf *config) {
 
 	t := time.Now()
 
-	amiibo := make(chan amiibo.Amiibo)
+	amiiboChan = make(chan amiibo.Amiibo)
 
 	// Connect to the portal when the UI is visible, so it can display the client logs etc.
-	ptl := newPortal(u.logBox.content, u.infoBox.content, u.usageBox.content, u.imageBox, amiibo, conf.amiiboApiBaseUrl)
+	ptl := newPortal(u.logBox.content, amiiboChan)
 	go ptl.listen(conf)
 
 	// Re-init loop for disconnect.
@@ -168,8 +172,10 @@ func tui(conf *config) {
 	go func() {
 		for {
 			select {
-			case a := <-amiibo:
-				u.amiibo = &a
+			case am := <-amiiboChan:
+				u.amb = &am
+				showAmiiboInfo(u.amb, u.logBox.content, u.infoBox.content, u.usageBox.content, u.imageBox, conf.amiiboApiBaseUrl)
+				u.draw(false)
 			case <-conf.quit:
 				return
 			}
