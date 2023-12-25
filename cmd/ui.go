@@ -12,7 +12,7 @@ var amiiboChan chan amiibo.Amiibo // amiiboChan is the main channel to pass amib
 // element defines the basic methods which any ui element should implement.
 type element interface {
 	// activate marks the element as active, so it will process events.
-	activate()
+	activate(a *amiibo.Amiibo)
 	// deactivate deactivates the element, so it will no longer process events.
 	deactivate()
 	// draw draws the element. When the 'animated' parameter is set to true, the element must be drawn with animation.
@@ -23,7 +23,7 @@ type element interface {
 	// hasKey must return true if the element is bound to the given rune.
 	hasKey(r rune) bool
 	// handleKey must act on the given tcell.EventKey and amiibo data
-	handleKey(k *tcell.EventKey, a *amiibo.Amiibo)
+	handleKey(e *tcell.EventKey)
 	// name returns the name of the element.
 	name() string
 }
@@ -82,7 +82,7 @@ func (u *ui) handleElementKey(r rune) {
 			// TODO: add a 'canActivate' check? Or pass 'hasAmiibo bool' to the activate function to prevent
 			//  useless modals (such as the dump modal without an amiibo in memory)
 			u.logBox.content <- encodeStringCell("Activating '" + b.name() + "' box; ESC to deactivate")
-			b.activate()
+			b.activate(u.amb)
 			for {
 				ev := u.pollEvent()
 				switch e := ev.(type) {
@@ -94,7 +94,7 @@ func (u *ui) handleElementKey(r rune) {
 						b.deactivate()
 						return
 					default:
-						b.handleKey(e, u.amb)
+						b.handleKey(e)
 					}
 				}
 			}
@@ -133,8 +133,9 @@ func newUi(invertImage bool) *ui {
 	// TODO: prevent overwriting modals when they're active (like reading a new amiibo while the dump modal is open)
 	dump := newFilenameModal(s, boxOpts{title: "write dump", key: 'w', xPos: -1, yPos: -1, width: 30, height: 10}, logs.content, writeDump)
 	load := newFilenameModal(s, boxOpts{title: "load dump", key: 'l', xPos: -1, yPos: -1, width: 30, height: 10}, logs.content, loadDump)
+	hex := newTextModal(s, boxOpts{title: "view dump as hex", key: 'h', xPos: -1, yPos: -1, width: 46, height: 70, scroll: true}, logs.content)
 
-	u.elements = []element{info, image, usage, logs, actions, dump, load}
+	u.elements = []element{info, image, usage, logs, actions, dump, load, hex}
 
 	return u
 }

@@ -53,6 +53,8 @@ func (i *imageBox) drawImage() {
 		return
 	}
 
+	// TODO: debug and fix out interleaved rendering.
+
 	// We calculate the new width according to the aspect ratio of the image, but since we are dealing with vertically
 	// rectangular ASCII chars, we multiply the new width by a factor of two to get a somewhat square 'pixel' again.
 	i.iOpts.FixedWidth = 2 * i.height() * i.img.Bounds().Max.X / i.img.Bounds().Max.Y

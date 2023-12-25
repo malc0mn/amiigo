@@ -7,10 +7,11 @@ import (
 
 type drawModalContent func(x, y int)
 
-type modalInputHandler func(e *tcell.EventKey, a *amiibo.Amiibo)
+type modalInputHandler func(e *tcell.EventKey)
 
 type modal struct {
 	*box
+	a              *amiibo.Amiibo
 	d              drawModalContent
 	h              modalInputHandler
 	coveredContent []coveredCell
@@ -34,7 +35,8 @@ func newModal(s tcell.Screen, opts boxOpts, handler modalInputHandler, drawer dr
 	}
 }
 
-// draw draws the modal when it is activated.
+// draw draws the modal in the center of the screen when it is activated. The return values are the top left corner of
+// the modal.
 func (m *modal) draw(animated bool, _, _ int) (int, int) {
 	x, y := m.getXY()
 
@@ -48,15 +50,21 @@ func (m *modal) draw(animated bool, _, _ int) (int, int) {
 
 	m.drawBorders(x, y, animated)
 
-	m.d(x+1, y+1)
-
-	m.s.Show()
+	if m.d != nil {
+		// Custom drawing.
+		m.d(x+1, y+1)
+	} else {
+		// Default drawing.
+		m.renderContent()
+		m.drawContent()
+	}
 
 	return x, y
 }
 
-// activate sets the active flag to true, stores the screen that will be overwritten and draws the box.
-func (m *modal) activate() {
+// activate sets the active flag to true, stores the part of the screen that will be overwritten and draws the box.
+func (m *modal) activate(a *amiibo.Amiibo) {
+	m.a = a
 	m.active = true
 	x, y := m.getXY()
 
@@ -76,6 +84,7 @@ func (m *modal) activate() {
 // deactivate sets the active flag to false and restores the screen to the state before drawing.
 func (m *modal) deactivate() {
 	m.active = false
+	m.a = nil
 
 	for _, c := range m.coveredContent {
 		m.s.SetContent(c.x, c.y, c.primary, c.combining, c.style)
@@ -87,8 +96,14 @@ func (m *modal) deactivate() {
 }
 
 // handleKey will take over the event listening routine so the user can control the box.
-func (m *modal) handleKey(k *tcell.EventKey, a *amiibo.Amiibo) {
-	m.h(k, a)
+func (m *modal) handleKey(e *tcell.EventKey) {
+	if m.h != nil {
+		// Custom input handling.
+		m.h(e)
+	} else {
+		// Default to scroll behavior.
+		m.scroll(e)
+	}
 }
 
 // getXY returns the x and y coordinates to start drawing from.

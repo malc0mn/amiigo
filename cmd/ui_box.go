@@ -584,7 +584,12 @@ func (b *box) hasKey(r rune) bool {
 }
 
 // handleKey will take over the event listening routine so the user can controll the box.
-func (b *box) handleKey(e *tcell.EventKey, _ *amiibo.Amiibo) {
+func (b *box) handleKey(e *tcell.EventKey) {
+	b.scroll(e)
+}
+
+// scroll handles scrolling of a scrollable box.
+func (b *box) scroll(e *tcell.EventKey) {
 	if !b.opts.scroll {
 		return
 	}
@@ -606,7 +611,7 @@ func (b *box) handleKey(e *tcell.EventKey, _ *amiibo.Amiibo) {
 }
 
 // activate sets the active flag to true and redraws the box.
-func (b *box) activate() {
+func (b *box) activate(_ *amiibo.Amiibo) {
 	b.active = true
 	b.draw(false, b.opts.xPos, b.opts.yPos)
 }

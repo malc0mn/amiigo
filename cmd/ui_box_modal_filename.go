@@ -23,7 +23,7 @@ func newFilenameModal(s tcell.Screen, opts boxOpts, log chan<- []byte, submit su
 	return fn
 }
 
-func (fn *filenameModal) handleInput(e *tcell.EventKey, a *amiibo.Amiibo) {
+func (fn *filenameModal) handleInput(e *tcell.EventKey) {
 	switch {
 	case e.Key() == tcell.KeyBackspace || e.Key() == tcell.KeyBackspace2:
 		if len(fn.filename) > 0 {
@@ -33,7 +33,7 @@ func (fn *filenameModal) handleInput(e *tcell.EventKey, a *amiibo.Amiibo) {
 			fn.s.Show()
 		}
 	case e.Key() == tcell.KeyEnter || e.Rune() == '\n':
-		fn.submit(fn.filename, a, fn.log)
+		fn.submit(fn.filename, fn.a, fn.log)
 		// TODO: properly deactivate modal, will prolly need channels for this
 	default:
 		if !unicode.IsPrint(e.Rune()) || len(fn.filename) == fn.width()-6 {
@@ -66,6 +66,7 @@ func (fn *filenameModal) drawModalContent(x, y int) {
 		fn.drawUnderscore()
 	}
 	fn.inputXPos = x + 2
+	fn.s.Show()
 }
 
 func (fn *filenameModal) drawChar(c rune) {
