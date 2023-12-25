@@ -32,7 +32,7 @@ type MasterKey struct {
 	Type           [14]byte
 	Rfu            byte
 	MagicBytesSize byte
-	MagicBytes     [16]byte
+	MagicBytes     [MaxMagicByteSize]byte
 	XorPad         [32]byte
 }
 
