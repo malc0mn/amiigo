@@ -42,6 +42,9 @@ func newModal(s tcell.Screen, opts boxOpts, handler modalInputHandler, drawer dr
 // draw draws the modal in the center of the screen when it is activated. The return values are the top left corner of
 // the modal.
 func (m *modal) draw(animated bool, _, _ int) (int, int) {
+	m.Lock()
+	defer m.Unlock()
+
 	x, y := m.getXY()
 
 	if !m.active {

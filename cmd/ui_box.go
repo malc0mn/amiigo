@@ -71,6 +71,8 @@ type box struct {
 	redraw     func()        // This is a callback to allow the box to do preparations BEFORE the UI completely redraws the box. This happens on initial drawing or screen resize, not on regular content updates.
 	active     bool          // Indicates if this box is activated for user interaction or not.
 	done       chan struct{} // A channel that will be closed when the box is done
+
+	sync.Mutex
 }
 
 // newBox creates a new box struct ready for display on screen by calling box.draw(). newBox also
@@ -185,6 +187,8 @@ func (b *box) destroy() {
 // scroll option is set.
 func (b *box) update() {
 	for c := range b.content {
+		b.Lock()
+
 		if !b.opts.history {
 			b.sbbStart = 0
 			b.buffer.Reset()
@@ -193,6 +197,8 @@ func (b *box) update() {
 
 		b.renderContent()
 		b.drawContent()
+
+		b.Unlock()
 	}
 }
 
@@ -303,6 +309,8 @@ draw:
 // The return values will be the first x column to the right side of the box and the first y column
 // below the box.
 func (b *box) draw(animated bool, x, y int) (int, int) {
+	b.Lock()
+
 	if b.redraw != nil {
 		b.redraw()
 	}
@@ -320,6 +328,8 @@ func (b *box) draw(animated bool, x, y int) (int, int) {
 		nextX = 0
 		nextY += len(b.r)
 	}
+
+	b.Unlock()
 
 	return nextX, nextY
 }
@@ -400,11 +410,12 @@ func (b *box) renderHorizontalLine(s *[]rune, width int) {
 
 // renderSides renders the sides of the box.
 func (b *box) renderSides() {
-	rightSide := b.width() - 1
-	verticalEnd := b.height() - 2
-	for i := 0; i < verticalEnd; i++ {
+	width := b.width()
+	rightSide := width - 1
+
+	for i := 0; i < len(b.r)-2; i++ {
 		line := i + 1
-		b.r[line] = make([]rune, b.width())
+		b.r[line] = make([]rune, width)
 		b.r[line][0] = boxLineVertical
 		b.r[line][rightSide] = boxLineVertical
 	}
@@ -412,7 +423,8 @@ func (b *box) renderSides() {
 
 // renderBottom renders the bottom of the box.
 func (b *box) renderBottom() {
-	lastRow := b.height() - 1
+	lastRow := len(b.r) - 1
+
 	b.r[lastRow] = append(b.r[lastRow], boxBottomLeftCorner)
 	b.renderHorizontalLine(&b.r[lastRow], b.width()-2)
 	b.r[lastRow] = append(b.r[lastRow], boxBottomRightCorner)
