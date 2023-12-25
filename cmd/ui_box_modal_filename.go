@@ -7,7 +7,7 @@ import (
 )
 
 // submitHandler defines a submithandler for a filenameModal, receiving a filename and an amiibo struct.
-type submitHandler func(f string, a *amiibo.Amiibo, log chan<- []byte)
+type submitHandler func(f string, a *amiibo.Amiibo, log chan<- []byte) bool
 
 // filenameModal represents a modal that will request filename input.
 type filenameModal struct {
@@ -21,7 +21,7 @@ type filenameModal struct {
 // newFilenameModal creates a new filenameModal struct ready for use.
 func newFilenameModal(s tcell.Screen, opts boxOpts, log chan<- []byte, submit submitHandler) *filenameModal {
 	fn := &filenameModal{submit: submit}
-	fn.modal = newModal(s, opts, fn.handleInput, fn.drawModalContent, log)
+	fn.modal = newModal(s, opts, fn.handleInput, fn.drawModalContent, fn.reset, log)
 
 	return fn
 }
@@ -37,9 +37,10 @@ func (fn *filenameModal) handleInput(e *tcell.EventKey) {
 			fn.s.Show()
 		}
 	case e.Key() == tcell.KeyEnter || e.Rune() == '\n':
-		fn.submit(fn.filename, fn.a, fn.log)
-		// Signal the modal is done.
-		fn.end()
+		if fn.submit(fn.filename, fn.a, fn.log) {
+			// Signal the modal is done.
+			fn.end()
+		}
 	default:
 		if !unicode.IsPrint(e.Rune()) || len(fn.filename) == fn.width()-6 {
 			// Ignore non-printable chars and stay within modal bounds.
@@ -84,4 +85,11 @@ func (fn *filenameModal) drawChar(c rune) {
 // drawUnderscore draws a single underscore char on the current position inside the modal.
 func (fn *filenameModal) drawUnderscore() {
 	fn.drawChar('_')
+}
+
+// reset resets the inner modal state.
+func (fn *filenameModal) reset() {
+	fn.filename = ""
+	fn.inputXPos = 0
+	fn.inputYPos = 0
 }

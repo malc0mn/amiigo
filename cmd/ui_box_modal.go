@@ -14,6 +14,7 @@ type modal struct {
 	a              *amiibo.Amiibo
 	d              drawModalContent
 	h              modalInputHandler
+	c              func()
 	coveredContent []coveredCell
 	log            chan<- []byte
 }
@@ -26,11 +27,14 @@ type coveredCell struct {
 	style     tcell.Style
 }
 
-func newModal(s tcell.Screen, opts boxOpts, handler modalInputHandler, drawer drawModalContent, log chan<- []byte) *modal {
+// newModal builds a new modal ready for use. It requires the screen to be drawn on, an input handler, a content drawing
+// function a cleanup function and a logging channel.
+func newModal(s tcell.Screen, opts boxOpts, handler modalInputHandler, drawer drawModalContent, cleanup func(), log chan<- []byte) *modal {
 	return &modal{
 		box: newBox(s, opts),
 		d:   drawer,
 		h:   handler,
+		c:   cleanup,
 		log: log,
 	}
 }
@@ -92,6 +96,10 @@ func (m *modal) activate(a *amiibo.Amiibo) <-chan struct{} {
 func (m *modal) deactivate() {
 	m.active = false
 	m.a = nil
+
+	if m.c != nil {
+		m.c()
+	}
 
 	for _, c := range m.coveredContent {
 		m.s.SetContent(c.x, c.y, c.primary, c.combining, c.style)

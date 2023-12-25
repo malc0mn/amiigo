@@ -8,14 +8,14 @@ import (
 )
 
 // writeDump writes the active amiibo data to disk.
-func writeDump(filename string, a *amiibo.Amiibo, log chan<- []byte) {
+func writeDump(filename string, a *amiibo.Amiibo, log chan<- []byte) bool {
 	if a == nil {
 		log <- encodeStringCell("No amiibo data to write!")
-		return
+		return false
 	}
 	if filename == "" {
 		log <- encodeStringCell("Please provide a filename!")
-		return
+		return false
 	}
 
 	if ext := filepath.Ext(filename); ext != ".bin" {
@@ -32,8 +32,9 @@ func writeDump(filename string, a *amiibo.Amiibo, log chan<- []byte) {
 	log <- encodeStringCell(fmt.Sprintf("Writing amiibo to file '%s'", dest))
 	if err := os.WriteFile(filename, a.Raw(), 0644); err != nil {
 		log <- encodeStringCell(fmt.Sprintf("Error writing file: %s", err))
-		return
+		return false
 	}
 
 	log <- encodeStringCell("Amiibo dump successful!")
+	return true
 }
