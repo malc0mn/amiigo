@@ -63,7 +63,13 @@ func (m *modal) draw(animated bool, _, _ int) (int, int) {
 }
 
 // activate sets the active flag to true, stores the part of the screen that will be overwritten and draws the box.
-func (m *modal) activate(a *amiibo.Amiibo) {
+func (m *modal) activate(a *amiibo.Amiibo) <-chan struct{} {
+	if m.opts.needAmiibo && a == nil {
+		m.log <- encodeStringCell("No amiibo data!")
+		return nil
+	}
+
+	m.done = make(chan struct{})
 	m.a = a
 	m.active = true
 	x, y := m.getXY()
@@ -79,6 +85,7 @@ func (m *modal) activate(a *amiibo.Amiibo) {
 	}
 
 	m.draw(false, m.opts.xPos, m.opts.yPos)
+	return m.done
 }
 
 // deactivate sets the active flag to false and restores the screen to the state before drawing.
@@ -93,6 +100,7 @@ func (m *modal) deactivate() {
 	m.coveredContent = nil
 
 	m.s.Show()
+	m.end()
 }
 
 // handleKey will take over the event listening routine so the user can control the box.

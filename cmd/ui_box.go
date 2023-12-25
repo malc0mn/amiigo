@@ -47,28 +47,30 @@ type boxOpts struct {
 	tail              bool        // The incoming content will be tailed when set to true.
 	bgColor           tcell.Color // The background colour.
 	fixedContent      []string    // Display fixed content. No goroutine that listens for content will be running when set.
+	needAmiibo        bool        // Whether or not the box needs amiibo data to function
 }
 
 // box represents a ui box element that can display content.
 type box struct {
-	opts       boxOpts      // The options for the box.
-	r          [][]rune     // The internal render array.
-	s          tcell.Screen // The screen to display the box on.
-	sbb        [][]byte     // The internal scrollback buffer of the box.
-	sbbStartMu sync.Mutex   // Mutex for ssbStart.
-	sbbStart   int          // The line to start displaying content from.
-	autoX      bool         // When true will calculate the x pos based on the previously drawn box.
-	autoY      bool         // When true will calculate the y pos based on the previously drawn box.
-	widthC     int          // The with in characters of the box.
-	widthP     int          // The with in percent of the box.
-	minWidth   int          // The minimal with of the box.
-	heightC    int          // The height in characters of the box.
-	heightP    int          // The height in percent of the box.
-	minHeight  int          // The minimal height of the box.
-	content    chan []byte  // The channel that will receive the box content.
-	buffer     *ringBuffer  // The buffer holding the box content
-	redraw     func()       // This is a callback to allow the box to do preparations BEFORE the UI completely redraws the box. This happens on initial drawing or screen resize, not on regular content updates.
-	active     bool         // Indicates if this box is activated for user interaction or not.
+	opts       boxOpts       // The options for the box.
+	r          [][]rune      // The internal render array.
+	s          tcell.Screen  // The screen to display the box on.
+	sbb        [][]byte      // The internal scrollback buffer of the box.
+	sbbStartMu sync.Mutex    // Mutex for ssbStart.
+	sbbStart   int           // The line to start displaying content from.
+	autoX      bool          // When true will calculate the x pos based on the previously drawn box.
+	autoY      bool          // When true will calculate the y pos based on the previously drawn box.
+	widthC     int           // The with in characters of the box.
+	widthP     int           // The with in percent of the box.
+	minWidth   int           // The minimal with of the box.
+	heightC    int           // The height in characters of the box.
+	heightP    int           // The height in percent of the box.
+	minHeight  int           // The minimal height of the box.
+	content    chan []byte   // The channel that will receive the box content.
+	buffer     *ringBuffer   // The buffer holding the box content
+	redraw     func()        // This is a callback to allow the box to do preparations BEFORE the UI completely redraws the box. This happens on initial drawing or screen resize, not on regular content updates.
+	active     bool          // Indicates if this box is activated for user interaction or not.
+	done       chan struct{} // A channel that will be closed when the box is done
 }
 
 // newBox creates a new box struct ready for display on screen by calling box.draw(). newBox also
@@ -611,18 +613,29 @@ func (b *box) scroll(e *tcell.EventKey) {
 }
 
 // activate sets the active flag to true and redraws the box.
-func (b *box) activate(_ *amiibo.Amiibo) {
+func (b *box) activate(_ *amiibo.Amiibo) <-chan struct{} {
 	b.active = true
+	b.done = make(chan struct{})
 	b.draw(false, b.opts.xPos, b.opts.yPos)
+	return b.done
 }
 
 // deactivate sets the active flag to false and redraws the box.
 func (b *box) deactivate() {
 	b.active = false
 	b.draw(false, b.opts.xPos, b.opts.yPos)
+	b.end()
 }
 
 // returns the name, or title, of the box.
 func (b *box) name() string {
 	return b.opts.title
+}
+
+// end closes the done channel to signal any listeners the box has deactivated itself.
+func (b *box) end() {
+	if b.done != nil {
+		close(b.done)
+		b.done = nil
+	}
 }

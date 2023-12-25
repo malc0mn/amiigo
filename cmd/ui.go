@@ -11,8 +11,10 @@ var amiiboChan chan amiibo.Amiibo // amiiboChan is the main channel to pass amib
 
 // element defines the basic methods which any ui element should implement.
 type element interface {
-	// activate marks the element as active, so it will process events.
-	activate(a *amiibo.Amiibo)
+	// activate marks the element as active, so it will process events. The element MUST return nil when activation
+	// was unsuccessful.
+	// The channel returned can be listened on to see if the box has closed itself.
+	activate(a *amiibo.Amiibo) <-chan struct{}
 	// deactivate deactivates the element, so it will no longer process events.
 	deactivate()
 	// draw draws the element. When the 'animated' parameter is set to true, the element must be drawn with animation.
@@ -77,24 +79,35 @@ func (u *ui) destroy() {
 
 // handleElementKey will block waiting for input for the active box.
 func (u *ui) handleElementKey(r rune) {
+	deactivate := func(b element) {
+		u.logBox.content <- encodeStringCell("Deactivating '" + b.name() + "' box")
+		b.deactivate()
+	}
+
 	for _, b := range u.elements {
 		if b.hasKey(r) {
-			// TODO: add a 'canActivate' check? Or pass 'hasAmiibo bool' to the activate function to prevent
-			//  useless modals (such as the dump modal without an amiibo in memory)
-			u.logBox.content <- encodeStringCell("Activating '" + b.name() + "' box; ESC to deactivate")
-			b.activate(u.amb)
-			for {
-				ev := u.pollEvent()
-				switch e := ev.(type) {
-				case *tcell.EventKey:
-					switch {
-					// TODO: do we deal with CTRL+C here, or just leave that be?
-					case e.Key() == tcell.KeyEscape:
-						u.logBox.content <- encodeStringCell("Deactivating '" + b.name() + "' box")
-						b.deactivate()
+			u.logBox.content <- encodeStringCell("Activating '" + b.name() + "' box...")
+			done := b.activate(u.amb)
+			if done != nil {
+				u.logBox.content <- encodeStringCell("...'" + b.name() + "' box active; ESC to deactivate")
+				for {
+					select {
+					case <-done:
+						deactivate(b)
 						return
 					default:
-						b.handleKey(e)
+						ev := u.pollEvent()
+						switch e := ev.(type) {
+						case *tcell.EventKey:
+							switch {
+							// TODO: do we deal with CTRL+C here, or just leave that be?
+							case e.Key() == tcell.KeyEscape:
+								deactivate(b)
+								return
+							default:
+								b.handleKey(e)
+							}
+						}
 					}
 				}
 			}
@@ -131,9 +144,10 @@ func newUi(invertImage bool) *ui {
 	}
 
 	// TODO: prevent overwriting modals when they're active (like reading a new amiibo while the dump modal is open)
-	dump := newFilenameModal(s, boxOpts{title: "write dump", key: 'w', xPos: -1, yPos: -1, width: 30, height: 10}, logs.content, writeDump)
+	dump := newFilenameModal(s, boxOpts{title: "write dump", key: 'w', xPos: -1, yPos: -1, width: 30, height: 10, needAmiibo: true}, logs.content, writeDump)
 	load := newFilenameModal(s, boxOpts{title: "load dump", key: 'l', xPos: -1, yPos: -1, width: 30, height: 10}, logs.content, loadDump)
-	hex := newTextModal(s, boxOpts{title: "view dump as hex", key: 'h', xPos: -1, yPos: -1, width: 46, height: 70, scroll: true}, logs.content)
+	// TODO: it would be cool to highlight the different data blocks in the hex dump (like ID, save data, ...)
+	hex := newTextModal(s, boxOpts{title: "view dump as hex", key: 'h', xPos: -1, yPos: -1, width: 46, height: 70, needAmiibo: true, scroll: true}, logs.content)
 
 	u.elements = []element{info, image, usage, logs, actions, dump, load, hex}
 

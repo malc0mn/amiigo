@@ -6,8 +6,10 @@ import (
 	"unicode"
 )
 
+// submitHandler defines a submithandler for a filenameModal, receiving a filename and an amiibo struct.
 type submitHandler func(f string, a *amiibo.Amiibo, log chan<- []byte)
 
+// filenameModal represents a modal that will request filename input.
 type filenameModal struct {
 	*modal
 	filename  string
@@ -16,6 +18,7 @@ type filenameModal struct {
 	submit    submitHandler
 }
 
+// newFilenameModal creates a new filenameModal struct ready for use.
 func newFilenameModal(s tcell.Screen, opts boxOpts, log chan<- []byte, submit submitHandler) *filenameModal {
 	fn := &filenameModal{submit: submit}
 	fn.modal = newModal(s, opts, fn.handleInput, fn.drawModalContent, log)
@@ -23,6 +26,7 @@ func newFilenameModal(s tcell.Screen, opts boxOpts, log chan<- []byte, submit su
 	return fn
 }
 
+// handleInput will handle keyboard input for the filenameModal.
 func (fn *filenameModal) handleInput(e *tcell.EventKey) {
 	switch {
 	case e.Key() == tcell.KeyBackspace || e.Key() == tcell.KeyBackspace2:
@@ -34,7 +38,8 @@ func (fn *filenameModal) handleInput(e *tcell.EventKey) {
 		}
 	case e.Key() == tcell.KeyEnter || e.Rune() == '\n':
 		fn.submit(fn.filename, fn.a, fn.log)
-		// TODO: properly deactivate modal, will prolly need channels for this
+		// Signal the modal is done.
+		fn.end()
 	default:
 		if !unicode.IsPrint(e.Rune()) || len(fn.filename) == fn.width()-6 {
 			// Ignore non-printable chars and stay within modal bounds.
@@ -48,6 +53,8 @@ func (fn *filenameModal) handleInput(e *tcell.EventKey) {
 	}
 }
 
+// drawModalContent will handle displaying of the drawModalContent content.
+// TODO: fix problems when the modal is not high enough: maybe give it a minimal height?
 func (fn *filenameModal) drawModalContent(x, y int) {
 	start := x + 1
 	fn.inputXPos = start
@@ -69,10 +76,12 @@ func (fn *filenameModal) drawModalContent(x, y int) {
 	fn.s.Show()
 }
 
+// drawChar draws a single char on the current position inside the modal.
 func (fn *filenameModal) drawChar(c rune) {
 	fn.s.SetContent(fn.inputXPos, fn.inputYPos, c, nil, tcell.StyleDefault)
 }
 
+// drawUnderscore draws a single underscore char on the current position inside the modal.
 func (fn *filenameModal) drawUnderscore() {
 	fn.drawChar('_')
 }
