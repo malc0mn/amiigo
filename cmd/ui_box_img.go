@@ -53,24 +53,36 @@ func (i *imageBox) drawImage() {
 		return
 	}
 
-	// TODO: debug and fix out interleaved rendering.
+	viewportWidth := i.width() - 4   // 4 = left and right borders + left and right margin
+	viewportHeight := i.height() - 2 // 2 = only top and bottom borders
 
 	// We calculate the new width according to the aspect ratio of the image, but since we are dealing with vertically
 	// rectangular ASCII chars, we multiply the new width by a factor of two to get a somewhat square 'pixel' again.
-	i.iOpts.FixedWidth = 2 * i.height() * i.img.Bounds().Max.X / i.img.Bounds().Max.Y
-	i.iOpts.FixedHeight = i.height()
+	i.iOpts.FixedWidth = 2 * viewportHeight * i.img.Bounds().Max.X / i.img.Bounds().Max.Y
+	i.iOpts.FixedHeight = viewportHeight
+
+	// If the new calculated with turns out to be bigger than our viewport with, we'll adjust height based on the
+	// viewport width.
+	if i.iOpts.FixedWidth > viewportWidth {
+		i.iOpts.FixedWidth = viewportWidth
+		i.iOpts.FixedHeight = viewportWidth * i.img.Bounds().Max.X / i.img.Bounds().Max.Y
+	}
 
 	var buf []byte
 	for _, l := range i.conv.Image2CharPixelMatrix(i.img, &i.iOpts) {
 		// Add padding to center image (-2 for the borders).
-		for j := 0; j < (i.width()-2-len(l))/2; j++ {
+		for j := 0; j < (viewportWidth-len(l))/2; j++ {
 			buf = append(buf, encodeImageCell(ascii.CharPixel{Char: ' '}, i.attrs)...)
 		}
 		// Render image line.
 		for _, p := range l {
+			// TODO: add vertical padding
 			buf = append(buf, encodeImageCell(p, i.attrs)...)
 		}
-		buf = append(buf, encodeStringCell("\n")...)
+		// Add end of line when the viewport width is bigger than the image width.
+		if viewportWidth > len(l) {
+			buf = append(buf, encodeStringCell("\n")...)
+		}
 	}
 
 	i.content <- buf
