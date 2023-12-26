@@ -54,8 +54,10 @@ func main() {
 		os.Exit(errGeneral)
 	}
 
+	log.Println("Starting TUI")
 	tui(conf)
 	conf.wg.Wait()
+	log.Println("Shutdown TUI")
 
 	fmt.Println("Bye bye!")
 	os.Exit(ok)
