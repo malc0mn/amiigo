@@ -37,7 +37,7 @@ const (
 	// obviously been enabled by issuing STM32F0_RFFieldOn first in order to detect a token.
 	STM32F0_GetTokenUid DriverCommand = 0x12
 
-	// STM32F0_Unknown5 what this does, seems to take one parameter.
+	// STM32F0_Unknown5 unknown what this does, seems to take one parameter.
 	STM32F0_Unknown5 DriverCommand = 0x13
 
 	// STM32F0_ReadAlt1 is an alternative for STM32F0_Read.
@@ -45,8 +45,8 @@ const (
 	// STM32F0_WriteAlt1 is an alternative for STM32F0_Write.
 	STM32F0_WriteAlt1 DriverCommand = 0x15
 
-	// STM32F0_Unknown6 what this does. When this command is sent while a token is present on the
-	// device, all read commands return empty data (0x00).
+	// STM32F0_Unknown6 unknown what this does. When this command is sent while a token is present
+	// on the device, all read commands return empty data (0x00).
 	STM32F0_Unknown6 DriverCommand = 0x16
 
 	// STM32F0_ReadAlt2 is another alternative for STM32F0_Read.
@@ -342,7 +342,7 @@ func (stm *stm32f0) wasTokenRemoved() bool {
 
 	// Once a token is placed on the portal, we will be polling only with message
 	// STM32F0_GetTokenUid which will alternate between an error and a token present in that order.
-	// As soon as we know a token is present on the portal we need to check for at least
+	// As soon as we know a token is present on the portal we need to check for at least 'stm.tokenErrors'
 	// consecutive errors to know the token has been removed again!
 	// The original software turns the front LED off after 10 consecutive errors.
 	if stm.tokenPlaced {
