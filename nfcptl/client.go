@@ -24,7 +24,7 @@ type Client struct {
 
 // NewClient builds a new Client struct.
 func NewClient(vendor, device string, debug bool) (*Client, error) {
-	// TODO: add auto detection when vendor and device are empty strings.
+	// TODO: add auto-detection when vendor and device are empty strings.
 	d, err := GetDriverByVendorAndProductAlias(vendor, device)
 	if err != nil {
 		return nil, err
