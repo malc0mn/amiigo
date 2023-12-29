@@ -3,6 +3,7 @@ package nfcptl
 import (
 	"bytes"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -156,6 +157,8 @@ const (
 	// starting from 0x01 will turn the LED on using different brightness levels.
 	STM32F0_LedOnFull = 0xff
 )
+
+var validationError = errors.New("stm32f0: token data does not match first read")
 
 // stm32f0 implements the Driver interface for STM32F0 based devices.
 type stm32f0 struct {
@@ -570,20 +573,17 @@ func (stm *stm32f0) handleToken(buff []byte) {
 	}
 
 	// Actual read.
-	token, err := stm.readToken()
+	token, err := stm.readTokenWithValidation()
 	if err != nil {
 		if stm.c.Debug() {
 			log.Printf("%s", err)
 		}
 		stm.c.PublishEvent(NewEvent(TokenTagDataError, token))
-	} else if !stm.optimised {
-		// The original software reads the token twice, probably for validation purposes.
-		verify, _ := stm.readToken()
-		if !bytes.Equal(token, verify) {
-			stm.c.PublishEvent(NewEvent(TokenTagDataError, token))
+		if err == validationError {
 			return
 		}
 	}
+
 	if stm.c.Debug() {
 		log.Println("stm32f0: full token data:")
 		log.Println(hex.Dump(token))
@@ -612,6 +612,25 @@ func (stm *stm32f0) readToken() ([]byte, error) {
 		// not cause a buffer overflow, which is nice.
 		copy(token[n:], res[2:18])
 		n += 16
+	}
+
+	return token, nil
+}
+
+// readTokenWithValidation will read the token data. After a successful read, it will be read again
+// and compared to the first read to see if the data matches. This is the original software behavior
+// as observed on the wire.
+// Setting the optimised option to true will disable this double read behavior!
+func (stm *stm32f0) readTokenWithValidation() ([]byte, error) {
+	token, err := stm.readToken()
+	if err != nil {
+		return token, err
+	} else if !stm.optimised {
+		// The original software reads the token twice, probably for validation purposes.
+		verify, _ := stm.readToken()
+		if !bytes.Equal(token, verify) {
+			return token, validationError
+		}
 	}
 
 	return token, nil
