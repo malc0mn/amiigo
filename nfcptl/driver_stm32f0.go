@@ -489,21 +489,10 @@ func (stm *stm32f0) getNextPollCommand(pos int) (int, DriverCommand) {
 
 // handleToken processes the token placed on the NFC portal.
 func (stm *stm32f0) handleToken(buff []byte) {
+	uid := stm.extractNuid(buff)
 	if buff == nil {
-		log.Println("stm32f0: handleToken: nil bytes received")
 		return
 	}
-
-	l := int(buff[4]) // Byte 4 in the sequence is the NUID length which can be 4 or 7 bytes long.
-	s := 5            // The NUID starts at byte 5.
-	end := s + l
-	if len(buff) < end {
-		log.Printf("stm32f0: handleToken: too few bytes: %d bytes received, at least %d expected", len(buff), end)
-		return
-	}
-	uid := buff[s:end] // Read the full NUID starting on byte 5 with length l.
-
-	log.Printf("stm32f0: token detected with id %#0"+fmt.Sprintf("%d", l)+"x", uid)
 
 	if stm.c.Debug() {
 		log.Println("stm32f0: enabling front led")
@@ -739,4 +728,25 @@ func (stm *stm32f0) createArguments(size int, args []byte) []byte {
 	copy(packet, args)
 
 	return packet
+}
+
+// extractNuid will extract the token ID from the given data. The data should be the answer received
+// from the STM32F0_GetTokenUid command.
+func (stm *stm32f0) extractNuid(buff []byte) []byte {
+	if buff == nil {
+		log.Println("stm32f0: extractNuid: nil bytes received")
+		return nil
+	}
+
+	l := int(buff[4]) // Byte 4 in the sequence is the NUID length which can be 4 or 7 bytes long.
+	s := 5            // The NUID starts at byte 5.
+	end := s + l
+	if len(buff) < end {
+		log.Printf("stm32f0: extractNuid: too few bytes: %d bytes received, at least %d expected", len(buff), end)
+		return nil
+	}
+	uid := buff[s:end] // Read the full NUID starting on byte 5 with length l.
+
+	log.Printf("stm32f0: extractNuid: token detected with id %#0"+fmt.Sprintf("%d", l)+"x", uid)
+	return uid
 }
