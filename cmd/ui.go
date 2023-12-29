@@ -122,8 +122,8 @@ func newUi(invertImage bool) *ui {
 		"h: ", "hex view of (decrypted) amiibo dump",
 		"i: ", "invert image view",
 		"l: ", "load dump from disk",
-		"w: ", "write dump to disk",
-		"", "",
+		"s: ", "save dump to disk",
+		"w: ", "write amiibo data to token",
 		"ESC: ", "double press to quit",
 	}
 
@@ -144,12 +144,12 @@ func newUi(invertImage bool) *ui {
 	}
 
 	// TODO: prevent overwriting modals when they're active (like reading a new amiibo while the dump modal is open)
-	dump := newFilenameModal(s, boxOpts{title: "write dump", key: 'w', xPos: -1, yPos: -1, width: 30, height: 10, needAmiibo: true}, logs.content, writeDump)
+	save := newFilenameModal(s, boxOpts{title: "save dump", key: 's', xPos: -1, yPos: -1, width: 30, height: 10, needAmiibo: true}, logs.content, writeDump)
 	load := newFilenameModal(s, boxOpts{title: "load dump", key: 'l', xPos: -1, yPos: -1, width: 30, height: 10}, logs.content, loadDump)
 	// TODO: it would be cool to highlight the different data blocks in the hex dump (like ID, save data, ...)
 	hex := newTextModal(s, boxOpts{title: "view dump as hex", key: 'h', xPos: -1, yPos: -1, width: 46, height: 70, needAmiibo: true, scroll: true}, logs.content)
 
-	u.elements = []element{info, image, usage, logs, actions, dump, load, hex}
+	u.elements = []element{info, image, usage, logs, actions, save, load, hex}
 
 	return u
 }
@@ -220,9 +220,17 @@ func tui(conf *config) {
 				u.logBox.content <- encodeStringCell("Double press ESC to quit!")
 			case e.Key() == tcell.KeyCtrlL:
 				u.sync()
+			case e.Rune() == 'D' || e.Rune() == 'd':
+				u.logBox.content <- encodeStringCell("Decrypt not yet implemented")
 			case e.Rune() == 'I' || e.Rune() == 'i':
 				u.logBox.content <- encodeStringCell("Toggle image invert")
 				u.imageBox.invertImage()
+			case e.Rune() == 'W' || e.Rune() == 'w':
+				if u.amb != nil {
+					ptl.write(u.amb.Raw())
+				} else {
+					u.logBox.content <- encodeStringCell("Cannot write: please load amiibo data first!")
+				}
 			default:
 				u.handleElementKey(e.Rune())
 			}

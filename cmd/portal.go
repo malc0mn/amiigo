@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/malc0mn/amiigo/amiibo"
 	"github.com/malc0mn/amiigo/nfcptl"
+	"sync"
 	"time"
 )
 
@@ -13,6 +14,9 @@ type portal struct {
 	evt    chan struct{}        // Event channel used to re-init the portal.
 	log    chan<- []byte        // Logger channel.
 	amb    chan<- amiibo.Amiibo // Channel to send last read amiibo to.
+	tkn    bool                 // Boolean to indicate a token is placed on the portal.
+	con    bool                 // Boolean to indicate the portal is connected.
+	sync.Mutex
 }
 
 // connect will block until a successful connection is established to the USB NFC portal.
@@ -29,6 +33,7 @@ func (p *portal) connect(quit <-chan struct{}) {
 		case <-ticker.C:
 			err := p.client.Connect()
 			if err == nil {
+				p.connected(true)
 				p.log <- encodeStringCell(fmt.Sprintf("Successfully connected to NFC portal %04x:%04x.", p.client.VendorId(), p.client.ProductId()))
 				return
 			}
@@ -56,14 +61,16 @@ func (p *portal) listen(conf *config) {
 	p.connect(conf.quit)
 
 	// TODO: Send this output to the UI, maybe close to the logo somewhere?
-	//client.SendCommand(nfcptl.GetDeviceName)
-	//client.SendCommand(nfcptl.GetHardwareInfo)
+	//p.client.SendCommand(nfcptl.Command{Command: nfcptl.GetDeviceName})
+	//p.client.SendCommand(nfcptl.Command{Command: nfcptl.GetHardwareInfo})
 
 	for {
 		select {
 		case e := <-p.client.Events():
 			p.log <- encodeStringCell(fmt.Sprintf("Received event: %s", e.String()))
-			if e.Name() == nfcptl.TokenTagData {
+			switch e.Name() {
+			case nfcptl.TokenTagData:
+				p.tokenState(true)
 				a, err := amiibo.NewAmiibo(e.Data(), nil)
 				if err != nil {
 					p.log <- encodeStringCell(err.Error())
@@ -74,16 +81,37 @@ func (p *portal) listen(conf *config) {
 				p.amb <- *a
 
 				p.log <- encodeStringCell("NFC portal ready")
-			} else if e.Name() == nfcptl.Disconnect {
+			case nfcptl.TokenRemoved:
+				p.tokenState(false)
+			case nfcptl.Disconnect:
+				p.connected(false)
 				p.log <- encodeStringCell("NFC portal disconnected!")
 				p.reInit()
 				return
 			}
 		case <-conf.quit:
 			p.client.Disconnect()
+			p.connected(false)
 			return
 		}
 	}
+}
+
+// write sends amiibo data to the NFC portal which will then write it to the token placed on the
+// portal.
+func (p *portal) write(data []byte) {
+	if !p.isConnected() {
+		p.log <- encodeStringCell("Cannot write: connect an NFC portal first!")
+		return
+	}
+
+	if !p.tokenPlaced() {
+		p.log <- encodeStringCell("Cannot write: please place a token on the NFC portal first!")
+		return
+	}
+
+	p.log <- encodeStringCell("Sending amiibo data to NFC portal")
+	p.client.SendCommand(nfcptl.Command{Command: nfcptl.WriteTokenData, Arguments: data})
 }
 
 // reInit signals the receiver that the portal needs to be re-initialized due to a disconnect. The
@@ -92,6 +120,40 @@ func (p *portal) listen(conf *config) {
 // listen go routine to re-initialize the portal.
 func (p *portal) reInit() {
 	p.evt <- struct{}{}
+}
+
+// tokenState updates the token status in a thread safe way. True means a token is present on the
+// portal.
+func (p *portal) tokenState(tkn bool) {
+	p.Lock()
+	p.tkn = tkn
+	p.Unlock()
+}
+
+// tokenPlaced returns true when a token is present on the NFC portal.
+func (p *portal) tokenPlaced() bool {
+	p.Lock()
+	tkn := p.tkn
+	p.Unlock()
+
+	return tkn
+}
+
+// tokenState updates the token status in a thread safe way. True means a token is present on the
+// portal.
+func (p *portal) connected(con bool) {
+	p.Lock()
+	p.con = con
+	p.Unlock()
+}
+
+// tokenPlaced returns true when a token is present on the NFC portal.
+func (p *portal) isConnected() bool {
+	p.Lock()
+	con := p.con
+	p.Unlock()
+
+	return con
 }
 
 // newPortal returns a new portal ready for use.
