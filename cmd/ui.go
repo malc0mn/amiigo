@@ -11,16 +11,17 @@ var amiiboChan chan amiibo.Amiibo // amiiboChan is the main channel to pass amib
 
 // element defines the basic methods which any ui element should implement.
 type element interface {
-	// activate marks the element as active, so it will process events. The element MUST return nil when activation
-	// was unsuccessful.
+	// activate marks the element as active, so it will process events. The element MUST return nil
+	// when activation was unsuccessful.
 	// The channel returned can be listened on to see if the box has closed itself.
 	activate(a *amiibo.Amiibo) <-chan struct{}
 	// deactivate deactivates the element, so it will no longer process events.
 	deactivate()
-	// draw draws the element. When the 'animated' parameter is set to true, the element must be drawn with animation.
-	// When the tcell.Screen is refreshed or resized, 'animated' will be false so that the ui is instantly displayed.
-	// The return values must be the first x column to the right side of the element and the first y column below the
-	// element.
+	// draw draws the element. When the 'animated' parameter is set to true, the element must be
+	// drawn with animation. When the tcell.Screen is refreshed or resized, 'animated' will be
+	// false so that the ui is instantly displayed.
+	// The return values must be the first x column to the right side of the element and the first
+	// y column below the element.
 	draw(animated bool, x, y int) (int, int)
 	// hasKey must return true if the element is bound to the given rune.
 	hasKey(r rune) bool
