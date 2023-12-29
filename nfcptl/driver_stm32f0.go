@@ -426,8 +426,8 @@ func (stm *stm32f0) commandListener() {
 // pollForToken executes an optimised token poll or a single three-step poll sequence to check if a
 // token is present on the NFC portal. The original software does a three step token poll but after
 // experimenting, this can be optimised to a single message on each poll.
-// When a token is detected, it will read the token contents  and send a TokenDetected event to the
-// client.
+// When a token is detected, it will send a TokenDetected event to the client followed by reading
+// the token contents and sending it to the client using the TokenTagData event.
 func (stm *stm32f0) pollForToken(ticker *time.Ticker) {
 	if stm.optimised {
 		res, isErr := stm.sendCommand(STM32F0_GetTokenUid, []byte{})
@@ -453,12 +453,16 @@ func (stm *stm32f0) pollForToken(ticker *time.Ticker) {
 }
 
 // handleGetTokenUidReturn will handle the result returned by the STM32F0_GetTokenUid command.
+// Based on the state, it will send a TokenRemoved event or a TokenDetected event containing the
+// token ID.
 func (stm *stm32f0) handleGetTokenUidReturn(res []byte, isErr bool) {
 	if isErr {
 		if stm.wasTokenRemoved() {
 			stm.sendCommand(STM32F0_SetLedState, []byte{STM32F0_LedOff})
+			stm.c.PublishEvent(NewEvent(TokenRemoved, nil))
 		}
 	} else if stm.wasTokenPlaced() {
+		stm.c.PublishEvent(NewEvent(TokenDetected, res))
 		stm.handleToken(res)
 	}
 }
