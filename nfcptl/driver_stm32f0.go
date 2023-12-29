@@ -408,7 +408,12 @@ func (stm *stm32f0) commandListener() {
 				if dc, err := stm.getDriverCommandForClientCommand(cmd.Command); err != nil {
 					stm.c.PublishEvent(NewEvent(UnknownCommand, []byte{}))
 				} else if dc == STM32F0_Write {
-					stm.writeToken(cmd.Arguments)
+					if cmd.Arguments == nil {
+						log.Println("stm32f0: no data to write")
+						stm.c.PublishEvent(NewEvent(TokenTagWriteError, nil))
+					} else {
+						stm.write(cmd.Arguments[1:], cmd.Arguments[0] == 1)
+					}
 				} else {
 					stm.sendCommand(dc, cmd.Arguments)
 				}
@@ -637,9 +642,12 @@ func (stm *stm32f0) readTokenWithValidation() ([]byte, error) {
 	return token, nil
 }
 
-// writeToken writes the given token data, all 540 bytes, to the PUC. To get a successful write, we
-// must do an init dance similar to the read init, but not entirely equal.
-func (stm *stm32f0) writeToken(data []byte) {
+// write writes the given amiibo data to the PUC. When userdata is false, all 540 bytes will be
+// written to the PUC. When userdata is true, only pages 0x04 up to and including 0x81 (the NTAG215
+// user data area) will be written. The original software labels this as 'restoring a backup'.
+// When userdata is true, it is imperative that the given token matches the data that is already
+// present on the PUC. Failing to do so will result in an invalid amiibo.
+func (stm *stm32f0) write(data []byte, userdata bool) {
 	got := len(data)
 	want := 540
 	if got != want {
@@ -648,15 +656,26 @@ func (stm *stm32f0) writeToken(data []byte) {
 		return
 	}
 
-	if stm.c.Debug() {
-		log.Println("stm32f0: full token data to be written:")
-		log.Println(hex.Dump(data))
+	msg := "full"
+	if userdata {
+		msg = "user"
 	}
 
-	log.Println("stm32f0: starting write procedure")
+	if stm.c.Debug() {
+		var dump string
+		if userdata {
+			dump = hex.Dump(data[16:520])
+		} else {
+			dump = hex.Dump(data)
+		}
+		log.Printf("stm32f0: %s token data to be written:", msg)
+		log.Println(dump)
+	}
+
+	log.Printf("stm32f0: starting %s write procedure", msg)
 	stm.c.PublishEvent(NewEvent(TokenTagWriteStart, nil))
 
-	// Write sequence:
+	// FULL write sequence:
 	//    0x11 -> turn off nfc field
 	//    0x10 -> turn on nfc field
 	//      the token has now been 'power cycled'
@@ -675,20 +694,46 @@ func (stm *stm32f0) writeToken(data []byte) {
 	//    0x1c 0x00 => read page 0 ... it keeps reading until page 0x84, possibly for validation?
 	//    0x1c 0x00 => and it starts reading from the start all over again (not very efficient is it)
 	//    finally it restarts the 'token on portal' polling sequence
+	//
+	// Userdata write sequence:
+	//    0x11 -> turn off nfc field
+	//    0x10 -> turn on nfc field
+	//      the token has now been 'power cycled'
+	//    0x12 -> get token NUID
+	//    0x1b -> unlock? returns: 0x80 0x80 which is the default password ack on an amiibo
+	//    0x1d 0x04 0x?? 0x?? 0x?? 0x?? -> writePage 0x04 with 4 bytes payload => page 0x04 is where the NTAG215 user
+	//      data starts! It continues writing until page 0x81 which is the end of the NTAG215 user data.
+	//      So it never 'resets' the default NTAG pages.
+	//    0x1c 0x00 => read page 0 ... it keeps reading until page 0x84, possibly for validation?
+	//    0x1c 0x00 => and it starts reading from the start all over again (not very efficient is it)
+	//    now it starts the 'token on portal' polling sequence
+
 	cmds := []map[DriverCommand][]byte{
 		{STM32F0_RFFieldOff: {}},
 		{STM32F0_RFFieldOn: {}},
 		{STM32F0_GetTokenUid: {}},
-		{STM32F0_Read: {0x10}},
-		{STM32F0_MakeKey: {}},
-		{STM32F0_Unknown4: {}},
-		{STM32F0_Unlock: {}},
 	}
+
+	startPage := 0x04
+	lastPage := 0x81
+	if !userdata {
+		// To get a successful FULL write, we must do an init dance similar to the read init, but not entirely equal.
+		cmds = append(cmds, []map[DriverCommand][]byte{
+			{STM32F0_Read: {0x10}},
+			{STM32F0_MakeKey: {}},
+			{STM32F0_Unknown4: {}},
+		}...)
+
+		startPage = 0
+		lastPage = 0x86
+	}
+
+	cmds = append(cmds, map[DriverCommand][]byte{STM32F0_Unlock: {}})
 
 	// Prepare write.
 	page16 := make([]byte, 16)
 	key := make([]byte, 16)
-	uid := []byte{0x00}
+	var uid []byte
 
 	for _, item := range cmds {
 		for cmd, args := range item {
@@ -718,11 +763,12 @@ func (stm *stm32f0) writeToken(data []byte) {
 	}
 
 	// Actual write.
-	totalWrites := 0
-	page := 0
-	// We need to write a total of 135 pages, but we write the last page first and the first page last as the original
-	// software does too.
-	for totalWrites < 0x87 {
+	totalWrites := startPage
+	page := totalWrites
+	for totalWrites < lastPage+1 {
+		// For a full write, we need to write a total of 135 pages, but we write the last page first and the first
+		// page last as the original software does too.
+		// For a user data write, we never start at page 0 nor will we reach page 0x86.
 		switch totalWrites {
 		case 0:
 			page = 0x86
@@ -733,9 +779,6 @@ func (stm *stm32f0) writeToken(data []byte) {
 		pageErrors := 0
 	write:
 		// TODO: should we send events here for each page that we're writing so that clients can display progress?
-		if stm.c.Debug() {
-			log.Printf("stm32f0: writing %#02x to page %#02x", data[i:i+4], page)
-		}
 		// byte(page) conversion is safe here since we stick to NTAG215 pages
 		_, isErr := stm.sendCommand(STM32F0_Write, append([]byte{byte(page)}, data[i:i+4]...))
 		if isErr {

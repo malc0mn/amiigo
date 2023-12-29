@@ -14,6 +14,8 @@ const (
 	GetHardwareInfo
 	GetApiPassword
 	FetchTokenData
+	// WriteTokenData expects the first byte in the arguments to be 0x00 for a full write or 0x01
+	// to write only the userdata block. The next 540 bytes must be the full amiibo data.
 	WriteTokenData
 	SetLedState
 )

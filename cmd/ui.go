@@ -227,7 +227,7 @@ func tui(conf *config) {
 				u.imageBox.invertImage()
 			case e.Rune() == 'W' || e.Rune() == 'w':
 				if u.amb != nil {
-					ptl.write(u.amb.Raw())
+					ptl.write(u.amb.Raw(), false)
 				} else {
 					u.logBox.content <- encodeStringCell("Cannot write: please load amiibo data first!")
 				}

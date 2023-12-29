@@ -98,8 +98,10 @@ func (p *portal) listen(conf *config) {
 }
 
 // write sends amiibo data to the NFC portal which will then write it to the token placed on the
-// portal.
-func (p *portal) write(data []byte) {
+// portal. If user is true, then only the user data of the amiibo tag will be written,
+// corresponding with 'restoring a backup' in the original software. Pass false to write the full
+// amiibo data.
+func (p *portal) write(data []byte, user bool) {
 	if !p.isConnected() {
 		p.log <- encodeStringCell("Cannot write: connect an NFC portal first!")
 		return
@@ -110,8 +112,13 @@ func (p *portal) write(data []byte) {
 		return
 	}
 
+	typ := []byte{0x00}
+	if user {
+		typ = []byte{0x01}
+	}
+
 	p.log <- encodeStringCell("Sending amiibo data to NFC portal")
-	p.client.SendCommand(nfcptl.Command{Command: nfcptl.WriteTokenData, Arguments: data})
+	p.client.SendCommand(nfcptl.Command{Command: nfcptl.WriteTokenData, Arguments: append(typ, data...)})
 }
 
 // reInit signals the receiver that the portal needs to be re-initialized due to a disconnect. The
