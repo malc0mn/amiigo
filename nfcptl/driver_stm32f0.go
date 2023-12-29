@@ -407,6 +407,8 @@ func (stm *stm32f0) commandListener() {
 			case cmd := <-stm.c.Commands():
 				if dc, err := stm.getDriverCommandForClientCommand(cmd.Command); err != nil {
 					stm.c.PublishEvent(NewEvent(UnknownCommand, []byte{}))
+				} else if dc == STM32F0_Write {
+					stm.writeToken(cmd.Arguments)
 				} else {
 					stm.sendCommand(dc, cmd.Arguments)
 				}
@@ -542,7 +544,6 @@ func (stm *stm32f0) handleToken(buff []byte) {
 		{STM32F0_Unknown1: {}},
 		// This power cycle is not done when there is a PUC on the portal but is imperative when reading a real amiibo
 		// card or figure. Not power cycling will result in a read failure!
-		// TODO: find a way to detect a PUC because this power cycle will no doubt inhibit writing to the PUC.
 		{STM32F0_RFFieldOff: {}},
 		{STM32F0_RFFieldOn: {}},
 		{STM32F0_GetTokenUid: {}},
@@ -636,20 +637,141 @@ func (stm *stm32f0) readTokenWithValidation() ([]byte, error) {
 	return token, nil
 }
 
-// Write sequence:
-//    0x11 -> turn off nfc field
-//    0x10 -> turn on nfc field
-//      the token has now been 'power cycled'
-//    0x12 -> get token NUID
-//    0x1b -> unlock? returns: 0x80 0x80 which is the default password ack on an amiibo
-//    0x1d 0x04 0x?? 0x?? 0x?? 0x?? -> writePage 0x04 with 4 bytes payload => page 0x04 is where the NTAG215 user data
-//      starts! It continues writing until page 0x81 which is the end of the NTAG215 user data.
-//      So it never 'resets' the default NTAG pages.
-//    0x1c 0x00 => read page 0 ... it keeps reading until page 0x84, possibly for validation?
-//    0x1c 0x00 => and it starts reading from the start all over again (not very efficient is it)
-//    now it starts the 'token on portal' polling sequence
-func (stm *stm32f0) writeToken() error {
-	return nil
+// writeToken writes the given token data, all 540 bytes, to the PUC. To get a successful write, we
+// must do an init dance similar to the read init, but not entirely equal.
+func (stm *stm32f0) writeToken(data []byte) {
+	got := len(data)
+	want := 540
+	if got != want {
+		log.Printf("stm32f0: data too short, got %d bytes want %d", got, want)
+		stm.c.PublishEvent(NewEvent(TokenTagDataSizeError, data))
+		return
+	}
+
+	if stm.c.Debug() {
+		log.Println("stm32f0: full token data to be written:")
+		log.Println(hex.Dump(data))
+	}
+
+	log.Println("stm32f0: starting write procedure")
+	stm.c.PublishEvent(NewEvent(TokenTagWriteStart, nil))
+
+	// Write sequence:
+	//    0x11 -> turn off nfc field
+	//    0x10 -> turn on nfc field
+	//      the token has now been 'power cycled'
+	//    0x12 -> get token NUID
+	//    0x1c 0x10 -> read page 16
+	//    0x30 args are answer from 0x12 + 0x1c
+	//    0x1e args are 0x00 + answer from 0x30
+	//    0x1b -> unlock
+	//      returns: 0x80 0x80 which is the default password ack on an amiibo
+	//  actual write: last page first, rest of pages and first page last
+	//    0x1d 0x86 with corresponding 4 bytes from given amiibo dump
+	//    0x1d 0x01 with corresponding 4 bytes from given amiibo dump
+	//    0x1d ...
+	//    0x1d 0x85 with corresponding 4 bytes from given amiibo dump
+	//    0x1d 0x00 with corresponding 4 bytes from given amiibo dump
+	//    0x1c 0x00 => read page 0 ... it keeps reading until page 0x84, possibly for validation?
+	//    0x1c 0x00 => and it starts reading from the start all over again (not very efficient is it)
+	//    finally it restarts the 'token on portal' polling sequence
+	cmds := []map[DriverCommand][]byte{
+		{STM32F0_RFFieldOff: {}},
+		{STM32F0_RFFieldOn: {}},
+		{STM32F0_GetTokenUid: {}},
+		{STM32F0_Read: {0x10}},
+		{STM32F0_MakeKey: {}},
+		{STM32F0_Unknown4: {}},
+		{STM32F0_Unlock: {}},
+	}
+
+	// Prepare write.
+	page16 := make([]byte, 16)
+	key := make([]byte, 16)
+	uid := []byte{0x00}
+
+	for _, item := range cmds {
+		for cmd, args := range item {
+			switch cmd {
+			case STM32F0_MakeKey:
+				args = append(uid, page16...)
+			case STM32F0_Unknown4:
+				args = append([]byte{0x00}, key...)
+			}
+
+			r, _ := stm.sendCommand(cmd, args)
+
+			switch cmd {
+			case STM32F0_GetTokenUid:
+				uid = stm.extractNuid(r)
+				if uid == nil {
+					log.Println("stm32f0: write init failed, invalid token ID")
+					stm.c.PublishEvent(NewEvent(TokenTagWriteError, nil))
+					return
+				}
+			case STM32F0_Read:
+				copy(page16, r[2:])
+			case STM32F0_MakeKey:
+				copy(key, r[2:])
+			}
+		}
+	}
+
+	// Actual write.
+	totalWrites := 0
+	page := 0
+	// We need to write a total of 135 pages, but we write the last page first and the first page last as the original
+	// software does too.
+	for totalWrites < 0x87 {
+		switch totalWrites {
+		case 0:
+			page = 0x86
+		case 0x86:
+			page = 0
+		}
+		i := page * 4 // Convert page number to index: one page has four bytes of data.
+		pageErrors := 0
+	write:
+		// TODO: should we send events here for each page that we're writing so that clients can display progress?
+		if stm.c.Debug() {
+			log.Printf("stm32f0: writing %#02x to page %#02x", data[i:i+4], page)
+		}
+		// byte(page) conversion is safe here since we stick to NTAG215 pages
+		_, isErr := stm.sendCommand(STM32F0_Write, append([]byte{byte(page)}, data[i:i+4]...))
+		if isErr {
+			if pageErrors++; pageErrors > 2 {
+				log.Printf("stm32f0: failed to write page %#02x", page)
+				stm.c.PublishEvent(NewEvent(TokenTagWriteError, []byte{byte(page)}))
+				return
+			} else {
+				// Try writing the same page again.
+				goto write
+			}
+		}
+		totalWrites++
+		page = totalWrites
+	}
+
+	stm.c.PublishEvent(NewEvent(TokenTagWriteFinish, nil))
+	log.Println("stm32f0: successfully finished write procedure")
+
+	// Validate write.
+	token, err := stm.readTokenWithValidation()
+	if err != nil {
+		if stm.c.Debug() {
+			log.Printf("%s", err)
+		}
+		stm.c.PublishEvent(NewEvent(TokenTagDataError, token))
+		return
+	}
+
+	if stm.c.Debug() {
+		log.Println("stm32f0: full token data read after write:")
+		log.Println(hex.Dump(token))
+	}
+	stm.c.PublishEvent(NewEvent(TokenTagData, token))
+
+	return
 }
 
 // Write sequence:

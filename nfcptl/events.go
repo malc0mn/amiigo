@@ -36,6 +36,16 @@ const (
 	// The token tag data that has been read will be present in the event data but will be
 	// incomplete or corrupted.
 	TokenTagDataError EventType = "TokenTagDataError"
+	// TokenTagDataSizeError is sent when the driver received token data to write that is not
+	// exactly 540 bytes long. The passed data to write will be present in the event data.
+	TokenTagDataSizeError EventType = "TokenTagDataSizeError"
+	// TokenTagWriteStart is sent right before the driver starts the writing procedure.
+	TokenTagWriteStart EventType = "TokenTagWriteStart"
+	// TokenTagWriteFinish is sent when the driver successfully finishes the write sequence.
+	TokenTagWriteFinish EventType = "TokenTagWriteFinish"
+	// TokenTagWriteError is sent when the driver received an error after two consecutive write
+	// failures of the same page.
+	TokenTagWriteError EventType = "TokenTagWriteError"
 	// UnknownCommand is sent when the driver has received an unknown command.
 	UnknownCommand EventType = "UnknownCommand"
 	// Disconnect is sent when the Client.Disconnect method is called.
