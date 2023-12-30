@@ -12,6 +12,7 @@ const (
 	errGeneral     = 1
 	errOpenConfig  = 102
 	errOpenLogFile = 103
+	errReadKey     = 104
 )
 
 var (
@@ -39,6 +40,13 @@ func main() {
 			fmt.Fprintf(os.Stderr, "Error opening config file - %s\n", err)
 			os.Exit(errOpenConfig)
 		}
+	}
+
+	if key, err := loadRetailKey(conf.retailKeyPath); err != nil {
+		fmt.Fprint(os.Stderr, err)
+		os.Exit(errReadKey)
+	} else {
+		conf.retailKey = key
 	}
 
 	f, err := getLogfile(conf.logFile)

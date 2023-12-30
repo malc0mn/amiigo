@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"github.com/go-ini/ini"
+	"github.com/malc0mn/amiigo/amiibo"
 	"github.com/malc0mn/amiigo/nfcptl"
 	"sync"
 )
@@ -20,6 +22,11 @@ type config struct {
 	logFile string
 	// amiiboApiBaseUrl is the base url for the open amiibo API by n3evin.
 	amiiboApiBaseUrl string
+	// retailKeyPath is the full path to a file containing concatenated unfixed-info.bin and
+	// locked-secret.bin files.
+	retailKeyPath string
+	// retailKey is the loaded instance of the file referenced in retailKeyPath
+	retailKey *amiibo.RetailKey
 
 	// ui holds UI related config.
 	ui *uiConf
@@ -76,6 +83,9 @@ func loadConfig(cFile string, conf *config) error {
 		if k, err := i.GetKey("amiibo_api_base_url"); err == nil {
 			conf.amiiboApiBaseUrl = k.String()
 		}
+		if k, err := i.GetKey("retail_key"); err == nil {
+			conf.retailKeyPath = k.String()
+		}
 	}
 
 	if i, err := f.GetSection("ui"); err == nil {
@@ -87,4 +97,17 @@ func loadConfig(cFile string, conf *config) error {
 	}
 
 	return nil
+}
+
+func loadRetailKey(path string) (*amiibo.RetailKey, error) {
+	if path == "" {
+		return nil, nil
+	}
+
+	key, err := amiibo.NewRetailKey(path)
+	if err == nil {
+		return key, nil
+	}
+
+	return nil, fmt.Errorf("config: retail key file %q is invalid: %s", path, err)
 }
