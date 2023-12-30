@@ -3,7 +3,66 @@
 ![terminal user interface demo](img/amiigo.gif)
 **Note**: the terminal interface still has lots of rendering issues, but is usable.
 
+## Usage
+
+### Building
+Execute:
+```shell
+make clean; make amiigo
+```
+This will result in an `amiigo` binary in the root dir of this GIT repository.
+
+### Running tests
+Execute:
+```shell
+make test
+```
+**Note**: crypto tests will fail unless you supply the proper files, see the
+[crypto_test.go](amiibo/crypto_test.go) file for details.
+
+### Launch the CLI command
+Example:
+```shell
+./amiigo -l out.log -k key_retail.bin
+```
+
+Display commandline options by executing `amiigo` with the `-?` flag:
+```text
+Usage of amiigo:
+  -?	Display usage information.
+  -c string
+        Read all settings from a config file. The config file will override any command line flags present.
+  -d string
+        The NFC portal to connect to. (default "ps4amiibo")
+  -k string
+        Path to retail key for amiibo decryption/encryption
+  -l string
+        Write logfile to the given path. Logs are discarded by default.
+  -v string
+        The vendor of the portal that will be connected to. (default "datel")
+  -verbose
+        Output lots and lots of debug information.
+  -version
+        Display version info.
+```
+
+The `-c` option expects a path to an INI config file. The config file will
+override commandline options. An example with default values:
+```ini
+cache_dir = "~/.cache/amiigo"
+log_file = ""
+vendor = "datel"
+device = "ps4amiibo"
+amiibo_api_base_url = "https://www.amiiboapi.com"
+retail_key = ""
+solid_images = false
+```
+See [vendors.go](nfcptl/vendors.go) for supported vendors and devices. **Only
+Datel's PowerSaves For Amiibo portal has been tested!**
+
 ## Packages
+This codebase provides several stand-alone packages which can be used in your own go
+projects.
 
 ## amiibo
 The `amiibo` package can be used independently to work with amiibodumps being a
@@ -125,3 +184,4 @@ Executing `make testv` will run the tests in verbose mode.
 ## Credits
 - https://github.com/socram8888/amiitool
 - https://www.3dbrew.org
+- Kevin Valk: thank you for supplying me with your old Maxlander research data!
