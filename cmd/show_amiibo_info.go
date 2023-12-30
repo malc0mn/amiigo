@@ -7,7 +7,7 @@ import (
 )
 
 // showAmiiboInfo analyses the amiibo and updates the info, usage and image boxes.
-func showAmiiboInfo(a *amiibo.Amiibo, log, ifo, usg chan<- []byte, img *imageBox, baseUrl string) {
+func showAmiiboInfo(a amiibo.Amiidump, log, ifo, usg chan<- []byte, img *imageBox, baseUrl string) {
 	rawId := a.ModelInfo().ID()
 	if zeroed(rawId) {
 		return

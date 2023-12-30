@@ -7,7 +7,7 @@ import (
 )
 
 // submitHandler defines a submithandler for a filenameModal, receiving a filename and an amiibo struct.
-type submitHandler func(f string, a *amiibo.Amiibo, log chan<- []byte) bool
+type submitHandler func(f string, a amiibo.Amiidump, log chan<- []byte) bool
 
 // filenameModal represents a modal that will request filename input.
 type filenameModal struct {

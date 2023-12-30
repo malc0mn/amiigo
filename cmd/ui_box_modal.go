@@ -11,7 +11,7 @@ type modalInputHandler func(e *tcell.EventKey)
 
 type modal struct {
 	*box
-	a              *amiibo.Amiibo
+	a              amiibo.Amiidump
 	d              drawModalContent
 	h              modalInputHandler
 	c              func()
@@ -70,7 +70,7 @@ func (m *modal) draw(animated bool, _, _ int) (int, int) {
 }
 
 // activate sets the active flag to true, stores the part of the screen that will be overwritten and draws the box.
-func (m *modal) activate(a *amiibo.Amiibo) <-chan struct{} {
+func (m *modal) activate(a amiibo.Amiidump) <-chan struct{} {
 	if m.opts.needAmiibo && a == nil {
 		m.log <- encodeStringCell("No amiibo data!")
 		return nil

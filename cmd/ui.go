@@ -7,14 +7,14 @@ import (
 )
 
 // TODO: is there a way to get rid of this global var?
-var amiiboChan chan amiibo.Amiibo // amiiboChan is the main channel to pass amiboo structs around.
+var amiiboChan chan amiibo.Amiidump // amiiboChan is the main channel to pass amiboo structs around.
 
 // element defines the basic methods which any ui element should implement.
 type element interface {
 	// activate marks the element as active, so it will process events. The element MUST return nil
 	// when activation was unsuccessful.
 	// The channel returned can be listened on to see if the box has closed itself.
-	activate(a *amiibo.Amiibo) <-chan struct{}
+	activate(a amiibo.Amiidump) <-chan struct{}
 	// deactivate deactivates the element, so it will no longer process events.
 	deactivate()
 	// draw draws the element. When the 'animated' parameter is set to true, the element must be
@@ -39,7 +39,7 @@ type ui struct {
 	imageBox *imageBox
 	usageBox *box
 	logBox   *box
-	amb      *amiibo.Amiibo
+	amb      amiibo.Amiidump
 }
 
 // draw draws the entire user interface.
@@ -165,7 +165,7 @@ func tui(conf *config) {
 
 	t := time.Now()
 
-	amiiboChan = make(chan amiibo.Amiibo)
+	amiiboChan = make(chan amiibo.Amiidump)
 
 	// Connect to the portal when the UI is visible, so it can display the client logs etc.
 	ptl := newPortal(u.logBox.content, amiiboChan)
@@ -189,7 +189,7 @@ func tui(conf *config) {
 		for {
 			select {
 			case am := <-amiiboChan:
-				u.amb = &am
+				u.amb = am
 				showAmiiboInfo(u.amb, u.logBox.content, u.infoBox.content, u.usageBox.content, u.imageBox, conf.amiiboApiBaseUrl)
 				u.draw(false)
 			case <-conf.quit:
@@ -228,7 +228,12 @@ func tui(conf *config) {
 				u.imageBox.invertImage()
 			case e.Rune() == 'W' || e.Rune() == 'w':
 				if u.amb != nil {
-					ptl.write(u.amb.Raw(), false)
+					switch u.amb.(type) {
+					case *amiibo.Amiitool:
+						ptl.write(amiibo.AmiitoolToAmiibo(u.amb.(*amiibo.Amiitool)).Raw(), false)
+					case *amiibo.Amiibo:
+						ptl.write(u.amb.Raw(), false)
+					}
 				} else {
 					u.logBox.content <- encodeStringCell("Cannot write: please load amiibo data first!")
 				}

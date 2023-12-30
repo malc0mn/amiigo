@@ -8,7 +8,7 @@ import (
 )
 
 // loadDump loads an amiibo dump from disk.
-func loadDump(filename string, _ *amiibo.Amiibo, log chan<- []byte) bool {
+func loadDump(filename string, _ amiibo.Amiidump, log chan<- []byte) bool {
 	if filename == "" {
 		log <- encodeStringCell("Please provide a filename!")
 		return false
@@ -35,7 +35,7 @@ func loadDump(filename string, _ *amiibo.Amiibo, log chan<- []byte) bool {
 		return false
 	}
 
-	amiiboChan <- *am
+	amiiboChan <- am
 
 	log <- encodeStringCell("Amiibo read successful!")
 	return true

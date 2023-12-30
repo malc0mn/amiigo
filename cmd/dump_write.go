@@ -8,7 +8,7 @@ import (
 )
 
 // writeDump writes the active amiibo data to disk.
-func writeDump(filename string, a *amiibo.Amiibo, log chan<- []byte) bool {
+func writeDump(filename string, a amiibo.Amiidump, log chan<- []byte) bool {
 	if a == nil {
 		log <- encodeStringCell("No amiibo data to write!")
 		return false
