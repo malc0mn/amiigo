@@ -33,7 +33,7 @@ func (fn *filenameModal) handleInput(e *tcell.EventKey) {
 		if len(fn.filename) > 0 {
 			fn.filename = fn.filename[:len(fn.filename)-1]
 			fn.inputXPos--
-			fn.drawUnderscore()
+			fn.drawFilenameBlank()
 			fn.s.Show()
 		}
 	case e.Key() == tcell.KeyEnter || e.Rune() == '\n':
@@ -47,7 +47,7 @@ func (fn *filenameModal) handleInput(e *tcell.EventKey) {
 			return
 		}
 
-		fn.drawChar(e.Rune())
+		fn.drawFilenameChar(e.Rune())
 		fn.inputXPos++
 		fn.filename += string(e.Rune())
 		fn.s.Show()
@@ -62,7 +62,7 @@ func (fn *filenameModal) drawModalContent(x, y int) {
 	fn.inputYPos = y + 1
 	prompt := "Enter filename followed by enter, ESC to abort:"
 	for _, char := range prompt {
-		fn.drawChar(char)
+		fn.drawChar(char, tcell.StyleDefault)
 		fn.inputXPos++
 	}
 	fn.inputYPos += 2 // Add blank line as well
@@ -70,21 +70,24 @@ func (fn *filenameModal) drawModalContent(x, y int) {
 
 	for i := 0; i < fn.width()-6; i++ {
 		fn.inputXPos++
-		// TODO: cant get inverse styling to work here, why!??
-		fn.drawUnderscore()
+		fn.drawFilenameBlank()
 	}
 	fn.inputXPos = x + 2
 	fn.s.Show()
 }
 
 // drawChar draws a single char on the current position inside the modal.
-func (fn *filenameModal) drawChar(c rune) {
-	fn.s.SetContent(fn.inputXPos, fn.inputYPos, c, nil, tcell.StyleDefault)
+func (fn *filenameModal) drawChar(c rune, style tcell.Style) {
+	fn.s.SetContent(fn.inputXPos, fn.inputYPos, c, nil, style)
 }
 
 // drawUnderscore draws a single underscore char on the current position inside the modal.
-func (fn *filenameModal) drawUnderscore() {
-	fn.drawChar('_')
+func (fn *filenameModal) drawFilenameChar(c rune) {
+	fn.drawChar(c, tcell.StyleDefault.Background(backColour).Foreground(fontColour).Attributes(tcell.AttrReverse|tcell.AttrBold))
+}
+
+func (fn *filenameModal) drawFilenameBlank() {
+	fn.drawFilenameChar(' ')
 }
 
 // reset resets the inner modal state.
