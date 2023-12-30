@@ -17,6 +17,7 @@ const (
 	// WriteTokenData expects the first byte in the arguments to be 0x00 for a full write or 0x01
 	// to write only the user data block. The next 540 bytes must always be the full amiibo data.
 	WriteTokenData
+	// SetLedState accepts an argument ranging from 0x00 being off, to 0xff being full power.
 	SetLedState
 )
 
