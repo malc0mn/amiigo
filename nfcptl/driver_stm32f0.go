@@ -642,12 +642,14 @@ func (stm *stm32f0) readTokenWithValidation() ([]byte, error) {
 	return token, nil
 }
 
-// write writes the given amiibo data to the PUC. When userdata is false, all 540 bytes will be
-// written to the PUC. When userdata is true, only pages 0x04 up to and including 0x81 (the NTAG215
-// user data area) will be written. The original software labels this as 'restoring a backup'.
-// When userdata is true, it is imperative that the given token matches the data that is already
-// present on the PUC. Failing to do so will result in an invalid amiibo.
-func (stm *stm32f0) write(data []byte, userdata bool) {
+// write writes the given amiibo data to the PUC. When userdataOnly is false, all 540 bytes will be
+// written to the PUC. When userdataOnly is true, only pages 0x04 up to and including 0x81 (the
+// NTAG215 user data area) will be written. The original software labels this as 'restoring a
+// backup'.
+// When userdataOnly is true, it is imperative that the given token matches the data that is already
+// present on the PUC. Failing to do so will result in an invalid amiibo. It is the responsibility
+// of the caller to do this validation beforehand!
+func (stm *stm32f0) write(data []byte, userdataOnly bool) {
 	got := len(data)
 	want := 540
 	if got != want {
@@ -657,13 +659,13 @@ func (stm *stm32f0) write(data []byte, userdata bool) {
 	}
 
 	msg := "full"
-	if userdata {
+	if userdataOnly {
 		msg = "user"
 	}
 
 	if stm.c.Debug() {
 		var dump string
-		if userdata {
+		if userdataOnly {
 			dump = hex.Dump(data[16:520])
 		} else {
 			dump = hex.Dump(data)
@@ -716,7 +718,7 @@ func (stm *stm32f0) write(data []byte, userdata bool) {
 
 	startPage := 0x04
 	lastPage := 0x81
-	if !userdata {
+	if !userdataOnly {
 		// To get a successful FULL write, we must do an init dance similar to the read init, but not entirely equal.
 		cmds = append(cmds, []map[DriverCommand][]byte{
 			{STM32F0_Read: {0x10}},
