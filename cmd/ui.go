@@ -219,10 +219,8 @@ func tui(conf *config) {
 		for {
 			select {
 			case am := <-amiiboChan:
-				// TODO: detect the amiibo is decrypted to set the 2nd parameter below to the actual value
-				//  and not assume it's encrypted by default.
-				u.setAmiibo(am, false)
-				showAmiiboInfo(u.amiibo(), u.logBox.content, u.infoBox.content, u.usageBox.content, u.imageBox, conf.amiiboApiBaseUrl)
+				u.setAmiibo(am, isAmiiboDecrypted(am, conf.retailKey))
+				showAmiiboInfo(u.amiibo(), u.isDecrypted(), u.logBox.content, u.infoBox.content, u.usageBox.content, u.imageBox, conf.amiiboApiBaseUrl)
 				u.draw(false)
 			case <-conf.quit:
 				return
@@ -231,6 +229,12 @@ func tui(conf *config) {
 	}()
 
 	u.show()
+
+	if conf.retailKey == nil {
+		u.logBox.content <- encodeStringCellWarning("No retail key loaded: cannot decrypt nor detect decrypted amiibo!")
+	} else {
+		u.logBox.content <- encodeStringCell("Retail key loaded: crypto support available.")
+	}
 
 	for {
 		ev := u.pollEvent()

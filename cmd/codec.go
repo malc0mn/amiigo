@@ -13,6 +13,10 @@ func encodeStringCell(s string) []byte {
 	return encodeStringCellWithAttrs(s, tcell.AttrNone, "\n")
 }
 
+func encodeStringCellWarning(s string) []byte {
+	return encodeStringCellWithAttrs(s, tcell.AttrBold|tcell.AttrReverse, "\n")
+}
+
 func encodeStringCellWithAttrs(s string, a tcell.AttrMask, suf string) []byte {
 	if !strings.HasSuffix(s, suf) {
 		s += "\n"

@@ -6,17 +6,29 @@ import (
 	"github.com/malc0mn/amiigo/amiibo"
 	"github.com/malc0mn/amiigo/apii"
 	"os"
+	"path"
 	"path/filepath"
+	"strings"
 )
 
 // showAmiiboInfo analyses the amiibo and updates the info, usage and image boxes.
-func showAmiiboInfo(a amiibo.Amiidump, log, ifo, usg chan<- []byte, img *imageBox, baseUrl string) {
+func showAmiiboInfo(a amiibo.Amiidump, dec bool, log, ifo, usg chan<- []byte, img *imageBox, baseUrl string) {
 	rawId := a.ModelInfo().ID()
 	if zeroed(rawId) {
 		return
 	}
 	id := hex.EncodeToString(rawId)
 	log <- encodeStringCell("Got id: " + id)
+
+	typ := "a regular amiibo"
+	if a.Type() == amiibo.TypeAmiitool {
+		typ = "an amiitool dump"
+	}
+	log <- encodeStringCell("Amiibo is " + typ)
+
+	if dec {
+		log <- encodeStringCellWarning("Warning: amiibo is decrypted!")
+	}
 
 	// Fill info box.
 	log <- encodeStringCell("Fetching amiibo info")
@@ -69,6 +81,7 @@ func loadDump(filename string, _ amiibo.Amiidump, log chan<- []byte) bool {
 		return false
 	}
 
+	// TODO: how to detect amiitool files?
 	am, err := amiibo.NewAmiibo(data, nil)
 	if err != nil {
 		log <- encodeStringCell(fmt.Sprintf("Error reading amiibo data: %s", err))
@@ -92,9 +105,17 @@ func saveDump(filename string, a amiibo.Amiidump, log chan<- []byte) bool {
 		return false
 	}
 
-	if ext := filepath.Ext(filename); ext != ".bin" {
-		filename += ".bin"
+	filename = path.Clean(filename)
+
+	ext := ".bin"
+	filename = strings.TrimSuffix(filename, ext)
+	if isAmiiboDecrypted(a, conf.retailKey) {
+		suf := "_decrypted"
+		if !strings.HasSuffix(filename, suf) {
+			ext = "_decrypted" + ext
+		}
 	}
+	filename += ext
 
 	dest := filename
 	dir := filepath.Dir(filename)
@@ -134,6 +155,7 @@ func prepData(a amiibo.Amiidump, dec bool, log chan<- []byte) []byte {
 	}
 }
 
+// decrypt decrypts the given amiibo and returns a new amiibo.Amiidump instance.
 func decrypt(a amiibo.Amiidump, log chan<- []byte) amiibo.Amiidump {
 	if a == nil {
 		log <- encodeStringCell("Cannot decrypt: no amiibo data")
@@ -151,4 +173,18 @@ func decrypt(a amiibo.Amiidump, log chan<- []byte) amiibo.Amiidump {
 
 	log <- encodeStringCell("Decryption successful")
 	return dec
+}
+
+// isAmiiboDecrypted will TRY to ascertain if a given amiibo is decrypted. It will do this by
+// assuming it is decrypted and verifying the HMAC signatures. If this fails, we assume it is
+// encrypted.
+// If no retail key is loaded, we will always assume it is not decrypted.
+func isAmiiboDecrypted(a amiibo.Amiidump, key *amiibo.RetailKey) bool {
+	if key == nil {
+		return false
+	}
+	t := amiibo.NewDerivedKey(&key.Tag, a)
+	d := amiibo.NewDerivedKey(&key.Data, a)
+
+	return amiibo.Verify(a, t, d)
 }
