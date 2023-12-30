@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/malc0mn/amiigo/amiibo"
+	"sync"
 	"time"
 )
 
@@ -40,6 +41,9 @@ type ui struct {
 	usageBox *box
 	logBox   *box
 	amb      amiibo.Amiidump
+	dec      bool
+
+	sync.Mutex
 }
 
 // draw draws the entire user interface.
@@ -88,7 +92,7 @@ func (u *ui) handleElementKey(r rune) {
 	for _, b := range u.elements {
 		if b.hasKey(r) {
 			u.logBox.content <- encodeStringCell("Activating '" + b.name() + "' box...")
-			done := b.activate(u.amb)
+			done := b.activate(u.amiibo())
 			if done != nil {
 				u.logBox.content <- encodeStringCell("...'" + b.name() + "' box active; ESC to deactivate")
 				for {
@@ -114,6 +118,32 @@ func (u *ui) handleElementKey(r rune) {
 			}
 		}
 	}
+}
+
+// setAmiibo sets the active amiibo in a thread safe way.
+func (u *ui) setAmiibo(a amiibo.Amiidump, dec bool) {
+	u.Lock()
+	u.amb = a
+	u.dec = dec
+	u.Unlock()
+}
+
+// amiibo sets the active amiibo in a thread safe way.
+func (u *ui) amiibo() amiibo.Amiidump {
+	u.Lock()
+	a := u.amb
+	u.Unlock()
+
+	return a
+}
+
+// isDecrypted reports in a thread safe way if the current amiibo is decrypted.
+func (u *ui) isDecrypted() bool {
+	u.Lock()
+	d := u.dec
+	u.Unlock()
+
+	return d
 }
 
 // newUi create a new ui structure.
@@ -145,10 +175,10 @@ func newUi(invertImage bool) *ui {
 	}
 
 	// TODO: prevent overwriting modals when they're active (like reading a new amiibo while the dump modal is open)
-	save := newFilenameModal(s, boxOpts{title: "save dump", key: 's', xPos: -1, yPos: -1, width: 30, height: 10, minHeight: 6, minWidth: 84, needAmiibo: true}, logs.content, writeDump)
+	save := newFilenameModal(s, boxOpts{title: "save dump", key: 's', xPos: -1, yPos: -1, width: 30, height: 10, minHeight: 6, minWidth: 84, needAmiibo: true}, logs.content, saveDump)
 	load := newFilenameModal(s, boxOpts{title: "load dump", key: 'l', xPos: -1, yPos: -1, width: 30, height: 10, minHeight: 6, minWidth: 84}, logs.content, loadDump)
 	// TODO: it would be cool to highlight the different data blocks in the hex dump (like ID, save data, ...)
-	hex := newTextModal(s, boxOpts{title: "view dump as hex", key: 'h', xPos: -1, yPos: -1, width: 84, height: 36, typ:boxTypeCharacter, needAmiibo: true, scroll: true}, logs.content)
+	hex := newTextModal(s, boxOpts{title: "view dump as hex", key: 'h', xPos: -1, yPos: -1, width: 84, height: 36, typ: boxTypeCharacter, needAmiibo: true, scroll: true}, logs.content)
 
 	u.elements = []element{info, image, usage, logs, actions, save, load, hex}
 
@@ -189,8 +219,10 @@ func tui(conf *config) {
 		for {
 			select {
 			case am := <-amiiboChan:
-				u.amb = am
-				showAmiiboInfo(u.amb, u.logBox.content, u.infoBox.content, u.usageBox.content, u.imageBox, conf.amiiboApiBaseUrl)
+				// TODO: detect the amiibo is decrypted to set the 2nd parameter below to the actual value
+				//  and not assume it's encrypted by default.
+				u.setAmiibo(am, false)
+				showAmiiboInfo(u.amiibo(), u.logBox.content, u.infoBox.content, u.usageBox.content, u.imageBox, conf.amiiboApiBaseUrl)
 				u.draw(false)
 			case <-conf.quit:
 				return
@@ -222,20 +254,15 @@ func tui(conf *config) {
 			case e.Key() == tcell.KeyCtrlL:
 				u.sync()
 			case e.Rune() == 'D' || e.Rune() == 'd':
-				u.logBox.content <- encodeStringCell("Decrypt not yet implemented")
+				if dec := decrypt(u.amiibo(), u.logBox.content); dec != nil {
+					u.setAmiibo(dec, true)
+				}
 			case e.Rune() == 'I' || e.Rune() == 'i':
 				u.logBox.content <- encodeStringCell("Toggle image invert")
 				u.imageBox.invertImage()
 			case e.Rune() == 'W' || e.Rune() == 'w':
-				if u.amb != nil {
-					switch u.amb.(type) {
-					case *amiibo.Amiitool:
-						ptl.write(amiibo.AmiitoolToAmiibo(u.amb.(*amiibo.Amiitool)).Raw(), false)
-					case *amiibo.Amiibo:
-						ptl.write(u.amb.Raw(), false)
-					}
-				} else {
-					u.logBox.content <- encodeStringCell("Cannot write: please load amiibo data first!")
+				if data := prepData(u.amiibo(), u.isDecrypted(), u.logBox.content); data != nil {
+					ptl.write(data, false)
 				}
 			default:
 				u.handleElementKey(e.Rune())
