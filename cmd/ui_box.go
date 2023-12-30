@@ -41,6 +41,8 @@ type boxOpts struct {
 	yPos              int         // The y position the box should be drawn at. Pass -1 to auto position after the previous box.
 	width             int         // The width of the box in cells or percent.
 	height            int         // The height of the box in cells or percent.
+	minWidth          int         // The minimal width of the box in cells.
+	minHeight         int         // The minimal height of the box in cells.
 	typ               int         // The type of the box: boxTypePercent or boxTypeCharacter. Percent is the default.
 	history           bool        // Set to true to preserve history, otherwise the buffer will always be replaced completely.
 	scroll            bool        // Allow scrolling using arrow keys. Will also display a scrollbar.
@@ -89,6 +91,14 @@ func newBox(s tcell.Screen, opts boxOpts) *box {
 		minHeight: 5, // nothing to calculate really: top line + margin line + content line + margin line + bottom line
 		content:   make(chan []byte, 4096),
 		buffer:    newRingBuffer(boxBufferSize),
+	}
+
+	if opts.minWidth > b.minWidth {
+		b.minWidth = opts.minWidth
+	}
+
+	if opts.minHeight > b.minHeight {
+		b.minHeight = opts.minHeight
 	}
 
 	if b.opts.typ == boxTypePercent {
