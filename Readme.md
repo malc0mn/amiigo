@@ -1,5 +1,8 @@
 # Amiigo is the _uber geek amiibo inspector_
 
+![terminal user interface demo](img/amiigo.gif)
+**Note**: the terminal interface still has lots of rendering issues, but is usable.
+
 ## Packages
 
 ## amiibo
