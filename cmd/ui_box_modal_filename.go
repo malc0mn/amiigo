@@ -6,8 +6,9 @@ import (
 	"unicode"
 )
 
-// submitHandler defines a submithandler for a filenameModal, receiving a filename and an amiibo struct.
-type submitHandler func(f string, a amiibo.Amiidump, log chan<- []byte) bool
+// filenameSubmitHandler defines a submithandler for a filenameModal, receiving a filename and an
+// amiibo instance.
+type filenameSubmitHandler func(f string, a amiibo.Amiidump, log chan<- []byte) bool
 
 // filenameModal represents a modal that will request filename input.
 type filenameModal struct {
@@ -15,11 +16,11 @@ type filenameModal struct {
 	filename  string
 	inputXPos int
 	inputYPos int
-	submit    submitHandler
+	submit    filenameSubmitHandler
 }
 
 // newFilenameModal creates a new filenameModal struct ready for use.
-func newFilenameModal(s tcell.Screen, opts boxOpts, log chan<- []byte, submit submitHandler) *filenameModal {
+func newFilenameModal(s tcell.Screen, opts boxOpts, log chan<- []byte, submit filenameSubmitHandler) *filenameModal {
 	fn := &filenameModal{submit: submit}
 	fn.modal = newModal(s, opts, fn.handleInput, fn.drawModalContent, fn.reset, log)
 
