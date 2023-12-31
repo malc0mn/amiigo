@@ -26,7 +26,7 @@ type element interface {
 	draw(animated bool, x, y int) (int, int)
 	// hasKey must return true if the element is bound to the given rune.
 	hasKey(r rune) bool
-	// handleKey must act on the given tcell.EventKey and amiibo data
+	// handleKey must act on the given tcell.EventKey.
 	handleKey(e *tcell.EventKey)
 	// name returns the name of the element.
 	name() string

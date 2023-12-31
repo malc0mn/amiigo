@@ -55,7 +55,6 @@ func (fn *filenameModal) handleInput(e *tcell.EventKey) {
 }
 
 // drawModalContent will handle displaying of the drawModalContent content.
-// TODO: fix problems when the modal is not high enough: maybe give it a minimal height?
 func (fn *filenameModal) drawModalContent(x, y int) {
 	start := x + 1
 	fn.inputXPos = start
