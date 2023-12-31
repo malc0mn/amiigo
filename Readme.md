@@ -12,14 +12,6 @@ make clean; make amiigo
 ```
 This will result in an `amiigo` binary in the root dir of this GIT repository.
 
-### Running tests
-Execute:
-```shell
-make test
-```
-**Note**: crypto tests will fail unless you supply the proper files, see the
-[crypto_test.go](amiibo/crypto_test.go) file for details.
-
 ### Launch the CLI command
 Example:
 ```shell
@@ -188,4 +180,4 @@ Executing `make testv` will run the tests in verbose mode.
 ## Credits
 - https://github.com/socram8888/amiitool
 - https://www.3dbrew.org
-- Kevin Valk: thank you for supplying me with your old Maxlander research data!
+- Kevin Valk: thank you for supplying me with your old MaxLander research data!
