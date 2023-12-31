@@ -31,3 +31,31 @@ func isAmiiboDecrypted(a amiibo.Amiidump, key *amiibo.RetailKey) bool {
 
 	return amiibo.Verify(a, t, d)
 }
+
+// isAmiiTool will TRY to ascertain if the given data is in the amiitool format. It will do this by
+// assuming it is decrypted amiitool data. If that test fails, then it will assume encrypted
+// amiitool data was given and try to decrypt it. If the decryption is successful, a pointer to an
+// amiibo.Amiitool struct containing the original data is returned.
+// So if it is valid amiitool data, you will always get a pointer to an amiibo.Amiitool struct
+// holding the original data, nil otherwise.
+// If no retail key is loaded, we will always assume it is not an amiitool format.
+func isAmiiTool(data []byte, key *amiibo.RetailKey) *amiibo.Amiitool {
+	if key == nil {
+		return nil
+	}
+
+	a, err := amiibo.NewAmiitool(data, nil)
+	if err != nil {
+		return nil
+	}
+
+	if isAmiiboDecrypted(a, key) {
+		return a
+	}
+
+	if _, err = amiibo.Decrypt(key, a); err != nil {
+		return nil
+	}
+
+	return a
+}

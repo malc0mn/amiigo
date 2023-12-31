@@ -86,11 +86,15 @@ func loadDump(filename string, _ *amb, log chan<- []byte) bool {
 		return false
 	}
 
-	// TODO: how to detect amiitool files?
-	am, err := amiibo.NewAmiibo(data, nil)
-	if err != nil {
-		log <- encodeStringCell(fmt.Sprintf("Error reading amiibo data: %s", err))
-		return false
+	var am amiibo.Amiidump
+
+	am = isAmiiTool(data, conf.retailKey)
+	if am.(*amiibo.Amiitool) == nil {
+		am, err = amiibo.NewAmiibo(data, nil)
+		if err != nil {
+			log <- encodeStringCell(fmt.Sprintf("Error reading amiibo data: %s", err))
+			return false
+		}
 	}
 
 	amiiboChan <- newAmiibo(am, false)

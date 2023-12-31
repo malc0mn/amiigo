@@ -250,7 +250,7 @@ func tui(conf *config) {
 	if conf.retailKey == nil {
 		u.logBox.content <- encodeStringCellWarning("No retail key loaded: cannot decrypt nor detect decrypted amiibo!")
 	} else {
-		u.logBox.content <- encodeStringCell("Retail key loaded: crypto support available.")
+		u.logBox.content <- encodeStringCell("Retail key loaded: amiitool and crypto support available.")
 	}
 
 	if conf.expertMode {
