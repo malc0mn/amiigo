@@ -113,9 +113,12 @@ func (p *portal) write(data []byte, user bool) {
 	}
 
 	typ := []byte{0x00}
+	msg := "full amiibo"
 	if user {
 		typ = []byte{0x01}
+		msg = "amiibo user"
 	}
+	p.log <- encodeStringCell("Writing " + msg + " data to token")
 
 	p.log <- encodeStringCell("Sending amiibo data to NFC portal")
 	p.client.SendCommand(nfcptl.Command{Command: nfcptl.WriteTokenData, Arguments: append(typ, data...)})
