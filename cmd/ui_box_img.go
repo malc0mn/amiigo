@@ -53,6 +53,8 @@ func (i *imageBox) drawImage() {
 		return
 	}
 
+	// TODO: image rendering still has bugs, e.g.: try a Kirby amiibo in different terminal sizes.
+
 	viewportWidth := i.width() - 4   // 4 = left and right borders + left and right margin
 	viewportHeight := i.height() - 2 // 2 = only top and bottom borders
 
