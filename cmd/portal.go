@@ -74,7 +74,7 @@ func (p *portal) listen(conf *config) {
 				a, err := amiibo.NewAmiibo(e.Data(), nil)
 				if err != nil {
 					p.log <- encodeStringCell(err.Error())
-					continue
+					break
 				}
 
 				// Send amiibo to receiver
