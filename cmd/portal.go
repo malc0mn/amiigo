@@ -11,11 +11,12 @@ import (
 // portal holds the parts that need to be controlled by the NFC portal.
 type portal struct {
 	client *nfcptl.Client
-	evt    chan struct{}          // Event channel used to re-init the portal.
-	log    chan<- []byte          // Logger channel.
-	amb    chan<- amiibo.Amiidump // Channel to send last read amiibo to.
-	tkn    bool                   // Boolean to indicate a token is placed on the portal.
-	con    bool                   // Boolean to indicate the portal is connected.
+	evt    chan struct{} // Event channel used to re-init the portal.
+	log    chan<- []byte // Logger channel.
+	amb    chan<- *amb   // Channel to send last read amiibo to.
+	tkn    bool          // Boolean to indicate a token is placed on the portal.
+	con    bool          // Boolean to indicate the portal is connected.
+
 	sync.Mutex
 }
 
@@ -78,11 +79,12 @@ func (p *portal) listen(conf *config) {
 				}
 
 				// Send amiibo to receiver
-				p.amb <- a
+				p.amb <- newAmiibo(a, true)
 
 				p.log <- encodeStringCell("NFC portal ready")
 			case nfcptl.TokenRemoved:
 				p.tokenState(false)
+				p.amb <- &amb{nfc: true} // Signal token removal from NFC portal.
 			case nfcptl.Disconnect:
 				p.connected(false)
 				p.log <- encodeStringCell("NFC portal disconnected!")
@@ -167,7 +169,7 @@ func (p *portal) isConnected() bool {
 }
 
 // newPortal returns a new portal ready for use.
-func newPortal(log chan<- []byte, amiiboChan chan<- amiibo.Amiidump) *portal {
+func newPortal(log chan<- []byte, amiiboChan chan<- *amb) *portal {
 	return &portal{
 		evt: make(chan struct{}),
 		log: log,

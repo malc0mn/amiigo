@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
-	"github.com/malc0mn/amiigo/amiibo"
 	"sync"
 	"time"
 	"unicode"
@@ -635,7 +634,7 @@ func (b *box) scroll(e *tcell.EventKey) {
 }
 
 // activate sets the active flag to true and redraws the box.
-func (b *box) activate(_ amiibo.Amiidump) <-chan struct{} {
+func (b *box) activate(_ *amb) <-chan struct{} {
 	b.active = true
 	b.done = make(chan struct{})
 	b.draw(false, b.opts.xPos, b.opts.yPos)

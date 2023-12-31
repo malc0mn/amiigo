@@ -2,13 +2,12 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
-	"github.com/malc0mn/amiigo/amiibo"
 	"unicode"
 )
 
 // filenameSubmitHandler defines a submithandler for a filenameModal, receiving a filename and an
 // amiibo instance.
-type filenameSubmitHandler func(f string, a amiibo.Amiidump, log chan<- []byte) bool
+type filenameSubmitHandler func(f string, amb *amb, log chan<- []byte) bool
 
 // filenameModal represents a modal that will request filename input.
 type filenameModal struct {
@@ -38,7 +37,7 @@ func (fn *filenameModal) handleInput(e *tcell.EventKey) {
 			fn.s.Show()
 		}
 	case e.Key() == tcell.KeyEnter || e.Rune() == '\n':
-		if fn.submit(fn.filename, fn.a, fn.log) {
+		if fn.submit(fn.filename, fn.amb, fn.log) {
 			// Signal the modal is done.
 			fn.end()
 		}

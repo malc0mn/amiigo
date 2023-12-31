@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
-	"github.com/malc0mn/amiigo/amiibo"
 )
 
 type drawModalContent func(x, y int)
@@ -11,7 +10,7 @@ type modalInputHandler func(e *tcell.EventKey)
 
 type modal struct {
 	*box
-	a              amiibo.Amiidump
+	amb            *amb
 	d              drawModalContent
 	h              modalInputHandler
 	c              func()
@@ -70,14 +69,14 @@ func (m *modal) draw(animated bool, _, _ int) (int, int) {
 }
 
 // activate sets the active flag to true, stores the part of the screen that will be overwritten and draws the box.
-func (m *modal) activate(a amiibo.Amiidump) <-chan struct{} {
-	if m.opts.needAmiibo && a == nil {
+func (m *modal) activate(amb *amb) <-chan struct{} {
+	if m.opts.needAmiibo && (amb == nil || amb.a == nil) {
 		m.log <- encodeStringCell("No amiibo data!")
 		return nil
 	}
 
 	m.done = make(chan struct{})
-	m.a = a
+	m.amb = amb
 	m.active = true
 	x, y := m.getXY()
 
@@ -98,7 +97,7 @@ func (m *modal) activate(a amiibo.Amiidump) <-chan struct{} {
 // deactivate sets the active flag to false and restores the screen to the state before drawing.
 func (m *modal) deactivate() {
 	m.active = false
-	m.a = nil
+	m.amb = nil
 
 	if m.c != nil {
 		m.c()

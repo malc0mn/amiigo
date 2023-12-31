@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
-	"github.com/malc0mn/amiigo/amiibo"
 )
 
 // mopts describes a single option for an options modal.
@@ -16,7 +15,7 @@ type mopts struct {
 
 // optionsSubmitHandler defines a submithandler for an optionsModal, receiving the selected option
 // value and an amiibo struct.
-type optionsSubmitHandler func(value int, a amiibo.Amiidump, log chan<- []byte) []byte
+type optionsSubmitHandler func(value int, amb *amb, log chan<- []byte) []byte
 
 // optionsModal represents a modal that will request the user to select an option. It holds a
 // channel to which the data of the submit handler will be sent before the modal is closed.
@@ -39,7 +38,7 @@ func newOptionsModal(s tcell.Screen, opts boxOpts, log chan<- []byte, mopts []mo
 func (o *optionsModal) handleInput(e *tcell.EventKey) {
 	for _, opt := range o.opts {
 		if e.Rune() == opt.key {
-			o.ret <- o.submit(opt.value, o.a, o.log)
+			o.ret <- o.submit(opt.value, o.amb, o.log)
 			// Signal the modal is done.
 			o.end()
 		}

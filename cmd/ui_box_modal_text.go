@@ -17,5 +17,5 @@ func newTextModal(s tcell.Screen, opts boxOpts, log chan<- []byte) *textModal {
 }
 
 func (t *textModal) drawModalContent(_, _ int) {
-	t.content <- encodeStringCell(hex.Dump(t.a.Raw()))
+	t.content <- encodeStringCell(hex.Dump(t.amb.a.Raw()))
 }

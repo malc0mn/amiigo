@@ -19,6 +19,7 @@ func initFlags() {
 	flag.StringVar(&conf.retailKeyPath, "k", "", "Path to retail key for amiibo decryption/encryption")
 	flag.StringVar(&cFile, "c", "", "Read all settings from a config file. The config file will override any command line flags present.")
 
+	flag.BoolVar(&conf.expertMode, "expert", false, "Allows i.a. dangerous writes to NFC tokens that can cause defunct amiibo characters.")
 	flag.BoolVar(&verbose, "verbose", false, "Output lots and lots of debug information.")
 
 	flag.BoolVar(&showHelp, "?", false, "Display usage information.")

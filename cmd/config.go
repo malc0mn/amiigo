@@ -27,6 +27,9 @@ type config struct {
 	retailKeyPath string
 	// retailKey is the loaded instance of the file referenced in retailKeyPath
 	retailKey *amiibo.RetailKey
+	// expertMode allows i.a. dangerous writes to NFC tokens that can cause defunct amiibo chars.
+	// The token itself is not in danger!
+	expertMode bool
 
 	// ui holds UI related config.
 	ui *uiConf

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/hex"
 	"fmt"
 	"github.com/malc0mn/amiigo/amiibo"
@@ -12,8 +13,12 @@ import (
 )
 
 // showAmiiboInfo analyses the amiibo and updates the info, usage and image boxes.
-func showAmiiboInfo(a amiibo.Amiidump, dec bool, log, ifo, usg chan<- []byte, img *imageBox, baseUrl string) {
-	rawId := a.ModelInfo().ID()
+func showAmiiboInfo(amb *amb, log, ifo, usg chan<- []byte, img *imageBox, baseUrl string) {
+	if amb == nil || amb.a == nil {
+		return
+	}
+
+	rawId := amb.a.ModelInfo().ID()
 	if zeroed(rawId) {
 		return
 	}
@@ -21,12 +26,12 @@ func showAmiiboInfo(a amiibo.Amiidump, dec bool, log, ifo, usg chan<- []byte, im
 	log <- encodeStringCell("Got id: " + id)
 
 	typ := "a regular amiibo"
-	if a.Type() == amiibo.TypeAmiitool {
+	if amb.a.Type() == amiibo.TypeAmiitool {
 		typ = "an amiitool dump"
 	}
 	log <- encodeStringCell("Amiibo is " + typ)
 
-	if dec {
+	if amb.dec {
 		log <- encodeStringCellWarning("Warning: amiibo is decrypted!")
 	}
 
@@ -60,7 +65,7 @@ func showAmiiboInfo(a amiibo.Amiidump, dec bool, log, ifo, usg chan<- []byte, im
 }
 
 // loadDump loads an amiibo dump from disk.
-func loadDump(filename string, _ amiibo.Amiidump, log chan<- []byte) bool {
+func loadDump(filename string, _ *amb, log chan<- []byte) bool {
 	if filename == "" {
 		log <- encodeStringCell("Please provide a filename!")
 		return false
@@ -88,15 +93,15 @@ func loadDump(filename string, _ amiibo.Amiidump, log chan<- []byte) bool {
 		return false
 	}
 
-	amiiboChan <- am
+	amiiboChan <- newAmiibo(am, false)
 
 	log <- encodeStringCell("Amiibo read successful!")
 	return true
 }
 
 // saveDump writes the active amiibo data to disk.
-func saveDump(filename string, a amiibo.Amiidump, log chan<- []byte) bool {
-	if a == nil {
+func saveDump(filename string, amb *amb, log chan<- []byte) bool {
+	if amb == nil || amb.a == nil {
 		log <- encodeStringCell("No amiibo data to write!")
 		return false
 	}
@@ -109,7 +114,7 @@ func saveDump(filename string, a amiibo.Amiidump, log chan<- []byte) bool {
 
 	ext := ".bin"
 	filename = strings.TrimSuffix(filename, ext)
-	if isAmiiboDecrypted(a, conf.retailKey) {
+	if amb.dec {
 		suf := "_decrypted"
 		if !strings.HasSuffix(filename, suf) {
 			ext = "_decrypted" + ext
@@ -125,7 +130,7 @@ func saveDump(filename string, a amiibo.Amiidump, log chan<- []byte) bool {
 	}
 
 	log <- encodeStringCell(fmt.Sprintf("Writing amiibo to file '%s'", dest))
-	if err := os.WriteFile(filename, a.Raw(), 0644); err != nil {
+	if err := os.WriteFile(filename, amb.a.Raw(), 0644); err != nil {
 		log <- encodeStringCell(fmt.Sprintf("Error writing file: %s", err))
 		return false
 	}
@@ -135,61 +140,76 @@ func saveDump(filename string, a amiibo.Amiidump, log chan<- []byte) bool {
 }
 
 // prepData gets the amiibo data in the correct format for writing to the NFC portal.
-func prepData(value int, a amiibo.Amiidump, log chan<- []byte) []byte {
-	if isAmiiboDecrypted(a, conf.retailKey) {
-		log <- encodeStringCell("Refusing to write decrypted amiibo!")
-		return nil
-	}
-	if a == nil {
+// The returned byte array has the following structure:
+//   - the first 8 bytes are the amiibo ID to be written
+//   - the 9th byte is 0 for a full write and 1 to write only user data
+//   - the rest of the bytes, 540 in total, is the amiibo data to be written
+func prepData(value int, amb *amb, log chan<- []byte) []byte {
+	if amb == nil || amb.a == nil {
 		log <- encodeStringCell("Cannot write: please load amiibo data first!")
 		return nil
 	}
 
+	if amb.dec {
+		if !conf.expertMode {
+			log <- encodeStringCellWarning("Refusing to write: decrypted amiibo!")
+			return nil
+		}
+		log <- encodeStringCellWarning("WARNING: writing decrypted amiibo!")
+	}
+
 	var data []byte
 
-	switch a.(type) {
+	id := amb.a.ModelInfo().ID()
+
+	switch amb.a.(type) {
 	case *amiibo.Amiitool:
-		data = amiibo.AmiitoolToAmiibo(a.(*amiibo.Amiitool)).Raw()
+		data = amiibo.AmiitoolToAmiibo(amb.a.(*amiibo.Amiitool)).Raw()
 	case *amiibo.Amiibo:
-		data = a.Raw()
+		data = amb.a.Raw()
 	default:
 		log <- encodeStringCell("Cannot write: unknown amiibo type!")
 		return nil
 	}
 
-	return append([]byte{byte(value)}, data...)
+	return append(append(id, byte(value)), data...)
+}
+
+// writeToken will write the given data to the token on the NFC portal.
+func writeToken(data []byte, nfcId []byte, ptl *portal, log chan<- []byte) {
+	if data == nil || len(data) < 549 {
+		return
+	}
+
+	user := data[8] == 1
+
+	if user && nfcId != nil && !bytes.Equal(data[:8], nfcId) {
+		if !conf.expertMode {
+			log <- encodeStringCellWarning("Refusing to write: amiibo ID from dump does not match amiibo ID from portal!")
+			return
+		}
+		log <- encodeStringCellWarning("WARNING: writing user data with mismatching amiibo ID!")
+	}
+
+	ptl.write(data[9:], user)
 }
 
 // decrypt decrypts the given amiibo and returns a new amiibo.Amiidump instance.
-func decrypt(a amiibo.Amiidump, log chan<- []byte) amiibo.Amiidump {
-	if a == nil {
-		log <- encodeStringCell("Cannot decrypt: no amiibo data")
-		return nil
-	}
+func decrypt(amb *amb, log chan<- []byte) *amb {
 	if conf.retailKey == nil {
 		log <- encodeStringCell("Cannot decrypt: no retail key loaded")
 		return nil
 	}
-	dec, err := amiibo.Decrypt(conf.retailKey, a)
+	if amb == nil || amb.a == nil {
+		log <- encodeStringCell("Cannot decrypt: no amiibo data")
+		return nil
+	}
+	dec, err := amiibo.Decrypt(conf.retailKey, amb.a)
 	if err != nil {
 		log <- encodeStringCell("Decryption error: " + err.Error())
 		return nil
 	}
 
 	log <- encodeStringCell("Decryption successful")
-	return dec
-}
-
-// isAmiiboDecrypted will TRY to ascertain if a given amiibo is decrypted. It will do this by
-// assuming it is decrypted and verifying the HMAC signatures. If this fails, we assume it is
-// encrypted.
-// If no retail key is loaded, we will always assume it is not decrypted.
-func isAmiiboDecrypted(a amiibo.Amiidump, key *amiibo.RetailKey) bool {
-	if key == nil {
-		return false
-	}
-	t := amiibo.NewDerivedKey(&key.Tag, a)
-	d := amiibo.NewDerivedKey(&key.Data, a)
-
-	return amiibo.Verify(a, t, d)
+	return newAmiibo(dec, amb.nfc)
 }

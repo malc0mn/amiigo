@@ -2,20 +2,19 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
-	"github.com/malc0mn/amiigo/amiibo"
 	"sync"
 	"time"
 )
 
 // TODO: is there a way to get rid of this global var?
-var amiiboChan chan amiibo.Amiidump // amiiboChan is the main channel to pass amiboo structs around.
+var amiiboChan chan *amb // amiiboChan is the main channel to pass amb structs around.
 
 // element defines the basic methods which any ui element should implement.
 type element interface {
 	// activate marks the element as active, so it will process events. The element MUST return nil
 	// when activation was unsuccessful.
 	// The channel returned can be listened on to see if the box has closed itself.
-	activate(a amiibo.Amiidump) <-chan struct{}
+	activate(amb *amb) <-chan struct{}
 	// deactivate deactivates the element, so it will no longer process events.
 	deactivate()
 	// draw draws the element. When the 'animated' parameter is set to true, the element must be
@@ -41,8 +40,8 @@ type ui struct {
 	usageBox *box
 	logBox   *box
 	write    chan []byte
-	amb      amiibo.Amiidump
-	dec      bool
+	amb      *amb
+	ambNfcId []byte
 
 	sync.Mutex
 }
@@ -122,15 +121,18 @@ func (u *ui) handleElementKey(r rune) {
 }
 
 // setAmiibo sets the active amiibo in a thread safe way.
-func (u *ui) setAmiibo(a amiibo.Amiidump, dec bool) {
+func (u *ui) setAmiibo(a *amb) {
 	u.Lock()
 	u.amb = a
-	u.dec = dec
+	if u.amb.nfc {
+		u.ambNfcId = make([]byte, 8)
+		copy(u.ambNfcId, u.amb.a.ModelInfo().ID())
+	}
 	u.Unlock()
 }
 
 // amiibo sets the active amiibo in a thread safe way.
-func (u *ui) amiibo() amiibo.Amiidump {
+func (u *ui) amiibo() *amb {
 	u.Lock()
 	a := u.amb
 	u.Unlock()
@@ -138,13 +140,11 @@ func (u *ui) amiibo() amiibo.Amiidump {
 	return a
 }
 
-// isDecrypted reports in a thread safe way if the current amiibo is decrypted.
-func (u *ui) isDecrypted() bool {
+// resetAmbNfcId will clear the ambNfcId field when a token is removed from the portal.
+func (u *ui) resetAmbNfcId() {
 	u.Lock()
-	d := u.dec
+	u.ambNfcId = nil
 	u.Unlock()
-
-	return d
 }
 
 // newUi create a new ui structure.
@@ -205,7 +205,7 @@ func tui(conf *config) {
 
 	t := time.Now()
 
-	amiiboChan = make(chan amiibo.Amiidump)
+	amiiboChan = make(chan *amb)
 
 	// Connect to the portal when the UI is visible, so it can display the client logs etc.
 	ptl := newPortal(u.logBox.content, amiiboChan)
@@ -229,13 +229,16 @@ func tui(conf *config) {
 		for {
 			select {
 			case am := <-amiiboChan:
-				u.setAmiibo(am, isAmiiboDecrypted(am, conf.retailKey))
-				showAmiiboInfo(u.amiibo(), u.isDecrypted(), u.logBox.content, u.infoBox.content, u.usageBox.content, u.imageBox, conf.amiiboApiBaseUrl)
+				if am.nfc && am.a == nil {
+					// An amb struct with nfc set to true and a nil amiibo signals a token removal.
+					u.resetAmbNfcId()
+					break
+				}
+				u.setAmiibo(am)
+				showAmiiboInfo(am, u.logBox.content, u.infoBox.content, u.usageBox.content, u.imageBox, conf.amiiboApiBaseUrl)
 				u.draw(false)
 			case data := <-u.write:
-				if data != nil {
-					ptl.write(data[1:], data[0] == 1)
-				}
+				writeToken(data, u.ambNfcId, ptl, u.logBox.content)
 			case <-conf.quit:
 				return
 			}
@@ -248,6 +251,10 @@ func tui(conf *config) {
 		u.logBox.content <- encodeStringCellWarning("No retail key loaded: cannot decrypt nor detect decrypted amiibo!")
 	} else {
 		u.logBox.content <- encodeStringCell("Retail key loaded: crypto support available.")
+	}
+
+	if conf.expertMode {
+		u.logBox.content <- encodeStringCellWarning("WARNING: expert mode activated, defunct amiibo may be written!")
 	}
 
 	for {
@@ -273,7 +280,7 @@ func tui(conf *config) {
 				u.sync()
 			case e.Rune() == 'D' || e.Rune() == 'd':
 				if dec := decrypt(u.amiibo(), u.logBox.content); dec != nil {
-					u.setAmiibo(dec, true)
+					u.setAmiibo(dec)
 				}
 			case e.Rune() == 'I' || e.Rune() == 'i':
 				u.logBox.content <- encodeStringCell("Toggle image invert")

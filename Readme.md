@@ -34,6 +34,8 @@ Usage of amiigo:
         Read all settings from a config file. The config file will override any command line flags present.
   -d string
         The NFC portal to connect to. (default "ps4amiibo")
+  -expert
+        Allows i.a. dangerous writes to NFC tokens that can cause defunct amiibo characters.
   -k string
         Path to retail key for amiibo decryption/encryption
   -l string
