@@ -135,8 +135,8 @@ func saveDump(filename string, a amiibo.Amiidump, log chan<- []byte) bool {
 }
 
 // prepData gets the amiibo data in the correct format for writing to the NFC portal.
-func prepData(a amiibo.Amiidump, dec bool, log chan<- []byte) []byte {
-	if dec {
+func prepData(value int, a amiibo.Amiidump, log chan<- []byte) []byte {
+	if isAmiiboDecrypted(a, conf.retailKey) {
 		log <- encodeStringCell("Refusing to write decrypted amiibo!")
 		return nil
 	}
@@ -145,14 +145,19 @@ func prepData(a amiibo.Amiidump, dec bool, log chan<- []byte) []byte {
 		return nil
 	}
 
+	var data []byte
+
 	switch a.(type) {
 	case *amiibo.Amiitool:
-		return amiibo.AmiitoolToAmiibo(a.(*amiibo.Amiitool)).Raw()
+		data = amiibo.AmiitoolToAmiibo(a.(*amiibo.Amiitool)).Raw()
 	case *amiibo.Amiibo:
-		return a.Raw()
+		data = a.Raw()
 	default:
-		panic(fmt.Sprintf("Unknown amiibo type!"))
+		log <- encodeStringCell("Cannot write: unknown amiibo type!")
+		return nil
 	}
+
+	return append([]byte{byte(value)}, data...)
 }
 
 // decrypt decrypts the given amiibo and returns a new amiibo.Amiidump instance.

@@ -40,6 +40,7 @@ type ui struct {
 	imageBox *imageBox
 	usageBox *box
 	logBox   *box
+	write    chan []byte
 	amb      amiibo.Amiidump
 	dec      bool
 
@@ -172,6 +173,7 @@ func newUi(invertImage bool) *ui {
 		imageBox: image,
 		usageBox: usage,
 		logBox:   logs,
+		write:    make(chan []byte),
 	}
 
 	// TODO: prevent overwriting modals when they're active (like reading a new amiibo while the dump modal is open)
@@ -179,8 +181,16 @@ func newUi(invertImage bool) *ui {
 	load := newFilenameModal(s, boxOpts{title: "load dump", key: 'l', xPos: -1, yPos: -1, width: 30, height: 10, minHeight: 6, minWidth: 84}, logs.content, loadDump)
 	// TODO: it would be cool to highlight the different data blocks in the hex dump (like ID, save data, ...)
 	hex := newTextModal(s, boxOpts{title: "view dump as hex", key: 'h', xPos: -1, yPos: -1, width: 84, height: 36, typ: boxTypeCharacter, needAmiibo: true, scroll: true}, logs.content)
+	write := newOptionsModal(
+		s,
+		boxOpts{title: "write amiibo data to token", key: 'w', xPos: -1, yPos: -1, width: 80, height: 9, typ: boxTypeCharacter, needAmiibo: true},
+		logs.content,
+		[]mopts{{'f', "write full amiibo to token", 0}, {'u', "only write userdata to token (aka 'restore backup')", 1}},
+		prepData,
+		u.write,
+	)
 
-	u.elements = []element{info, image, usage, logs, actions, save, load, hex}
+	u.elements = []element{info, image, usage, logs, actions, save, load, write, hex}
 
 	return u
 }
@@ -222,6 +232,8 @@ func tui(conf *config) {
 				u.setAmiibo(am, isAmiiboDecrypted(am, conf.retailKey))
 				showAmiiboInfo(u.amiibo(), u.isDecrypted(), u.logBox.content, u.infoBox.content, u.usageBox.content, u.imageBox, conf.amiiboApiBaseUrl)
 				u.draw(false)
+			case data := <-u.write:
+				ptl.write(data[1:], data[0] == 1)
 			case <-conf.quit:
 				return
 			}
@@ -264,10 +276,6 @@ func tui(conf *config) {
 			case e.Rune() == 'I' || e.Rune() == 'i':
 				u.logBox.content <- encodeStringCell("Toggle image invert")
 				u.imageBox.invertImage()
-			case e.Rune() == 'W' || e.Rune() == 'w':
-				if data := prepData(u.amiibo(), u.isDecrypted(), u.logBox.content); data != nil {
-					ptl.write(data, false)
-				}
 			default:
 				u.handleElementKey(e.Rune())
 			}
