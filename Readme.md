@@ -62,13 +62,15 @@ solid_images = false
 See [vendors.go](nfcptl/vendors.go) for supported vendors and devices. **Only
 Datel's PowerSaves For Amiibo portal has been tested!**
 
+Expert mode cannot be set using the config file!
+
 ## Packages
 This codebase provides several stand-alone packages which can be used in your own go
 projects.
 
 ## amiibo
 The `amiibo` package can be used independently to work with amiibodumps being a
-classic NTAG215 raw dump or a decrypted amiitool bin file.
+classic NTAG215 raw dump or a decrypted [amiitool](https://github.com/socram8888/amiitool) bin file.
 It can decrypt and encrypt both formats and inspect or modify the amiibo data.
 
 ## apii
