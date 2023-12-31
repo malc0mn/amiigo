@@ -674,7 +674,7 @@ func (stm *stm32f0) write(data []byte, userdataOnly bool) {
 		log.Println(dump)
 	}
 
-	log.Printf("stm32f0: starting %s write procedure", msg)
+	log.Printf("stm32f0: starting %s token data write procedure", msg)
 	stm.c.PublishEvent(NewEvent(TokenTagWriteStart, nil))
 
 	// FULL write sequence:
