@@ -233,7 +233,9 @@ func tui(conf *config) {
 				showAmiiboInfo(u.amiibo(), u.isDecrypted(), u.logBox.content, u.infoBox.content, u.usageBox.content, u.imageBox, conf.amiiboApiBaseUrl)
 				u.draw(false)
 			case data := <-u.write:
-				ptl.write(data[1:], data[0] == 1)
+				if data != nil {
+					ptl.write(data[1:], data[0] == 1)
+				}
 			case <-conf.quit:
 				return
 			}
