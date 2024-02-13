@@ -11,7 +11,7 @@ LDFLAGS=-ldflags "-s -w -X main.version=${VERSION} -X main.buildTime=${BUILD_TIM
 all: amiigo
 
 amiigo:
-	cd cmd; go build -trimpath ${LDFLAGS} -o ../${BINARY}
+	cd ${SOURCEDIR}; go build -trimpath ${LDFLAGS} -o ../${BINARY}
 
 .PHONY: test
 test:
@@ -23,7 +23,7 @@ testv:
 
 .PHONY: install
 install:
-	cd cmd; GOBIN=/usr/local/bin/ go install ${LDFLAGS}
+	cd ${SOURCEDIR}; GOBIN=/usr/local/bin/ go install ${LDFLAGS}
 
 .PHONY: clean
 clean:
